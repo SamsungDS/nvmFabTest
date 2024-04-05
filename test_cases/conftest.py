@@ -13,7 +13,11 @@ ts_config = json.load(f)
 f.close()
 
 
-def connectByIP(app, cmd_lib):
+def connectByIP(app, cmd_lib, connect_details):
+
+    tr = connect_details["transport"]
+    addr = connect_details["addr"] 
+    svc = connect_details["svcid"]
     # Start Discover Command
     status, response = app.submit_discover_cmd(transport=tr, address=addr, svcid=svc)
     if status!=0:
@@ -49,14 +53,12 @@ def session_setup():
     print("\n\nSetting up session")
     if ts_config["connectByIP"]:
         connect_details = ts_config["connectDetails"]
-        tr = connect_details["transport"]
-        addr = connect_details["addr"] 
-        svc = connect_details["svcid"]
+        
     
         app = NVMeCLILib()
         cmd_lib = NVMeCommandLib(ts_config["device_path"], ts_config["app_name"])
 
-        dev_path = connectByIP(app, cmd_lib)
+        dev_path = connectByIP(app, cmd_lib, connect_details)
     else:
         dev_path = ts_config["device_path"]
         
