@@ -1,0 +1,6 @@
+{
+    "python.analysis.extraPaths": [
+        "./lib/devlib",
+        "./test_cases/"
+    ]
+}

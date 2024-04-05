@@ -1,0 +1,13 @@
+{
+    "app_name": "nvme-cli", 
+    "device_path": "/dev/nvme1",
+    
+    "connectByIP": "True",
+    "connectDetails":
+    {
+        "transport": "tcp",
+        "addr": "10.0.0.220",
+        "svcid": "1153"
+    }
+
+}
