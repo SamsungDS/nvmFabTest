@@ -8,7 +8,7 @@ import subprocess
 import ctypes
 
 class ApplicationLib():
-    def __init__(self, dev) -> None:
+    def __init__(self, dev_path) -> None:
         self.version = ""
         self.dev_version = ""
         self.cntrl = ""
@@ -24,15 +24,15 @@ def bit_combining(value, pos, limit):
 
 
 class NVMeCLILib(ApplicationLib):
-    def __init__(self, dev='') -> None:
-        super(NVMeCLILib, self).__init__(dev)
+    def __init__(self, dev_path='') -> None:
+        super(NVMeCLILib, self).__init__(dev_path)
         self.version = ""
         self.dev_version = ""
         self.app_version = ""
         self.app_path = ""
         self.data_buffer = ""
         # self.dev = dev
-        self.dev_path = dev
+        self.dev_path = dev_path
         self.command = None
         self.response = None
         self.err_code = 0
@@ -40,14 +40,14 @@ class NVMeCLILib(ApplicationLib):
         self.subsys_list = []
 
     def execute_cmd(self, command, async_run=False):
-        print("Executing Command: ", command)
+        print("-- Executing Command: ", command)
         process = subprocess.Popen(command,stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         self.stdout, self.stderr = process.communicate()
         self.ret_code = process.returncode
         if len(self.stderr) != 0:
-            print("-- Command execution failed")
+            print("-- -- Command execution failed")
             return 1
-        print("-- Command execution success")
+        print("-- -- Command execution success")
         return 0
 
     def get_app_details(self):
@@ -85,14 +85,15 @@ class NVMeCLILib(ApplicationLib):
         version = version.split(":")
         return version[1]
     
-    def get_response(self):
+    def get_response(self, nvme_cmd):
         """
         """
-        self.response = NVMeRspStruct()
+        print(self.stderr)
+        self.response = nvme_cmd.rsp.response
         try:
             if self.ret_code != 0:
                 completion_val = list(bytes(self.stderr).decode('ascii').split(":"))
-                val = re.findall(r'\((.*?)\)', completion_val[len(completion_val)-1])
+                val = re.findall(r'\((.*?)\)', completion_val[-1])
                 self.response.sf.DNR = bit_combining(int(val[0], 16), 14, 15)
                 self.response.sf.M = bit_combining(int(val[0], 16), 13, 14)
                 self.response.sf.CRD = bit_combining(int(val[0], 16), 11, 13)
@@ -144,16 +145,34 @@ class NVMeCLILib(ApplicationLib):
         cmd = f"{cmd} -n {nqn}"
         cmd = f"{cmd}"
         status = self.execute_cmd(cmd)
+        
+        alreadyConnected = self.stderr.decode().strip().endswith("Operation already in progress")
+        
         if status==0:
-            return 0
+            return 0, self.stdout
         else:
-            return 1 
+            if alreadyConnected:
+                return 1, "Already connected to device."
+            return 2, self.stderr
         
     def submit_list_subsys_cmd(self):
         cmd = "nvme list-subsys -o json"
         status = self.execute_cmd(cmd)
         if status==0:
             return 0, self.stdout
+        else:
+            return 1, self.stderr
+        
+    def submit_list_ns_cmd(self):
+        cmd = "nvme list-ns"
+        cmd = f"{cmd} {self.dev_path}"
+        status = self.execute_cmd(cmd)
+        if status==0:
+            ns_paths = []
+            lines = self.stdout.decode().splitlines()
+            for i in range(len(lines)):
+                ns_paths.append(self.dev_path+'n'+lines[i][-1])
+            return 0, ns_paths
         else:
             return 1, self.stderr
         
@@ -184,4 +203,7 @@ class NVMeCLILib(ApplicationLib):
 
 import json
 if __name__ == "__main__":
+    status, response = NVMeCLILib("/dev/nvme2").submit_list_ns_cmd()
+    if status==0:
+        print(response)
     pass

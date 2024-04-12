@@ -1,13 +1,13 @@
 {
     "app_name": "nvme-cli", 
-    "device_path": "/dev/nvme1",
+    "device_path": "/dev/nvme2",
     
-    "connectByIP": "True",
+    "connectByIP": "true",
     "connectDetails":
     {
-        "transport": "tcp",
+        "transport": "rdma",
         "addr": "10.0.0.220",
-        "svcid": "1153"
+        "svcid": "1153",
+        "index": 0
     }
-
 }

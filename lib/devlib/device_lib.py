@@ -34,3 +34,4 @@ class DeviceConfig:
     def __init__(self, device, application) -> None:
         self.device = device
         self.application = application
+        

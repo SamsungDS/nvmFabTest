@@ -101,7 +101,7 @@ class Response(ctypes.Structure): #Completion Queue Entry
     _fields_ = [("command_specific", CommandSpecific), #DW0-1,  C.S and Reserved 
                 ("SQID", ctypes.c_uint16), #SQ Identifier   #DW2 (16 - 31)
                 ("SQHD", ctypes.c_uint16), #SQ Head Pointer #DW2 (0 - 15)
-                ("SF", StatusField), #Status Field  #DW3 (17-31)
+                ("sf", StatusField), #Status Field  #DW3 (17-31)
                 ("P", ctypes.c_uint8, 1), #Phase Tag             #DW3 (16)
                 ("CID", ctypes.c_uint16), #CommandIdentifier #DW3 (0 - 15) 
                 ]
