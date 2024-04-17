@@ -34,4 +34,11 @@ class DeviceConfig:
     def __init__(self, device, application) -> None:
         self.device = device
         self.application = application
+
+class ConnectDetails:
+    def __init__(self, tr='', addr='', svc ='', index = 0) -> None:
         
+        self.transport = tr
+        self.address = addr
+        self.svcid = svc
+        self.index = index

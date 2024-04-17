@@ -9,10 +9,19 @@ from lib.devlib.device_lib import Controller
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData
 from test_cases.conftest import dummy
 
+
 class TestNVMeIdentify:
-    def setup_method(self):
+    @pytest.fixture(scope='function', autouse=True)
+    def setup_method(self, dummy):
         print("-"*100)
         print("Setup TestCase: Identify Controller")
+        self.dummy = dummy
+        device = self.dummy.device
+        application = self.dummy.application
+        self.controller = Controller(device, application)
+        status, self.ns_paths = self.controller.app.submit_list_ns_cmd()
+        if status!=0:
+            raise Exception("List NS failed")
         
 
     def teardown_method(self):
@@ -20,19 +29,19 @@ class TestNVMeIdentify:
         print("-"*100)
 
     def test_identify_cmd(self, dummy):
-        self.dummy = dummy
-        device = self.dummy.device
-        application = self.dummy.application
-        controller = Controller(device, application) # /dev/nvme1 ; nvme-cli|libnve
+        # self.dummy = dummy
+        # device = self.dummy.device
+        # application = self.dummy.application
+        # self.controller = Controller(device, application) # /dev/nvme1 ; nvme-cli|libnve
 
-        nvme_cmd = controller.cmdlib.get_identify_cmd()
-        nvme_cmd.cmd.identify_cmd.cdw10.raw = 0x01 # Making it identify-controller command
+        nvme_cmd = self.controller.cmdlib.get_identify_cmd()
+        nvme_cmd.cmd.identify_cmd.cdw10.raw = 0x01 # Making it identify-self.controller command
         
         result = IdentifyControllerData()
         nvme_cmd.buff = ctypes.addressof(result)
 
-        res_status = controller.submit_passthru_cmd(nvme_cmd, verify_rsp=True, async_run=False)
-        controller.app.get_response(nvme_cmd)
+        res_status = self.controller.submit_passthru_cmd(nvme_cmd, verify_rsp=True, async_run=False)
+        self.controller.app.get_response(nvme_cmd)
         print("Status Code: ", nvme_cmd.rsp.response.sf.SC)
 
         if res_status!=0:
@@ -45,16 +54,12 @@ class TestNVMeIdentify:
             assert False, "SN: {} does not match".format(SN)
 
     def test_identify_cmd_all_ns(self, dummy):
-        self.dummy = dummy
-        device = self.dummy.device
-        application = self.dummy.application
-        controller = Controller(device, application) # /dev/nvme1 ; nvme-cli|libnve
+        # self.dummy = dummy
+        # device = self.dummy.device
+        # application = self.dummy.application
+        # self.controller = Controller(device, application) # /dev/nvme1 ; nvme-cli|libnve
 
-        status, ns_paths = controller.app.submit_list_ns_cmd()
-        if status!=0:
-                assert False, "List NS failed"
-
-        nvme_cmd = controller.cmdlib.get_identify_cmd()
+        nvme_cmd = self.controller.cmdlib.get_identify_cmd()
         
         # Giving incorrect CNS
         nvme_cmd.cmd.identify_cmd.cdw10.raw = 0xFF
@@ -62,12 +67,12 @@ class TestNVMeIdentify:
         result = IdentifyControllerData()
         nvme_cmd.buff = ctypes.addressof(result)
 
-        for ns_path in ns_paths:
-            controller.app.dev_path = ns_path
+        for ns_path in self.ns_paths:
+            self.controller.app.dev_path = ns_path
 
-            res_status = controller.submit_passthru_cmd(nvme_cmd, verify_rsp=True, async_run=False)
+            res_status = self.controller.submit_passthru_cmd(nvme_cmd, verify_rsp=True, async_run=False)
             
-            controller.app.get_response(nvme_cmd)
+            self.controller.app.get_response(nvme_cmd)
             sc = nvme_cmd.rsp.response.sf.SC
             if sc == 2 and res_status!=0:
                 print(f"-- Expected Fail: Invalid Field in Command. Status Code: {sc}")

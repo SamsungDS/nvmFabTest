@@ -4,7 +4,7 @@ import json
 import pytest
 from lib.cmdlib.commands_lib import NVMeCommandLib
 from lib.applib.nvme_cli_lib import NVMeCLILib 
-from lib.devlib.device_lib import DeviceConfig
+from lib.devlib.device_lib import ConnectDetails, DeviceConfig
 from src.utils.nvme_utils import *
 
 f = open("config/ts_config.json")
@@ -73,6 +73,8 @@ def connectByIP(app: NVMeCLILib, cmd_lib: NVMeCommandLib, connect_details):
     dev_path = response
     return 0, dev_path
 
+
+
 #Setup session
 @pytest.fixture(scope='session', autouse=True)
 def session_setup():
@@ -108,3 +110,15 @@ def dummy(session_setup):
     dum = DeviceConfig(dev_path, ts_config["app_name"])
     # dum = DeviceConfig(dev_path, ts_config["app_name"])
     return dum
+
+@pytest.fixture
+def connectDetails():
+    data = ts_config["connectDetails"]
+    connect_details = ConnectDetails()
+    connect_details.transport = data["transport"]
+    connect_details.address = data["addr"] 
+    connect_details.svcid = data["svcid"]
+    connect_details.index = data["index"]
+    
+    
+    return connect_details

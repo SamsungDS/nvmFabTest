@@ -1,0 +1,4 @@
+KATO_ZERO = 0
+KATO_DEFAULT = 120000
+KATO_NONZERO = 60000
+NVME_DISCOVERY_NQN = 'nqn.2014-08.org.nvmexpress.discovery'

@@ -88,7 +88,7 @@ class NVMeCLILib(ApplicationLib):
     def get_response(self, nvme_cmd):
         """
         """
-        print(self.stderr)
+        # print(self.stderr)
         self.response = nvme_cmd.rsp.response
         try:
             if self.ret_code != 0:
@@ -137,13 +137,14 @@ class NVMeCLILib(ApplicationLib):
             return 0, self.stdout
         else:
             return 1, self.stderr
-    def submit_connect_cmd(self, transport, address, svcid, nqn):
+    def submit_connect_cmd(self, transport, address, svcid, nqn, kato=None):
         cmd = "nvme connect"
         cmd = f"{cmd} -t {transport}"
         cmd = f"{cmd} -a {address}"
         cmd = f"{cmd} -s {svcid}"
         cmd = f"{cmd} -n {nqn}"
-        cmd = f"{cmd}"
+        if kato!=None:
+            cmd = f"{cmd} -k {kato}"
         status = self.execute_cmd(cmd)
         
         alreadyConnected = self.stderr.decode().strip().endswith("Operation already in progress")
@@ -154,6 +155,20 @@ class NVMeCLILib(ApplicationLib):
             if alreadyConnected:
                 return 1, "Already connected to device."
             return 2, self.stderr
+    
+    def submit_disconnect_cmd(self, nqn=None):
+        cmd = "nvme disconnect"
+        if nqn:
+            cmd = f"{cmd} -n {nqn}"
+        else:    
+            cmd = f"{cmd} -d {self.dev_path}"
+        
+        status = self.execute_cmd(cmd)
+        
+        if status==0:
+            return 0, self.stdout
+        else:
+            return 1, self.stderr
         
     def submit_list_subsys_cmd(self):
         cmd = "nvme list-subsys -o json"
@@ -203,7 +218,7 @@ class NVMeCLILib(ApplicationLib):
 
 import json
 if __name__ == "__main__":
-    status, response = NVMeCLILib("/dev/nvme2").submit_list_ns_cmd()
+    status, response = NVMeCLILib("/dev/nvme2").submit_disconnect_cmd()
     if status==0:
         print(response)
     pass

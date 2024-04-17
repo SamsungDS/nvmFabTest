@@ -1,8 +1,9 @@
 {
     "app_name": "nvme-cli", 
-    "device_path": "/dev/nvme2",
+    "device_path": "",
     
     "connectByIP": "true",
+    "disconnectOnDone": "true",
     "connectDetails":
     {
         "transport": "rdma",
