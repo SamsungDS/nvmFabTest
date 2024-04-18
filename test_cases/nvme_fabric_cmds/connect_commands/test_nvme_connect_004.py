@@ -1,6 +1,8 @@
 import sys
 import ctypes
 import pytest
+import json
+import re
 
 sys.path.insert(1, "/root/nihal223/nvmfabtest/")
 from lib.devlib.device_lib import ConnectDetails, Controller
@@ -12,9 +14,6 @@ from src.macros import *
 class TestNVMeConnectKato:
     @pytest.fixture(scope='function', autouse=True)
     def setup_method(self, dummy, connectDetails: ConnectDetails):
-        '''
-        Setup for Connect Command with KATO value  
-        '''
         print("-"*100)
         print("Setup TestCase: Connect Command with KATO")
         self.dummy = dummy
@@ -75,7 +74,7 @@ class TestNVMeConnectKato:
     def test_connect_discovery_kato(self, connectDetails: ConnectDetails):
         '''
         Send Connect command with zero KATO value to Controller 
-        if discovery change notification is supported.
+        if discovery change notification is not supported.
         
         Expected: Command response is successful
         '''
@@ -85,7 +84,8 @@ class TestNVMeConnectKato:
         svc = connectDetails.svcid
         nvme_cmd = self.controller.cmdlib.get_nvme_cmd()
 
-        if self.isChangeNotificationSupported:
+        if not self.isChangeNotificationSupported:
+
             status, res = self.controller.app.submit_connect_cmd(tr, addr, svc, nqn, KATO_ZERO)
             self.controller.app.get_response(nvme_cmd)
             status_code = nvme_cmd.rsp.response.sf.SC
@@ -93,7 +93,6 @@ class TestNVMeConnectKato:
                 assert True
             else:
                 assert False, "Connect failed for ZERO KATO"
-
 
     def teardown_method(self):
         print("\n\n", '-'*35)

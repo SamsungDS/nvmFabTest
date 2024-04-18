@@ -12,9 +12,6 @@ from src.macros import *
 class TestNVMeConnectKato:
     @pytest.fixture(scope='function', autouse=True)
     def setup_method(self, dummy, connectDetails: ConnectDetails):
-        '''
-        Setup for Connect Command with KATO value  
-        '''
         print("-"*100)
         print("Setup TestCase: Connect Command with KATO")
         self.dummy = dummy
@@ -70,14 +67,13 @@ class TestNVMeConnectKato:
         print("Change Notification is %ssupported".format("" if self.isChangeNotificationSupported else "not "))
         print("Setup Done: Connect Command with KATO")
         print("-"*35, "\n")
-        
 
     def test_connect_discovery_kato(self, connectDetails: ConnectDetails):
         '''
-        Send Connect command with zero KATO value to Controller 
-        if discovery change notification is supported.
+        Send Connect command with non-zero KATO value to Controller 
+        if discovery change notification is not supported.
         
-        Expected: Command response is successful
+        Expected: Connect Command error
         '''
         nqn = NVME_DISCOVERY_NQN
         tr = connectDetails.transport
@@ -85,15 +81,15 @@ class TestNVMeConnectKato:
         svc = connectDetails.svcid
         nvme_cmd = self.controller.cmdlib.get_nvme_cmd()
 
-        if self.isChangeNotificationSupported:
-            status, res = self.controller.app.submit_connect_cmd(tr, addr, svc, nqn, KATO_ZERO)
+        if not self.isChangeNotificationSupported:
+
+            status, res = self.controller.app.submit_connect_cmd(tr, addr, svc, nqn, KATO_NONZERO)
             self.controller.app.get_response(nvme_cmd)
             status_code = nvme_cmd.rsp.response.sf.SC
-            if status==0 and status_code==0:
+            if status!=0 or status_code!=0:
                 assert True
             else:
-                assert False, "Connect failed for ZERO KATO"
-
+                assert False, "Connect passed for NON-ZERO KATO"
 
     def teardown_method(self):
         print("\n\n", '-'*35)
