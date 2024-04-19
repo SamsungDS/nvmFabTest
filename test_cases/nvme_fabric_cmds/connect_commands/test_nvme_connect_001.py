@@ -1,9 +1,5 @@
 import sys
-import ctypes
 import pytest
-import json
-import re
-
 
 sys.path.insert(1, "/root/nihal223/nvmfabtest/")
 from lib.devlib.device_lib import ConnectDetails, Controller
@@ -34,6 +30,9 @@ class TestNVMeConnect:
         
 
     def test_connect_discovery(self, connectDetails: ConnectDetails):
+        '''
+        
+        '''
         nqn = NVME_DISCOVERY_NQN
         tr = connectDetails.transport
         addr = connectDetails.address
@@ -49,4 +48,3 @@ class TestNVMeConnect:
                 assert False, f"Connect Command failed with Status Code {status_code}"
             else:
                 assert True
-

@@ -137,7 +137,7 @@ class NVMeCLILib(ApplicationLib):
             return 0, self.stdout
         else:
             return 1, self.stderr
-    def submit_connect_cmd(self, transport, address, svcid, nqn, kato=None):
+    def submit_connect_cmd(self, transport, address, svcid, nqn, kato=None, duplicate=False, hostnqn=None, hostid=None, nr_io_queues=None):
         cmd = "nvme connect"
         cmd = f"{cmd} -t {transport}"
         cmd = f"{cmd} -a {address}"
@@ -145,6 +145,14 @@ class NVMeCLILib(ApplicationLib):
         cmd = f"{cmd} -n {nqn}"
         if kato!=None:
             cmd = f"{cmd} -k {kato}"
+        if hostnqn!=None:
+            cmd = f"{cmd} -q {hostnqn}"
+        if hostid!=None:
+            cmd = f"{cmd} -I {hostid}"
+        if nr_io_queues!=None:
+            cmd = f"{cmd} -i {nr_io_queues}"
+        if duplicate:
+            cmd = f"{cmd} -D"
         status = self.execute_cmd(cmd)
         
         alreadyConnected = self.stderr.decode().strip().endswith("Operation already in progress")
@@ -156,10 +164,12 @@ class NVMeCLILib(ApplicationLib):
                 return 1, "Already connected to device."
             return 2, self.stderr
     
-    def submit_disconnect_cmd(self, nqn=None):
+    def submit_disconnect_cmd(self, nqn=None, device_path=None):
         cmd = "nvme disconnect"
         if nqn:
             cmd = f"{cmd} -n {nqn}"
+        elif device_path:
+            cmd = f"{cmd} -d {device_path}"
         else:    
             cmd = f"{cmd} -d {self.dev_path}"
         

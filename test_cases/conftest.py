@@ -11,17 +11,17 @@ f = open("config/ts_config.json")
 ts_config = json.load(f)
 f.close()
 
-def a(app, nqn):
+# def a(app, nqn):
 
-    status, response = app.submit_list_subsys_cmd()
-    if status!=0:
-        print("-- -- Command failed. Check if nvme cli tool is installed")
-        return status, response
+#     status, response = app.submit_list_subsys_cmd()
+#     if status!=0:
+#         print("-- -- Command failed. Check if nvme cli tool is installed")
+#         return status, response
     
-    status, response = get_dev_from_subsys(response, nqn)
-    if status!=0:
-        print(f"-- -- Session Setup Error: {response}")
-        return status, response
+#     status, response = get_dev_from_subsys(response, nqn)
+#     if status!=0:
+#         print(f"-- -- Session Setup Error: {response}")
+#         return status, response
 
 def connectByIP(app: NVMeCLILib, cmd_lib: NVMeCommandLib, connect_details):
 
@@ -69,7 +69,7 @@ def connectByIP(app: NVMeCLILib, cmd_lib: NVMeCommandLib, connect_details):
         if status!=0:
             print(f"-- -- Session Setup Error: {response}")
             return status, response
-    print("-- Device already connected. Fetching device_path.")     
+    print("-- Device connected. Fetching device_path.")     
     dev_path = response
     return 0, dev_path
 
@@ -102,6 +102,11 @@ def session_setup():
     print("-"*30, "Completed session setup ", "-"*50, "\n")
     print("Path being used for testcases: ", dev_path, "\n")
     yield dev_path
+    print("\nSession Teardown:")
+    if ts_config["disconnectOnDone"].lower()=="true":
+        status, res = app.submit_disconnect_cmd(device_path=dev_path)
+        if status!=0:
+            raise Exception(f"Disconnect failed: {res}")
 
 @pytest.fixture
 def dummy(session_setup):
@@ -119,6 +124,5 @@ def connectDetails():
     connect_details.address = data["addr"] 
     connect_details.svcid = data["svcid"]
     connect_details.index = data["index"]
-    
     
     return connect_details

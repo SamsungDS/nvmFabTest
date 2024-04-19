@@ -74,7 +74,7 @@ class TestNVMeConnectKato:
 
     def test_connect_discovery_kato(self, connectDetails: ConnectDetails):
         '''
-        Send Connect command with zero KATO value to Controller 
+        Send Connect command with zero KATO value to Discovery Controller 
         if discovery change notification is supported.
         
         Expected: Command response is successful

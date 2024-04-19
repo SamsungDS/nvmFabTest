@@ -44,7 +44,7 @@ class TestNVMeIdentify:
         SN = result.SN.decode().strip()
         
         for char in SN:
-            if not ASCII_MIN<=char<ASCII_MAX:
+            if not ASCII_MIN<=ord(char)<ASCII_MAX:
                 assert False, f"ASCII out of range: {int(char)}"
         assert True
         

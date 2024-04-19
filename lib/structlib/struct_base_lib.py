@@ -19,7 +19,7 @@ class PRP(ctypes.Structure):
 class DPTR(ctypes.Union):
     _pack_ = 1
     _fields_ = [("prp", PRP),
-                ("SGL1", ctypes.c_uint64 * 2),
+                ("SGL1", ctypes.c_uint8 * 16),
                 ]
 
 class CDW2(ctypes.Union):
