@@ -11,18 +11,9 @@ f = open("config/ts_config.json")
 ts_config = json.load(f)
 f.close()
 
-# def a(app, nqn):
-
-#     status, response = app.submit_list_subsys_cmd()
-#     if status!=0:
-#         print("-- -- Command failed. Check if nvme cli tool is installed")
-#         return status, response
-    
-#     status, response = get_dev_from_subsys(response, nqn)
-#     if status!=0:
-#         print(f"-- -- Session Setup Error: {response}")
-#         return status, response
-
+def pytest_html_report_title(report):
+   report.title = "NVMe over Fabric Compliance Test Report (nvmfabtest)"
+   
 def connectByIP(app: NVMeCLILib, cmd_lib: NVMeCommandLib, connect_details):
 
     tr = connect_details["transport"]
@@ -35,7 +26,7 @@ def connectByIP(app: NVMeCLILib, cmd_lib: NVMeCommandLib, connect_details):
     if status!=0:
         print("-- -- Session Setup Error: Discover command failed. Check the configuration details")
         return status, response
-    nqn = cmd_lib.parse_discover_cmd(response, index)
+    nqn = app.parse_discover_cmd(response, index)
     # End Discover Command
     
     #Check Device already connected

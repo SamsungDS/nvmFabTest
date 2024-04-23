@@ -14,6 +14,8 @@ class Controller():
         self.app_name = app_name
         if app_name.lower() == "nvme-cli":
             self.app = NVMeCLILib(dev_name)
+        elif app_name.lower == "libnvme":
+            pass #self.app = Libnvme(dev_name)
         else:
             print("Error : ", app_name, app_name.lower)
 
@@ -28,7 +30,6 @@ class Controller():
         res = self.app.submit_passthru(connect_cmd, verify_rsp=verify_rsp, async_run=async_run)
         if not res:
             print("Error Message")
-    pass
 
 class DeviceConfig:
     def __init__(self, device, application) -> None:

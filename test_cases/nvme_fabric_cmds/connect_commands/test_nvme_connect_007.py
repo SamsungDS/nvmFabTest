@@ -1,5 +1,8 @@
+'''
+Verify connect command with NVM Subsystem NQN value - "not matching" the values that the NVM subsystem is configured to support.
+Expected output: Failure with status "Connect Invalid Parameters"
+'''
 import sys
-import ctypes
 import pytest
 import re
 
@@ -10,10 +13,13 @@ from test_cases.conftest import dummy
 from src.utils.nvme_utils import *
 from src.macros import *
 
-class TestNVMeConnectValidFields:
+class TestNVMeConnectNQN:
+
     @pytest.fixture(scope='function', autouse=True)
     def setup_method(self, dummy, connectDetails: ConnectDetails):
-        print("-"*100)
+        ''' Setup test case by getting discovering the NQN '''
+
+        print("\n", "-"*100)
         print("Setup TestCase: Connect Command with invalid subsystem NQN")
         self.dummy = dummy
         device = self.dummy.device
@@ -31,7 +37,7 @@ class TestNVMeConnectValidFields:
             print("-- -- TestCase Setup Error: Discover command failed. Check the configuration details")
             raise Exception("TestCase Setup Exception")
         
-        self.nqn = self.controller.cmdlib.parse_discover_cmd(response, index)
+        self.nqn = self.controller.app.parse_discover_cmd(response, index)
         # End Discover Command
         
         #List-subsys
@@ -46,18 +52,14 @@ class TestNVMeConnectValidFields:
         print("Setup Done: Connect Command with invalid subsystem NQN")
         print("-"*35, "\n")
 
-    def test_connect_valid_fields(self, connectDetails: ConnectDetails):
-        '''
-        Send Connect command with invalid subsystem NQN.
-        
-        Expected: Connect Command error
-        '''
+    def test_connect_invalid_subnqn(self, connectDetails: ConnectDetails):
+        ''' Send Connect command with invalid subsystem NQN '''
         tr = connectDetails.transport
         addr = connectDetails.address
         svc = connectDetails.svcid
         nqn = self.nqn
         
-        nqn = nqn+"z"
+        nqn = nqn+"ZzZ"
         nvme_cmd = self.controller.cmdlib.get_nvme_cmd()
 
         # Start Connect Command
@@ -74,6 +76,8 @@ class TestNVMeConnectValidFields:
             assert False, f"Connect failed with unexpected error code: {status}"
 
     def teardown_method(self):
+        ''' Teardown test case by disconnecting the device '''
+
         print("\n\n", '-'*35)
         print("Teardown TestCase: Connect Command with invalid subsystem NQN")
         status, response = self.controller.app.submit_list_subsys_cmd()

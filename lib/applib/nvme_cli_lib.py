@@ -111,6 +111,15 @@ class NVMeCLILib(ApplicationLib):
 
     def verify_response(self, actual_rsp, expected_rsp):
         pass
+
+    def parse_discover_cmd(self, response: bytes, index: int):
+        response = response.decode()
+        occurences = [m.start() for m in re.finditer('subnqn', response)]
+        index = 0 if len(occurences)==1 else index
+        start = 7 + occurences[index]
+        end = response.find('\n', start)
+        nqn = response[start:end].strip()     
+        return nqn
         
     def prepare_admin_passthru_cmd(self, command):
         """

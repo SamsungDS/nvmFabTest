@@ -4,7 +4,7 @@ sys.path.insert(1, "/root/nihal223/nvmfabtest")
 from lib.applib.nvme_cli_lib import NVMeCLILib
 from lib.structlib.nvme_struct_main_lib import NVMeCommand
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData 
-import ctypes, sys, re
+
 
 
 class NVMeCommandLib:
@@ -13,6 +13,8 @@ class NVMeCommandLib:
         self.app_name = app_name
         if app_name.lower == "nvme-cli":
             self.app = NVMeCLILib(dev_name)
+        elif app_name.lower == "libnvme":
+            pass #self.app = Libnvme(dev_name)
         else:
             pass
 
@@ -30,16 +32,7 @@ class NVMeCommandLib:
 
         return nvme_cmd
     
-    def parse_discover_cmd(self, response: bytes, index: int):
-        response = response.decode()
-        occurences = [m.start() for m in re.finditer('subnqn', response)]
-        index = 0 if len(occurences)==1 else index
-        
-        start = 7 + occurences[index]
-        end = response.find('\n', start)
-        nqn = response[start:end].strip()
-        
-        return nqn
+
 
 
     

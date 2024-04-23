@@ -1,3 +1,7 @@
+'''
+Send Connect and Disconnect command with different number of IO queues.
+Expected: Connect Command successful
+'''
 import sys
 import pytest
 import re
@@ -8,10 +12,13 @@ from test_cases.conftest import dummy
 from src.utils.nvme_utils import *
 from src.macros import *
 
-class TestNVMeConnectDifferentNrIOQueues:
+class TestNVMeConnectIOQueues:
+
     @pytest.fixture(scope='function', autouse=True)
     def setup_method(self, dummy, connectDetails: ConnectDetails):
-        print("-"*100)
+        ''' Setup test case by getting discovering the NQN '''
+
+        print("\n", "-"*100)
         print("Setup TestCase: Connect Command with different number of IO queues")
         self.dummy = dummy
         device = self.dummy.device
@@ -29,7 +36,7 @@ class TestNVMeConnectDifferentNrIOQueues:
             print("-- -- TestCase Setup Error: Discover command failed. Check the configuration details")
             raise Exception("TestCase Setup Exception")
         
-        self.nqn = self.controller.cmdlib.parse_discover_cmd(response, index)
+        self.nqn = self.controller.app.parse_discover_cmd(response, index)
         # End Discover Command
         
         #List-subsys
@@ -42,13 +49,10 @@ class TestNVMeConnectDifferentNrIOQueues:
 
         print("Setup Complete")
         print("-"*35, "\n")
-
+    
     def test_connect_nr_io_queues(self, connectDetails: ConnectDetails):
-        '''
-        Send Connect command with different number of IO queues.
-        
-        Expected: Connect Command successful
-        '''
+        ''' Send Connect and Disconnect command with different number of IO queues '''
+
         tr = connectDetails.transport
         addr = connectDetails.address
         svc = connectDetails.svcid
@@ -82,8 +86,9 @@ class TestNVMeConnectDifferentNrIOQueues:
             else:
                 assert True
 
-
     def teardown_method(self):
+        ''' Teardown test case by disconnecting the device '''
+
         print("\n\n", '-'*35)
         print("Teardown TestCase: Connect Command with different number of IO queues")
         status, response = self.controller.app.submit_list_subsys_cmd()

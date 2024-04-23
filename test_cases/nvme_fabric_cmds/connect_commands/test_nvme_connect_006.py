@@ -1,3 +1,7 @@
+'''
+Verify connect command with valid fields(SUBNQN, TRADDR, TRSVCID, TRTYPE).
+Expected output: Connect command response is successful
+'''
 import sys
 import pytest
 import re
@@ -8,11 +12,14 @@ from test_cases.conftest import dummy
 from src.utils.nvme_utils import *
 from src.macros import *
 
-class TestNVMeConnectValidFields:
+class TestNVMeConnect:
     @pytest.fixture(scope='function', autouse=True)
     def setup_method(self, dummy, connectDetails: ConnectDetails):
-        print("-"*100)
+        ''' Setup test case by getting discovering the NQN '''
+
+        print("\n", "-"*100)
         print("Setup TestCase: Connect Command with valid fields")
+
         self.dummy = dummy
         device = self.dummy.device
         application = self.dummy.application
@@ -29,7 +36,7 @@ class TestNVMeConnectValidFields:
             print("-- -- TestCase Setup Error: Discover command failed. Check the configuration details")
             raise Exception("TestCase Setup Exception")
         
-        self.nqn = self.controller.cmdlib.parse_discover_cmd(response, index)
+        self.nqn = self.controller.app.parse_discover_cmd(response, index)
         # End Discover Command
         
         #List-subsys
@@ -44,12 +51,8 @@ class TestNVMeConnectValidFields:
         print("-"*35, "\n")
 
     def test_connect_valid_fields(self, connectDetails: ConnectDetails):
-        '''
-        Send Connect command with non-zero KATO value to Controller 
-        if discovery change notification is not supported.
-        
-        Expected: Connect Command error
-        '''
+        ''' Send Connect command with valid fields '''
+
         tr = connectDetails.transport
         addr = connectDetails.address
         svc = connectDetails.svcid
@@ -58,7 +61,6 @@ class TestNVMeConnectValidFields:
 
         # Start Connect Command
         status, response = self.controller.app.submit_connect_cmd(transport=tr, address=addr, svcid=svc, nqn=nqn, duplicate=True)
-        
         self.controller.app.get_response(nvme_cmd)
         status_code = nvme_cmd.rsp.response.sf.SC
         if status==0 and status_code==0:
@@ -67,6 +69,8 @@ class TestNVMeConnectValidFields:
             assert False, "Connect failed for valid fields"
 
     def teardown_method(self):
+        ''' Teardown test case by disconnecting the device '''
+
         print("\n\n", '-'*35)
         print("Teardown TestCase: Connect Command with valid fields")
         status, response = self.controller.app.submit_list_subsys_cmd()

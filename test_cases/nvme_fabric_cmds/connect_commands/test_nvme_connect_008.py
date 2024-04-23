@@ -1,3 +1,7 @@
+'''
+Send Connect command with Host ID cleared to 0h.
+Expected: Connect Command error
+'''
 import sys
 import pytest
 import re
@@ -8,10 +12,12 @@ from test_cases.conftest import dummy
 from src.utils.nvme_utils import *
 from src.macros import *
 
-class TestNVMeConnectValidFields:
+class TestNVMeConnectHostID:
     @pytest.fixture(scope='function', autouse=True)
     def setup_method(self, dummy, connectDetails: ConnectDetails):
-        print("-"*100)
+        ''' Setup test case by getting discovering the NQN '''
+
+        print("\n", "-"*100)
         print("Setup TestCase: Connect Command with Host ID cleared to 0h")
         self.dummy = dummy
         device = self.dummy.device
@@ -29,7 +35,7 @@ class TestNVMeConnectValidFields:
             print("-- -- TestCase Setup Error: Discover command failed. Check the configuration details")
             raise Exception("TestCase Setup Exception")
         
-        self.nqn = self.controller.cmdlib.parse_discover_cmd(response, index)
+        self.nqn = self.controller.app.parse_discover_cmd(response, index)
         # End Discover Command
         
         #List-subsys
@@ -44,25 +50,18 @@ class TestNVMeConnectValidFields:
         print("Setup Complete")
         print("-"*35, "\n")
 
-    def test_connect_valid_fields(self, connectDetails: ConnectDetails):
-        '''
-        Send Connect command with Host ID cleared to 0h.
-        
-        Expected: Connect Command error
-        '''
+    def test_connect_zero_hostid(self, connectDetails: ConnectDetails):
+        ''' Send Connect command with Host ID cleared to 0h '''
+
         tr = connectDetails.transport
         addr = connectDetails.address
         svc = connectDetails.svcid
         nqn = self.nqn
         
         hostid = 0
-        # nvme_cmd = self.controller.cmdlib.get_nvme_cmd()
 
         # Start Connect Command
         status, response = self.controller.app.submit_connect_cmd(transport=tr, address=addr, svcid=svc, nqn=nqn, duplicate=True, hostid=hostid)
-
-        # self.controller.app.get_response(nvme_cmd)
-        # status_code = nvme_cmd.rsp.response.sf.SC
         if status==2:
             print("-- Expected Failure in Connect Command")
             assert True
@@ -72,6 +71,8 @@ class TestNVMeConnectValidFields:
             assert False, f"Connect failed with unexpected error code: {status}"
 
     def teardown_method(self):
+        ''' Teardown test case by disconnecting the device '''
+
         print("\n\n", '-'*35)
         print("Teardown TestCase: Connect Command with Host ID cleared to 0h")
         status, response = self.controller.app.submit_list_subsys_cmd()
