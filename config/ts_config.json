@@ -1,14 +1,17 @@
 {
-    "app_name": "nvme-cli", 
+    "app_name": "libnvme", 
     "device_path": "",
     
     "connectByIP": "true",
     "disconnectOnDone": "true",
+    
     "connectDetails":
     {
         "transport": "tcp",
         "addr": "10.0.0.220",
-        "svcid": "4420",
+        "svcid": "1153",
         "index": 0
-    }
+    },
+
+    "libnvme_path": "auto"
 }

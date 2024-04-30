@@ -41,11 +41,11 @@ class TestNVMeIdentify:
         nvme_cmd.buff = ctypes.addressof(result)
 
         for ns_path in self.ns_paths:
-            self.controller.app.dev_path = ns_path
+            self.controller.app.dev_name = ns_path
 
-            res_status = self.controller.submit_passthru_cmd(nvme_cmd, verify_rsp=True, async_run=False)
+            res_status = self.controller.app.submit_passthru(nvme_cmd, verify_rsp=True, async_run=False)
             
-            self.controller.app.get_response(nvme_cmd)
+            # self.controller.app.get_response(nvme_cmd)
             sc = nvme_cmd.rsp.response.sf.SC
             if sc == 2 or res_status!=0:
                 print(f"-- Expected Fail: Invalid Field in Command. Status Code: {sc}")

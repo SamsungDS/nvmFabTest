@@ -120,7 +120,7 @@ class NVMeCLILib(ApplicationLib):
         end = response.find('\n', start)
         nqn = response[start:end].strip()     
         return nqn
-        
+    
     def prepare_admin_passthru_cmd(self, command):
         """
         """
@@ -211,7 +211,7 @@ class NVMeCLILib(ApplicationLib):
             return 1, self.stderr
         
     def submit_passthru(self, nvme_cmd, verify_rsp=True, async_run=False):
-        command = nvme_cmd.cmd.identify_cmd
+        command = nvme_cmd.cmd.generic_command
         response = nvme_cmd.rsp.response
         data_len = nvme_cmd.buff_size
         if command.cdw0.OPC == 0x06:
@@ -237,7 +237,10 @@ class NVMeCLILib(ApplicationLib):
 
 import json
 if __name__ == "__main__":
-    status, response = NVMeCLILib("/dev/nvme2").submit_disconnect_cmd()
-    if status==0:
-        print(response)
-    pass
+    obj = NVMeCLILib("/dev/nvme2")
+    print(obj)
+    # status, response = NVMeCLILib("/dev/nvme2").submit_disconnect_cmd()
+    
+    # if status==0:
+    #     print(response)
+    # pass

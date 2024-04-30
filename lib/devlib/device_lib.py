@@ -2,6 +2,7 @@
 import sys 
 sys.path.insert(1, "/root/nihal223/nvmfabtest")
 
+from lib.applib.libnvme_wrap import Libnvme
 from lib.applib.nvme_cli_lib import NVMeCLILib
 from lib.cmdlib.commands_lib import NVMeCommandLib
 
@@ -14,8 +15,8 @@ class Controller():
         self.app_name = app_name
         if app_name.lower() == "nvme-cli":
             self.app = NVMeCLILib(dev_name)
-        elif app_name.lower == "libnvme":
-            pass #self.app = Libnvme(dev_name)
+        elif app_name.lower() == "libnvme":
+            self.app = Libnvme(dev_name)
         else:
             print("Error : ", app_name, app_name.lower)
 

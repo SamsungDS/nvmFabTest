@@ -10,10 +10,10 @@ from lib.structlib.struct_admin_data_lib import IdentifyControllerData
 class NVMeCommandLib:
     def __init__(self, app_name, dev_name='', connectDetails=None) -> None:
         self.dev_name = dev_name
-        self.app_name = app_name
-        if app_name.lower == "nvme-cli":
+        self.app_name = app_name.lower()
+        if app_name.lower() == "nvme-cli":
             self.app = NVMeCLILib(dev_name)
-        elif app_name.lower == "libnvme":
+        elif app_name.lower() == "libnvme":
             pass #self.app = Libnvme(dev_name)
         else:
             pass
@@ -32,6 +32,17 @@ class NVMeCommandLib:
 
         return nvme_cmd
     
+    def get_identify_controller_cmd(self):
+
+        nvme_cmd = self.get_nvme_cmd()
+        nvme_cmd.buff_size = 4096
+        nvme_cmd.cmd.identify_cmd.cdw0.OPC = 0x06
+        nvme_cmd.cmd.identify_cmd.NSID = 0
+        
+
+        # Making it identify-controller command
+        nvme_cmd.cmd.identify_cmd.cdw10.raw = 0x01
+        return nvme_cmd
 
 
 

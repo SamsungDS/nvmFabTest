@@ -3,11 +3,11 @@ import ctypes
 
 class CDW0(ctypes.Structure): # Fig 104
     _pack_ = 1
-    _fields_ = [("CID", ctypes.c_uint16), # Command Identifier     # 16 - 31
-                ("PSDT", ctypes.c_uint8, 2),#PRP/SGLforDataTransfer# 14 - 15 
-                ("Reserved", ctypes.c_uint8, 4),                   # 10 - 13
+    _fields_ = [("OPC", ctypes.c_uint8), #Op Code   # 0 - 7  
                 ("FUSE", ctypes.c_uint8, 2), # Fused Operation     # 8 - 9
-                ("OPC", ctypes.c_uint8), #Op Code                  # 0 - 7
+                ("Reserved", ctypes.c_uint8, 4),                   # 10 - 13
+                ("PSDT", ctypes.c_uint8, 2),#PRP/SGLforDataTransfer# 14 - 15 
+                ("CID", ctypes.c_uint16), # Command Identifier     # 16 - 31
                 ]
 
 class PRP(ctypes.Structure):
@@ -16,10 +16,17 @@ class PRP(ctypes.Structure):
                 ("PRP2", ctypes.c_uint64),
                 ]
 
+class SGL(ctypes.Structure):
+    _pack_ = 1
+    _fields_ =[ ("addr", ctypes.c_uint64),
+                ("metadata_len", ctypes.c_uint32),
+                ("data_len", ctypes.c_uint32),
+                ]
+
 class DPTR(ctypes.Union):
     _pack_ = 1
     _fields_ = [("prp", PRP),
-                ("SGL1", ctypes.c_uint8 * 16),
+                ("sgl", SGL),
                 ]
 
 class CDW2(ctypes.Union):

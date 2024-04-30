@@ -9,7 +9,7 @@ class ConnectCommand(ctypes.Structure): #Submission Queue Connect Command
     _pack_ = 1
     _fields_ = [("OPC", ctypes.c_uint8), # Byte 0
                 ("Reserved1", ctypes.c_uint8), # Byte 1
-                ("CID", ctypes.c_char * 8), # Bytes 2-3
+                ("CID", ctypes.c_char * 2), # Bytes 2-3
                 ("FCTYPE", ctypes.c_byte), # Bytes 4
                 ("Reserved2", ctypes.c_ubyte * 19), # # Bytes 05-23
                 ("SGL1", ctypes.c_uint8 * 16), # Bytes 24 - 39
@@ -21,7 +21,7 @@ class ConnectCommand(ctypes.Structure): #Submission Queue Connect Command
                 ("KATO", ctypes.c_uint32), # Bytes 48 - 51
                 ("Reserved4", ctypes.c_uint8 * 12), # Byte 52 - 63
                 ]
-
+    
 class ConnectCommandData(ctypes.Structure):
     '''
     Connect Command Data
@@ -69,3 +69,35 @@ class ConnectResponse(ctypes.Structure):
                 ("CID", ctypes.c_uint16), # Bytes 12-13
                 ("STS", ctypes.c_uint16), # Bytes 14-15
                 ]
+    
+class PropertyGetCommand(ctypes.Structure): #Submission Queue Connect Command
+    '''
+    Property Get Command Submission Queue Entry
+    Figure 25, NVMe Fabric Specification 1.1a
+    '''
+    _pack_ = 1
+    _fields_ = [("OPC", ctypes.c_uint8), # Byte 0
+                ("Reserved1", ctypes.c_uint8), # Byte 1
+                ("CID", ctypes.c_char * 2), # Bytes 2-3
+                ("FCTYPE", ctypes.c_ubyte), # Bytes 4
+                ("Reserved2", ctypes.c_ubyte * 35), # # Bytes 05 - 39
+                ("ATTRIB", ctypes.c_ubyte), # Byte 40
+                ("Reserved3", ctypes.c_uint8 * 3), # Bytes 41-43
+                ("OFST", ctypes.c_uint32),# Bytes 44 - 47
+                ("Reserved4", ctypes.c_uint8 * 16), # Byte 48 - 63
+                ]
+    
+class PropertyGetResponse(ctypes.Structure): 
+    '''
+    Property Get Command Response
+    Figure 26, NVMe Fabric Specification 1.1a
+    '''
+    _pack_ = 1
+    _fields_ = [("VALUE", ctypes.c_uint64), # Byte 0 - 7
+                ("SQHD", ctypes.c_uint16), # Bytes 8-9
+                ("Reserved", ctypes.c_uint16), # Bytes 10-11
+                ("CID", ctypes.c_uint16), # Bytes 12-13
+                ("STS", ctypes.c_uint16), # Bytes 14-15
+                ]    
+
+print(ctypes.sizeof(PropertyGetResponse()))

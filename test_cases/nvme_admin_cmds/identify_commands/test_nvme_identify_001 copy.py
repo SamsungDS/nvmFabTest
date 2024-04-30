@@ -27,19 +27,20 @@ class TestNVMeIdentify:
 
     def test_identify_cmd(self, dummy):
         ''' Sending the command and verifying response '''
-        nvme_cmd = self.controller.cmdlib.get_identify_controller_cmd()
+        nvme_cmd = self.controller.cmdlib.get_identify_cmd()
         
+        # Making it identify-controller command
+        nvme_cmd.cmd.identify_cmd.cdw10.raw = 0x01
+
         result = IdentifyControllerData()
         nvme_cmd.buff = ctypes.addressof(result)
-
-        res_status = self.controller.app.submit_passthru(nvme_cmd, verify_rsp=True, async_run=False)
+        res_status = self.controller.submit_passthru_cmd(nvme_cmd, verify_rsp=True, async_run=False)
         
         self.controller.app.get_response(nvme_cmd)
         print("Status Code: ", nvme_cmd.rsp.response.sf.SC)
         if res_status!=0:
             assert False
         SN = result.SN.decode().strip()
-        print(SN)
         for char in SN:
             if not ASCII_MIN<=ord(char)<ASCII_MAX:
                 assert False, f"ASCII out of range: {int(char)}"
@@ -51,6 +52,9 @@ class TestNVMeIdentify:
         print("-"*100)   
              
 from lib.devlib.device_lib import DeviceConfig
+print("Hello 0")
 if __name__=='__main__':
+    print("Hello 1")
     dum = DeviceConfig("/dev/nvme2", "nvme-cli")
-    TestNVMeIdentify().test_identify_cmd_all_ns(dum)
+    print("Hello 2")
+    TestNVMeIdentify().test_identify_cmd(dum)

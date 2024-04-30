@@ -64,6 +64,7 @@ def connectByIP(app: NVMeCLILib, cmd_lib: NVMeCommandLib, connect_details):
     dev_path = response
     return 0, dev_path
 
+
 #Setup session
 @pytest.fixture(scope='session', autouse=True)
 def session_setup():
@@ -88,17 +89,10 @@ def session_setup():
     else:
         dev_path = ts_config["device_path"]
     
-    #Finding system's libnvme.so file
-    if ts_config["libnvme_path"].lower()=="auto":
-        for root, dirs, files in os.walk("/usr/"):
-            if "libnvme.so" in files:
-                libnvme_path = os.path.join(root, "libnvme.so")
-    
     print("-"*30, "Completed session setup ", "-"*50, "\n")
     print("Path being used for testcases: ", dev_path, "\n")
-    print("Path being used for libnvme.so file: ", libnvme_path, "\n")
-
-    yield dev_path, libnvme_path
+    
+    yield dev_path
 
     print("\nSession Teardown:")
     if ts_config["disconnectOnDone"].lower()=="true":

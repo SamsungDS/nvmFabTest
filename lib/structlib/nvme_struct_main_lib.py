@@ -12,7 +12,7 @@ from struct_admin_data_lib import *
 
 class NVMeCmdStruct(ctypes.Union):
     _pack_ = 1
-    _fields_ = [("command", GenericCommand),
+    _fields_ = [("generic_command", GenericCommand),
                 ("delete_io_subq_cmd", GenericCommand),         # OPC 0x0
                 ("create_io_subq_cmd", GenericCommand),         # OPC 0x1
                 ("get_log_page_cmd", GetLogPageCommand),        # OPC 0x2
