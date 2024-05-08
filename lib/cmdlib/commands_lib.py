@@ -1,7 +1,9 @@
 import sys
+import ctypes
+
 sys.path.insert(1, "/root/nihal223/nvmfabtest")
 
-from lib.applib.nvme_cli_lib import NVMeCLILib
+
 from lib.structlib.nvme_struct_main_lib import NVMeCommand
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData 
 
@@ -12,7 +14,7 @@ class NVMeCommandLib:
         self.dev_name = dev_name
         self.app_name = app_name.lower()
         if app_name.lower() == "nvme-cli":
-            self.app = NVMeCLILib(dev_name)
+            pass #self.app = NVMeCLILib(dev_name)
         elif app_name.lower() == "libnvme":
             pass #self.app = Libnvme(dev_name)
         else:
@@ -44,7 +46,15 @@ class NVMeCommandLib:
         nvme_cmd.cmd.identify_cmd.cdw10.raw = 0x01
         return nvme_cmd
 
-
+    def get_get_property_cmd(self):
+        nvme_cmd = self.get_nvme_cmd()
+        
+        nvme_cmd.cmd.generic_command.cdw0.OPC = 0x7f
+        nvme_cmd.cmd.generic_command.NSID = 0x04
+        nvme_cmd.cmd.generic_command.cdw10.raw = 0
+        nvme_cmd.cmd.generic_command.cdw11.raw = 0x14
+        
+        return nvme_cmd
 
     
     

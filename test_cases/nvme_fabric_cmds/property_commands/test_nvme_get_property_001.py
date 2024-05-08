@@ -5,7 +5,7 @@ characters in the range of 20h to 7Eh in Identify Response Data Structure
 import sys
 import ctypes
 import pytest
-import re
+
 
 sys.path.insert(1, "/root/nihal223/nvmfabtest/")
 from lib.devlib.device_lib import Controller
@@ -18,7 +18,6 @@ class TestNVMeIdentify:
     @pytest.fixture(scope='function', autouse=True)
     def setup_method(self, dummy):
         ''' Setup Test Case by initialization of objects '''
-        print("=====> Hello 2")
         print("\n", "-"*100)
         print("Setup TestCase: Identify Controller")
         self.dummy = dummy
@@ -26,26 +25,28 @@ class TestNVMeIdentify:
         application = self.dummy.application
         self.controller = Controller(device, application)
 
-    def test_identify_cmd(self, dummy):
+    def test_property_get_cmd(self, dummy):
         ''' Sending the command and verifying response '''
-        nvme_cmd = self.controller.cmdlib.get_identify_cmd()
-        
-        # Making it identify-controller command
-        nvme_cmd.cmd.identify_cmd.cdw10.raw = 0x01
 
-        result = IdentifyControllerData()
-        nvme_cmd.buff = ctypes.addressof(result)
-        res_status = self.controller.submit_passthru_cmd(nvme_cmd, verify_rsp=True, async_run=False)
-        
-        self.controller.app.get_response(nvme_cmd)
-        print("Status Code: ", nvme_cmd.rsp.response.sf.SC)
-        if res_status!=0:
-            assert False
-        SN = result.SN.decode().strip()
-        for char in SN:
-            if not ASCII_MIN<=ord(char)<ASCII_MAX:
-                assert False, f"ASCII out of range: {int(char)}"
-        assert True
+        nvme_cmd = self.controller.cmdlib.get_get_property_cmd()
+        offsets =  [0, 0x08, 0x14, 0x1C]
+
+        for offset in offsets:
+            get_property_value = ctypes.c_uint64()
+            nvme_cmd.buff = ctypes.addressof(get_property_value)
+            nvme_cmd.cmd.generic_command.cdw11.raw = offset
+            
+            res_status = self.controller.app.submit_passthru(nvme_cmd, verify_rsp=True, async_run=False)
+            
+            # self.controller.app.get_response(nvme_cmd)
+            print("Status Code: ", res_status)
+            if res_status!=0:
+                assert False
+            get_property_hex_value = hex(get_property_value.value)
+            print(get_property_hex_value)
+            if get_property_value.value == 0:
+                assert False, f"No value obtained"
+            assert True
 
     def teardown_method(self):
         ''' Teardown of Test Case '''
@@ -53,9 +54,6 @@ class TestNVMeIdentify:
         print("-"*100)   
              
 from lib.devlib.device_lib import DeviceConfig
-print("Hello 0")
 if __name__=='__main__':
-    print("=====> Hello 1")
     dum = DeviceConfig("/dev/nvme2", "nvme-cli")
-    TestNVMeIdentify().test_identify_cmd(dum)
-print("Hello 4")
+    TestNVMeIdentify().test_identify_cmd_all_ns(dum)

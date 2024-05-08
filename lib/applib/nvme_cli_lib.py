@@ -1,6 +1,8 @@
-import sys 
+import sys
+
 sys.path.insert(1, "/root/nihal223/nvmfabtest")
 
+from lib.cmdlib.commands_lib import NVMeCommandLib 
 import re
 from lib.structlib.nvme_struct_main_lib import NVMeRspStruct
 from utils.logging_module import logger
@@ -44,7 +46,8 @@ class NVMeCLILib(ApplicationLib):
         process = subprocess.Popen(command,stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         self.stdout, self.stderr = process.communicate()
         self.ret_code = process.returncode
-        if len(self.stderr) != 0:
+
+        if len(self.stderr) != 0 and self.ret_code !=0:
             print("-- -- Command execution failed")
             return 1
         print("-- -- Command execution success")
@@ -145,7 +148,7 @@ class NVMeCLILib(ApplicationLib):
         if status==0:
             return 0, self.stdout
         else:
-            return 1, self.stderr
+            return status, self.stderr
     def submit_connect_cmd(self, transport, address, svcid, nqn, kato=None, duplicate=False, hostnqn=None, hostid=None, nr_io_queues=None):
         cmd = "nvme connect"
         cmd = f"{cmd} -t {transport}"
@@ -170,8 +173,8 @@ class NVMeCLILib(ApplicationLib):
             return 0, self.stdout
         else:
             if alreadyConnected:
-                return 1, "Already connected to device."
-            return 2, self.stderr
+                return status, "Already connected to device."
+            return status, self.stderr
     
     def submit_disconnect_cmd(self, nqn=None, device_path=None):
         cmd = "nvme disconnect"
@@ -187,7 +190,7 @@ class NVMeCLILib(ApplicationLib):
         if status==0:
             return 0, self.stdout
         else:
-            return 1, self.stderr
+            return status, self.stderr
         
     def submit_list_subsys_cmd(self):
         cmd = "nvme list-subsys -o json"
@@ -195,7 +198,7 @@ class NVMeCLILib(ApplicationLib):
         if status==0:
             return 0, self.stdout
         else:
-            return 1, self.stderr
+            return status, self.stderr
         
     def submit_list_ns_cmd(self):
         cmd = "nvme list-ns"
@@ -208,38 +211,68 @@ class NVMeCLILib(ApplicationLib):
                 ns_paths.append(self.dev_path+'n'+lines[i][-1])
             return 0, ns_paths
         else:
-            return 1, self.stderr
+            return status, self.stderr
         
     def submit_passthru(self, nvme_cmd, verify_rsp=True, async_run=False):
         command = nvme_cmd.cmd.generic_command
         response = nvme_cmd.rsp.response
         data_len = nvme_cmd.buff_size
-        if command.cdw0.OPC == 0x06:
+        if 0 <= command.cdw0.OPC <= 0x0D:
             # Admin Command
             cmd = self.prepare_admin_passthru_cmd(command)
             cmd = f"{cmd} --data-len={data_len} -r -b"
-        ret_status = self.execute_cmd(cmd)
+            ret_status = self.execute_cmd(cmd)
 
-        if ret_status!=0:
-            print("Command execution unsuccessful: ", ret_status)
-            return ret_status
-        if verify_rsp:
-            #self.validate_response()
-            #raise Exception("Response invalid")
-            pass
-        if not response:
-            print("Empty response ")
-            return ret_status
+            if ret_status!=0:
+                print("Command execution unsuccessful: ", ret_status)
+                return ret_status
+            if verify_rsp:
+                #self.validate_response()
+                #raise Exception("Response invalid")
+                pass
+            if not response:
+                print("Empty response ")
+                return ret_status
+            
+            if len(self.stderr) == 0:
+                ctypes.memmove(nvme_cmd.buff, self.stdout, 4096)
+                return 0
         
-        if len(self.stderr) == 0:
-            ctypes.memmove(nvme_cmd.buff, self.stdout, 4096)
+        if command.cdw0.OPC == 0x7f:
+            # Fabric Command
+
+            cmd = self.prepare_admin_passthru_cmd(command)
+            cmd = f"{cmd} -r"
+            ret_status = self.execute_cmd(cmd)
+            
+            if ret_status!=0:
+                print("Command execution unsuccessful: ", ret_status)
+                return ret_status
+            if verify_rsp:
+                #self.validate_response()
+                #raise Exception("Response invalid")
+                pass
+            if not response:
+                print("Empty response ")
+                return ret_status
+            if command.NSID == 0x04:
+                #Parse Property Get response
+                value = int(str(self.stderr[-9:-1])[2:-1], 16)
+                ctypes.memmove(nvme_cmd.buff, value.to_bytes(8, 'little'), 8)
             return 0
 
 import json
 if __name__ == "__main__":
     obj = NVMeCLILib("/dev/nvme2")
-    print(obj)
-    # status, response = NVMeCLILib("/dev/nvme2").submit_disconnect_cmd()
+
+    nvme_cmd = NVMeCommandLib("").get_get_property_cmd()
+    get_property_value = ctypes.c_uint64()
+    nvme_cmd.buff = ctypes.addressof(get_property_value)
+
+    nvme_cmd.cmd.generic_command.cdw11.raw = 8
+    obj.submit_passthru(nvme_cmd)
+
+    print(hex(get_property_value.value))  
     
     # if status==0:
     #     print(response)

@@ -200,10 +200,3 @@ class NVMF_DISCOVERY_LOG(ctypes.Structure):
                 ("entries", NVMF_DISC_LOG_ENTRY * 0),
                 ]
  
-
-
-
-obj = LIST_NODE()
-obj1 = NVME_ROOT()
-print(obj.next)
-print(obj1.fp)

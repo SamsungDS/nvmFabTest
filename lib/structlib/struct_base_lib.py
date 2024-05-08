@@ -63,6 +63,24 @@ class CDW15(ctypes.Union):
     _pack_ = 1
     _fields_ = [("raw", ctypes.c_uint32)]
 
+class GenericLibnvmeCommand(ctypes.Structure): #Submission Queue Entry Fig 105
+    _pack_ = 1
+    _fields_ = [("cdw0", CDW0), # 0 - 3
+                ("NSID", ctypes.c_uint32), # 4 - 7
+                ("cdw2", CDW2), # 8 - 11
+                ("cdw3", CDW3), # 12 - 15
+                ("mptr", ctypes.c_uint64), # 16 - 23
+                ("dptr", DPTR), # 24 - 39
+                ("cdw10", CDW10), # 40 - 43
+                ("cdw11", CDW11), # 44 - 47
+                ("cdw12", CDW12), # 48 - 51
+                ("cdw13", CDW13), # 52 - 55
+                ("cdw14", CDW14), # 56 - 59
+                ("cdw15", CDW15),  # 60 - 63
+                ("timeout_ms", ctypes.c_uint32),
+                ("result", ctypes.c_uint32),
+                ]
+
 class GenericCommand(ctypes.Structure): #Submission Queue Entry Fig 105
     _pack_ = 1
     _fields_ = [("cdw0", CDW0), # 0 - 3
@@ -88,7 +106,7 @@ class StatusField(ctypes.Structure):
                 ("M", ctypes.c_uint8, 1), # More                        #30
                 ("CRD", ctypes.c_uint8, 2), # Command Retry Delay   #28 - 29
                 ("SCT", ctypes.c_uint8, 3), # Status Code Type      #25 - 27
-                ("SC", ctypes.c_uint8), # Status Code               #17 - 24
+                ("SC", ctypes.c_int8), # Status Code               #17 - 24
                 ]
 
 class CommandSpecific32(ctypes.Structure):

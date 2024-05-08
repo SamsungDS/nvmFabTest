@@ -3,7 +3,8 @@ sys.path.insert(1, "/root/nihal223/nvmfabtest")
 import json
 import pytest
 from lib.cmdlib.commands_lib import NVMeCommandLib
-from lib.applib.nvme_cli_lib import NVMeCLILib 
+from lib.applib.nvme_cli_lib import NVMeCLILib
+from lib.applib.libnvme_wrap import Libnvme 
 from lib.devlib.device_lib import ConnectDetails, DeviceConfig
 from src.utils.nvme_utils import *
 
@@ -44,11 +45,11 @@ def connectByIP(app: NVMeCLILib, cmd_lib: NVMeCommandLib, connect_details):
         print("-- -- Device not connected, attempting connection.")
         # Start Connect Command
         status, response = app.submit_connect_cmd(transport=tr, address=addr, svcid=svc, nqn=nqn)
-        if status!=0 and status!=1:
+        if status!=0:
             print("-- -- Session Setup Error: Connect failed. Check the configuration details")
             return status, response
-        if status==1:
-            print("-- -- Device already connected. Fetching device_path.")
+        # if status==1:
+        #     print("-- -- Device already connected. Fetching device_path.")
 
         #Verify connection and set device path
         status, response = app.submit_list_subsys_cmd()
