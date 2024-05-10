@@ -1,11 +1,13 @@
+""" Structures required for fabric commands """
 import ctypes
 
 
 class ConnectCommand(ctypes.Structure): #Submission Queue Connect Command
-    '''
+    """
     Connect Command Submission Queue Entry
     Figure 19, NVMe Fabric Specification 1.1a
-    '''
+    """
+
     _pack_ = 1
     _fields_ = [("OPC", ctypes.c_uint8), # Byte 0
                 ("Reserved1", ctypes.c_uint8), # Byte 1
@@ -22,11 +24,13 @@ class ConnectCommand(ctypes.Structure): #Submission Queue Connect Command
                 ("Reserved4", ctypes.c_uint8 * 12), # Byte 52 - 63
                 ]
     
+
 class ConnectCommandData(ctypes.Structure):
-    '''
+    """
     Connect Command Data
     Figure 20, NVMe Fabric Specification 1.1a
-    '''
+    """
+
     _pack_ = 1
     _fields_ = [("HOSTID", ctypes.c_char * 16), # Bytes 0-15
                 ("CNTLID", ctypes.c_uint16), # Byte 16 - 17
@@ -38,29 +42,44 @@ class ConnectCommandData(ctypes.Structure):
 
 
 class StatusSuccess(ctypes.Structure):
+    """
+    Status Success Structure.
+    """
+
     _pack_ = 1
     _fields_ = [("CNTLID", ctypes.c_uint16), # Byte 0 - 1
                 ("AUTHREQ", ctypes.c_uint16), # Byte 2 - 3
                 ]
     
+
 class StatusFailure(ctypes.Structure):
+    """
+    Status Failure Structure.
+    """
+
     _pack_ = 1
     _fields_ = [("IPO", ctypes.c_uint16), # Byte 0 - 1
                 ("IATTR", ctypes.c_uint8), # Byte 2
                 ("Reserved", ctypes.c_uint8), # Byte 3
                 ]
 
+
 class StatusCode(ctypes.Union):
+    """
+    Status code Union based on success and failure
+    """
     _pack_ = 1
     _fields_ = [("success", StatusSuccess),
                 ("failure", StatusFailure),                
                 ]
 
+
 class ConnectResponse(ctypes.Structure):
-    '''
+    """
     Connect Command Response
     Figure 21, NVMe Fabric Specification 1.1a
-    '''
+    """
+
     _pack_ = 1
     _fields_ = [("status_code", StatusCode), # Byte 0 - 3
                 ("Reserved1", ctypes.c_uint32), # Byte 4 - 7
@@ -70,11 +89,13 @@ class ConnectResponse(ctypes.Structure):
                 ("STS", ctypes.c_uint16), # Bytes 14-15
                 ]
     
+
 class PropertyGetCommand(ctypes.Structure): #Submission Queue Connect Command
-    '''
+    """
     Property Get Command Submission Queue Entry
     Figure 25, NVMe Fabric Specification 1.1a
-    '''
+    """
+
     _pack_ = 1
     _fields_ = [("OPC", ctypes.c_uint8), # Byte 0
                 ("Reserved1", ctypes.c_uint8), # Byte 1
@@ -87,11 +108,13 @@ class PropertyGetCommand(ctypes.Structure): #Submission Queue Connect Command
                 ("Reserved4", ctypes.c_uint8 * 16), # Byte 48 - 63
                 ]
     
+
 class PropertyGetResponse(ctypes.Structure): 
-    '''
+    """
     Property Get Command Response
     Figure 26, NVMe Fabric Specification 1.1a
-    '''
+    """
+
     _pack_ = 1
     _fields_ = [("VALUE", ctypes.c_uint64), # Byte 0 - 7
                 ("SQHD", ctypes.c_uint16), # Bytes 8-9
@@ -99,5 +122,3 @@ class PropertyGetResponse(ctypes.Structure):
                 ("CID", ctypes.c_uint16), # Bytes 12-13
                 ("STS", ctypes.c_uint16), # Bytes 14-15
                 ]    
-
-print(ctypes.sizeof(PropertyGetResponse()))

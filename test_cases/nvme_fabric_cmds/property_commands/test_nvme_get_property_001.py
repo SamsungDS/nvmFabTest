@@ -1,17 +1,17 @@
 '''
-Sends Identify Controller Command and verifies that the Serial Number has 
-characters in the range of 20h to 7Eh in Identify Response Data Structure
+Sends Property Get Command for all offsets and verify that
+non-zero response is obtained.
 '''
 import sys
 import ctypes
 import pytest
-
 
 sys.path.insert(1, "/root/nihal223/nvmfabtest/")
 from lib.devlib.device_lib import Controller
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData
 from test_cases.conftest import dummy
 from src.macros import *
+
 
 class TestNVMeIdentify:
     
@@ -28,7 +28,7 @@ class TestNVMeIdentify:
     def test_property_get_cmd(self, dummy):
         ''' Sending the command and verifying response '''
 
-        nvme_cmd = self.controller.cmdlib.get_get_property_cmd()
+        nvme_cmd = self.controller.cmdlib.get_property_get_cmd()
         offsets =  [0, 0x08, 0x14, 0x1C]
 
         for offset in offsets:
@@ -36,7 +36,8 @@ class TestNVMeIdentify:
             nvme_cmd.buff = ctypes.addressof(get_property_value)
             nvme_cmd.cmd.generic_command.cdw11.raw = offset
             
-            res_status = self.controller.app.submit_passthru(nvme_cmd, verify_rsp=True, async_run=False)
+            res_status = self.controller.app.submit_passthru(nvme_cmd,
+                                                              verify_rsp=True, async_run=False)
             
             # self.controller.app.get_response(nvme_cmd)
             print("Status Code: ", res_status)
@@ -52,8 +53,4 @@ class TestNVMeIdentify:
         ''' Teardown of Test Case '''
         print("Teardown TestCase: Identify Controller")
         print("-"*100)   
-             
-from lib.devlib.device_lib import DeviceConfig
-if __name__=='__main__':
-    dum = DeviceConfig("/dev/nvme2", "nvme-cli")
-    TestNVMeIdentify().test_identify_cmd_all_ns(dum)
+

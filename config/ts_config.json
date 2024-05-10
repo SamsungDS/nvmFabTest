@@ -1,17 +1,13 @@
 {
-    "app_name": "libnvme", 
+    "app_name": "libnvme",
     "device_path": "",
-    
     "connectByIP": "true",
     "disconnectOnDone": "true",
-    
-    "connectDetails":
-    {
+    "connectDetails": {
         "transport": "tcp",
         "addr": "10.0.0.220",
         "svcid": "1153",
         "index": 0
     },
-
     "libnvme_path": "auto"
 }

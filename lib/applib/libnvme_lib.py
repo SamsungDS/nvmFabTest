@@ -1,5 +1,12 @@
-import sys
-sys.path.insert(1, "/root/nihal223/nvmfabtest")
+""" 
+libnvme interface library.
+
+Library that provides an interface for interacting with NVMe devices
+using libnvme.
+This library is designed to be used in the framework that requires
+interaction with NVMe devices, and it abstracts the complexities
+of dealing with the libnvme APIs and it's source code.
+"""
 from lib.cmdlib.commands_lib import NVMeCommandLib
 from lib.structlib.struct_base_lib import GenericCommand
 from lib.structlib.nvme_struct_main_lib import NVMeCommand, NVMeRspStruct
@@ -8,13 +15,20 @@ import ctypes
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData
 from lib.structlib.struct_fabric_libnvme_lib import *
 import os
-from lib.applib.nvme_cli_lib import ApplicationLib
 import re
 import json
 
+
 class Libnvme():
-    def __init__(self, dev_path) -> None:
-        print("LIBNVME init")
+
+    def __init__(self, dev_path=None) -> None:
+        """ - Initialize attributes for the CLI Library
+            - Sets the path for the shared object file.
+            - Defines the function prototypes of the libnvme C methods.
+        Args:
+            dev_path (str, optional): Device path to which commands need to be sent.
+                Defaults to None.
+        """
         if re.match(r"\A/dev/nvme[0-9]+(n[0-9]+)?\Z", dev_path):
             self.dev_name = dev_path[5:]
             print(self.dev_name)
@@ -33,6 +47,7 @@ class Libnvme():
         self.response = None
         self.cmdlib = NVMeCommandLib("libnvme")
         libnvme_path = Libnvme.get_libnvme_path()
+        print(f"libnvme initializing, using path {libnvme_path}")
         self.libnvme = ctypes.CDLL(libnvme_path)
 
         # void nvmf_default_config(struct nvme_fabrics_config *cfg);
@@ -144,6 +159,15 @@ class Libnvme():
 
     @staticmethod
     def get_libnvme_path():
+        """Static method used to set the path of the libnvme.so file
+            and fine it if needed.
+
+        Raises:
+            FileNotFoundError: If unable to find the libnvme.so file anywhere.
+
+        Returns:
+            str: Path to the correct libnvme.so file.
+        """
         f = open("config/ts_config.json")
         ts_config = json.load(f)
         f.close()
@@ -171,6 +195,11 @@ class Libnvme():
                 "libnvme.so path not correct. Set to \"auto\" to find automatically.")
 
     def nvme_open(self):
+        """Wrapper for the nvme_open method in libnvme. 
+
+        Returns:
+            Tuple[int, str]: Tuple containing status and error message (empty if success)
+        """
         device_name = self.dev_name
         nvme_open = self.libnvme.nvme_open
         nvme_open.argtypes = [ctypes.c_char_p]
@@ -183,6 +212,15 @@ class Libnvme():
             return 0, ""
 
     def submit_list_ns_cmd(self):
+        """Sends identify command with CNS=02 to retrieve active namespace list
+
+        Returns:
+            Tuple[int, List[str] | str]:
+            - If execution successful, tuple contains status code and list of
+                absolute namespace paths.
+            - If execution fails, tuple contains status code and stderr.
+
+        """
         nvme_cmd = self.cmdlib.get_identify_cmd()
         result = ctypes.create_string_buffer(4096)
 
@@ -216,12 +254,24 @@ class Libnvme():
             return 0, ns_paths
         else:
             return 1, "ERROR"
-        return self.ret_status
 
     def submit_passthru(self, nvme_cmd, verify_rsp=False, async_run=False):
+        """
+        Submit a passthru command to the NVMe device.
+
+        Args:
+            nvme_cmd: The NVMe command object to be submitted. The "NVMeCmdStruct" 
+                will be utilised from "nvme_cmd.cmd" and the reponse is moved to memory
+                specified in "nvme_cmd.buff".
+            verify_rsp: Flag indicating whether to verify the response. (TBD)
+            async_run: Flag indicating whether to run the command asynchronously. (TBD)
+
+        Returns:
+            int: Status Code of the command execution.
+        """
         command = nvme_cmd.cmd.generic_command
         print(
-            f"LIBNVME submit passthru: OPC:{command.cdw0.OPC} NSID:{command.NSID} CDW10:{command.cdw10.raw} CDW11:{command.cdw11.raw}")
+            f"libnvme submit passthru: OPC:{command.cdw0.OPC} NSID:{command.NSID} CDW10:{command.cdw10.raw} CDW11:{command.cdw11.raw}")
         self.ret_status, error = self.nvme_open()
         if self.ret_status != 0:
             print(error)
@@ -262,7 +312,24 @@ class Libnvme():
         return self.ret_status
 
     def submit_connect_cmd(self, transport, address, svcid, nqn, kato=None, duplicate=False, hostnqn=None, hostid=None, nr_io_queues=None):
+        """
+        Submit a connect command to establish a connection with an NVMe fabric device.
 
+        Args:
+            transport (str): The transport type for the connection.
+            address (str): The address of the NVMe device.
+            svcid (str): The service ID for the connection.
+            nqn (str): The NVMe Qualified Name (NQN) of the device.
+            kato (int, optional): Keep Alive Timeout (KATO) value in milliseconds.
+            duplicate (bool, optional): Flag indicating whether to allow duplicate
+                connection.
+            hostnqn (str, optional): The NVMe Qualified Name (NQN) of the host.
+            hostid (str, optional): The host ID for the connection.
+            nr_io_queues (int, optional): The number of I/O queues to be used.
+
+        Returns:
+            Tuple[int, str]: A tuple containing the status code and the stdout or stderr.
+        """
         cfg = NVME_FABRICS_CONFIG()
         self.libnvme.nvmf_default_config(ctypes.byref(cfg))
 
@@ -274,7 +341,7 @@ class Libnvme():
 
         c = self.libnvme.nvme_create_ctrl(r, nqn.encode(
         ), transport.encode(), address.encode(), None, None, svcid.encode())
-        
+
         if not c:
             return 2, "Failed to allocate memory to ctrl"
 
@@ -283,10 +350,26 @@ class Libnvme():
         if self.ret_status < 0:
             return 3, "No controller found"
         print(f"Successfully connected: {transport} {address} {svcid} {nqn}")
-        
+
         return 0, ""
 
-    def submit_disconnect_cmd(self, dev_name=None):
+    def submit_disconnect_cmd(self, nqn=None, dev_name=None):
+        """
+        Submits a disconnect command to the NVMe fabric device.
+        If no arguments are given, then it will disconnect the dev_name attribute
+            stored in the object. 
+        If dev_name is not set, then raise error.
+
+        Args:
+            (TBD) nqn (str, optional): The NQN of the device to disconnect.
+            device_path (str, optional): The path of the device to disconnect.  
+
+        Returns:
+            Tuple[int, str]: A tuple containing the status code and the error (empty if success)
+
+        Raises:
+            NameError: If device path is not in correct format.
+        """
         if not dev_name:
             dev_name = self.dev_name
 
@@ -295,6 +378,10 @@ class Libnvme():
 
         if re.match(r"\A/dev/nvme[0-9]+n[0-9]+\Z", dev_name):
             dev_name = dev_name[5:-2]
+
+        if not dev_name or len(dev_name) == 0:
+            raise NameError(
+                f"Cannot disconnect this device: {dev_name}")
 
         print("Disconnecting . . .")
         ctrl = None
@@ -329,6 +416,14 @@ class Libnvme():
         return self.ret_status, "Disconnect failed" if self.ret_status != 0 else ""
 
     def get_response(self, nvme_cmd):
+        """Fill the CQE structure (TBD)
+
+        Args:
+            nvme_cmd: Command object to fill response in
+
+        Returns:
+            bool: Indicates success or failure
+        """
         response = nvme_cmd.rsp.response
         response.sf.SC = self.ret_status
         response.DNR = 0
@@ -336,44 +431,3 @@ class Libnvme():
         response.sf.CRD = 0
         response.sf.SCT = 0
         response.sf.SC = 0
-
-
-if __name__ == '__main__':
-
-    # obj  = GenericCommand()
-    # print(ctypes.sizeof(obj))
-
-    # nvme_cmd = NVMeCommandLib("nvme-cli").get_identify_cmd()
-    # identify_data_structure = IdentifyControllerData()
-
-    # nvme_cmd.cmd.generic_command.cdw0.OPC = 0x06
-    # nvme_cmd.cmd.generic_command.cdw10.raw = 0x01 #identify CONTROLLER
-    # nvme_cmd.cmd.generic_command.dptr.sgl.data_len = 4096
-    # nvme_cmd.cmd.generic_command.dptr.sgl.addr = ctypes.addressof(identify_data_structure)
-    # status = obj.submit_passthru(nvme_cmd)
-    # status, paths = obj.submit_list_ns_cmd()
-    # print(paths)
-
-    obj = Libnvme("")
-    nqn = "nqn.2023-01.com.samsung.semiconductor:665e905a-bfde-11d3-01aa-a8a159fba2e6_1_1"
-    obj.submit_connect_cmd("tcp", "10.0.0.220", "1153", nqn)
-
-    status, err = obj.submit_disconnect_cmd("nvme2")
-    if err:
-        print(err)
-    ''' Uncomment belpow for Prop Get trials'''
-    # obj = Libnvme("/dev/nvme2n2")
-
-    # nvme_cmd = NVMeCommandLib("").get_get_property_cmd()
-    # get_property_value = ctypes.c_uint64()
-    # nvme_cmd.buff = ctypes.addressof(get_property_value)
-
-    # nvme_cmd.cmd.generic_command.cdw11.raw = 8
-    # s = obj.submit_passthru(nvme_cmd)
-
-    # print(hex(get_property_value.value))
-
-    # temp = NVMF_DISCOVERY_LOG()
-    # log = NVMF_DISCOVERY_LOG()
-    # status = libnvme_nvmf_get_discovery_log(c, ctypes.byref(log), 4)
-

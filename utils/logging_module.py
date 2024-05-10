@@ -1,4 +1,9 @@
+"""
+Module for creating a logger object which
+can be used Test Suite wide for logging.
+"""
 import logging
+
 
 logging.basicConfig(filename="/root/nihal223/nvmeof_compliance/logs/test.log",
                     format='%(asctime)s %(message)s',
