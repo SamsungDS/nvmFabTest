@@ -19,19 +19,29 @@ The framework provides two user configurable application options which can be us
 9. [License(TBD)](#license)
 10. [Acknowledgements(TBD)](#acknowledgements)
 
+## Prerequisites
+
+- **Linux kernel version 4.5 or above.** You can check your version by running the command:
+    ```bash
+    uname -r
+    ```
+- **nvme-cli** You can install using the command:
+    ```bash
+    sudo apt install nvme-cli
+    ```
 ## Installation
 To install the NVMe-oF Compliance Test Suite, follow these steps:
 
 1. Clone the repository:
-   ```
+   ```bash
    git clone <url_to_repo>
    ```
 2. Navigate to the project directory:
-   ```
+   ```bash
    cd nvmfabtest
    ```
 3. Install dependencies:
-   ```
+   ```bash
    pip install -r requirements.txt
    ```
 
@@ -39,7 +49,7 @@ To install the NVMe-oF Compliance Test Suite, follow these steps:
 To use the NVMe-oF Compliance Test Suite, follow these steps:
 
 1. Configure the test environment according to your setup in `config/ts_config.json` as given below:
-    ```
+    ```json
     {
         "app_name": "",
         "device_path": "",
@@ -69,15 +79,15 @@ To use the NVMe-oF Compliance Test Suite, follow these steps:
 2. Run the Test Suite:
     
     In project directory, run:
-    ```
+    ```bash
     pytest
     ```
     To see verbose, run:
-    ```
+    ```bash
     pytest -s
     ```
     To generate html report, run:
-    ```
+    ```bash
     pytest --html=report.html
     ```
 
@@ -90,13 +100,16 @@ For more detailed usage instructions, refer to the documentation [here]() (Not a
 
 - libnvme application allows customizability and control over the command on par with the NVMe specifications. Direct interaction with this library allows us to use an extensive set of APIs which interact with the device on a low level using ioctls. This increases efficiency.
 
+- Requires the code modification only at one place to incorporate driver modifications. 
+
 - Python based framework and Python based test cases, easy to understand and expand.
 
 - Interaction with C libraries and implementation of C structures using [`ctypes`](https://docs.python.org/3/library/ctypes.html) to ensure low level compatibility.
 
 - JSON based user configurations.
 
-- Commands executed through admin-passthru (except connect, disconnect)
+- A simple pass-thru interface for executing most of the nvme commands (Admin, IO commands, Fabric) which work with specification adhering structures.
+
 
 - Test base and fabric commands on fabric devices.
 
@@ -130,7 +143,7 @@ The design involves Test Cases and the Framework Library as the two major compon
 
 Sample Test Case:
 
-```
+```python
 class TestNVMeConnect:
 
     @pytest.fixture(scope='function', autouse=True)
@@ -142,7 +155,7 @@ class TestNVMeConnect:
         application = self.dummy.application
         self.controller = Controller(device, application)
 ```
-```
+```python
     def test_sample(self):
         ''' Perform test '''
 
@@ -167,7 +180,7 @@ class TestNVMeConnect:
                 assert False, f"No value obtained"
             assert True
 ```
-```
+```python
     def teardown_method(self):
         '''Teardown test case'''
 
@@ -188,4 +201,8 @@ class TestNVMeConnect:
     - nvme-cli: `1001.1849403381348 ms`
 
 - libnvme itself adheres to the NVMe Specifications and hence does not pose challenges to test compliance from it's own internals. 
+
+- Reduce the overhead of using subprocess and command response parsing
+
+- Option to use nvme-cli interface for nvme command execution as per requirement.
 
