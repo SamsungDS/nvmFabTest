@@ -206,3 +206,12 @@ class TestNVMeConnect:
 
 - Option to use nvme-cli interface for nvme command execution as per requirement.
 
+## Test Cases
+
+Documented on confluence [here](https://confluence.samsungds.net/display/SSQ/Test+Cases)
+
+## Specification Mapping
+
+Documented on confluence [here](https://confluence.samsungds.net/pages/viewpage.action?pageId=1555525450)
+
+
