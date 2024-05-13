@@ -2,11 +2,10 @@
 Send Identify Command specifying an unsupported CNS value, FFh, for each namespace in the NVMe subsystem.
 Expected output: Failure with status "Invalid Field in Command" 
 '''
-import sys
+
 import ctypes
 import pytest
 
-sys.path.insert(1, "/root/nihal223/nvmfabtest/")
 from lib.devlib.device_lib import DeviceConfig
 from test_cases.conftest import dummy
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData

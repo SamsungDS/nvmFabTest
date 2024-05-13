@@ -2,11 +2,9 @@
 Send a connect command to Discovery Controller supporting change notification with Non-Zero Keep Alive Time Out (KATO) value.
 Expected Output: Command response is successful
 '''
-import sys
 import ctypes
 import pytest
 
-sys.path.insert(1, "/root/nihal223/nvmfabtest/")
 from src.macros import *
 from src.utils.nvme_utils import *
 from test_cases.conftest import dummy
@@ -71,7 +69,7 @@ class TestNVMeConnectKato:
         result = IdentifyControllerData()
         nvme_cmd.buff = ctypes.addressof(result)
 
-        ret_status = discovery_controller.submit_passthru_cmd(
+        ret_status = discovery_controller.app.submit_passthru(
             nvme_cmd, verify_rsp=True, async_run=False)
         discovery_controller.app.get_response(nvme_cmd)
         if ret_status != 0:

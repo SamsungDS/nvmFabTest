@@ -2,11 +2,9 @@
 Verify connect command with NVM Subsystem NQN value - "not matching" the values that the NVM subsystem is configured to support.
 Expected output: Failure with status "Connect Invalid Parameters"
 '''
-import sys
 import pytest
 import re
 
-sys.path.insert(1, "/root/nihal223/nvmfabtest/")
 from src.macros import *
 from src.utils.nvme_utils import *
 from test_cases.conftest import dummy

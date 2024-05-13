@@ -2,7 +2,7 @@
 
 
 import sys
-sys.path.insert(1, "/root/nihal223/nvmfabtest/lib/structlib")
+sys.path.insert(1, "./lib/structlib")
 from struct_admin_data_lib import *
 from struct_nvm_cmd_lib import *
 from struct_admin_cmd_lib import *

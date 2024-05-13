@@ -3,11 +3,9 @@ Send Connect and Disconnect command with different number of IO queues.
 Expected: Connect Command successful
 '''
 
-import sys
 import pytest
 import re
 
-sys.path.insert(1, "/root/nihal223/nvmfabtest/")
 from src.macros import *
 from src.utils.nvme_utils import *
 from test_cases.conftest import dummy

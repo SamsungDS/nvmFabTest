@@ -3,17 +3,13 @@ Sends Identify Controller Command and verifies that the Serial Number has
 characters in the range of 20h to 7Eh in Identify Response Data Structure
 '''
 
-import sys
-sys.path.insert(1, "/root/nihal223/nvmfabtest/")
-from lib.devlib.device_lib import DeviceConfig
 from src.macros import *
 from test_cases.conftest import dummy
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData
 from lib.devlib.device_lib import Controller
 import ctypes
 import pytest
-import re
-import time
+
 
 
 class TestNVMeIdentify:

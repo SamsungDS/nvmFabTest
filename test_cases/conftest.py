@@ -5,7 +5,7 @@ and tearing down a session for NVMe over Fabric compliance testing.
 """
 
 import sys
-sys.path.insert(1, "/root/nihal223/nvmfabtest")
+sys.path.insert(1, "./../nvmfabtest")
 from lib.applib.libnvme_lib import Libnvme
 from src.utils.nvme_utils import *
 from lib.devlib.device_lib import ConnectDetails, DeviceConfig

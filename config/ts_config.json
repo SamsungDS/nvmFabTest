@@ -1,5 +1,5 @@
 {
-    "app_name": "libnvme",
+    "app_name": "nvme-cli",
     "device_path": "",
     "connectByIP": "true",
     "disconnectOnDone": "true",

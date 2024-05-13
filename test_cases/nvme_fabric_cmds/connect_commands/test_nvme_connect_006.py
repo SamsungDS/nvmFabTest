@@ -2,11 +2,9 @@
 Verify connect command with valid fields(SUBNQN, TRADDR, TRSVCID, TRTYPE).
 Expected output: Connect command response is successful
 '''
-import sys
 import pytest
 import re
 
-sys.path.insert(1, "/root/nihal223/nvmfabtest/")
 from src.macros import *
 from src.utils.nvme_utils import *
 from test_cases.conftest import dummy

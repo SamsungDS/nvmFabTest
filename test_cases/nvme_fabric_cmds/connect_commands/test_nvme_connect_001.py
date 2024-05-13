@@ -2,10 +2,8 @@
 Send a connect command to Discovery Controller with discovery NQN.
 Expected output: Connect command response is successful
 '''
-import sys
-import pytest
 
-sys.path.insert(1, "/root/nihal223/nvmfabtest/")
+import pytest
 from src.macros import *
 from src.utils.nvme_utils import *
 from test_cases.conftest import dummy

@@ -2,11 +2,9 @@
 Sends Property Get Command for all offsets and verify that
 non-zero response is obtained.
 '''
-import sys
 import ctypes
 import pytest
 
-sys.path.insert(1, "/root/nihal223/nvmfabtest/")
 from lib.devlib.device_lib import Controller
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData
 from test_cases.conftest import dummy
