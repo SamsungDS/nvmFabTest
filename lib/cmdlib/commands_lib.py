@@ -77,7 +77,20 @@ class NVMeCommandLib:
 
         nvme_cmd.cmd.generic_command.cdw0.OPC = 0x7f
         nvme_cmd.cmd.generic_command.NSID = 0x04
-        nvme_cmd.cmd.generic_command.cdw10.raw = 0
-        nvme_cmd.cmd.generic_command.cdw11.raw = 0x14
 
         return nvme_cmd
+    
+    def get_property_set_cmd(self):
+        """Retrieves the main NVMeCommand Structure with the required fields set for making
+            it a fabric Property Set command
+
+        Returns:
+            NVMeCommand: Structure for Property Set command.
+        """
+        nvme_cmd = self.get_nvme_cmd()
+        nvme_cmd.cmd.generic_command.cdw0.OPC = 0x7f
+        nvme_cmd.cmd.generic_command.NSID = 0x00
+
+        return nvme_cmd
+
+

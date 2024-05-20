@@ -6,3 +6,8 @@ __pycache__/
 tags
 logs/
 reports/
+*.html
+*.pytest_cache
+*.txt
+try.py
+*.pcap

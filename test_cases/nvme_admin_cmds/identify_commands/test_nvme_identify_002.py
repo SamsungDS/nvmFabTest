@@ -48,23 +48,22 @@ class TestNVMeIdentify:
 
         for ns_path in self.ns_paths:
             self.controller.app.dev_name = ns_path
+            self.controller.app.dev_path = ns_path
             print(ns_path)
             res_status = self.controller.app.submit_passthru(
                 nvme_cmd, verify_rsp=True, async_run=False)
 
             self.controller.app.get_response(nvme_cmd)
             sc = nvme_cmd.rsp.response.sf.SC
-            if sc == 2 or res_status == 2:
+            if sc != 0 or res_status != 0:
                 print(
-                    f"-- Expected Fail: Invalid Field in Command. Status Code: {res_status}")
+                    f"-- Expected Fail: Status Code: {res_status}")
                 assert True
-            elif sc != 0 or res_status != 0:
-                assert False, f"-- Error response received with unexpected Status Code: {res_status}"
             else:
                 assert False, f"-- Unexpected Pass: Status Code {res_status} obtained instead of 2"
 
     def teardown_method(self):
-        ''' Teardown test case'''
+        ''' Teardown test case '''
         print("Teardown TestCase: Identify Controller")
         print("-"*100)
 

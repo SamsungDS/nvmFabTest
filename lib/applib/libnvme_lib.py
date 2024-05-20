@@ -7,6 +7,8 @@ This library is designed to be used in the framework that requires
 interaction with NVMe devices, and it abstracts the complexities
 of dealing with the libnvme APIs and it's source code.
 """
+import sys
+sys.path.insert(1, "/root/nihal223/nvmfabtest/")
 from lib.cmdlib.commands_lib import NVMeCommandLib
 from lib.structlib.struct_base_lib import GenericCommand
 from lib.structlib.nvme_struct_main_lib import NVMeCommand, NVMeRspStruct
@@ -156,6 +158,18 @@ class Libnvme():
         # const char *nvme_ctrl_get_name(nvme_ctrl_t c);
         self.libnvme.nvme_ctrl_get_name.argtypes = [ctypes.POINTER(NVME_CTRL)]
         self.libnvme.nvme_ctrl_get_name.restype = ctypes.c_char_p
+
+        # void nvme_host_set_dhchap_key(nvme_host_t h, const char *key);
+        self.libnvme.nvme_host_set_dhchap_key.argtypes = [ctypes.POINTER(NVME_HOST), ctypes.c_char_p]
+        self.libnvme.nvme_host_set_dhchap_key.restype = None    
+
+        # const char *nvme_ctrl_get_subsysnqn(nvme_ctrl_t c); 
+        self.libnvme.nvme_ctrl_get_subsysnqn.argtypes = [ctypes.POINTER(NVME_CTRL)]
+        self.libnvme.nvme_ctrl_get_subsysnqn.restype = ctypes.c_char_p
+
+        # void nvme_ctrl_set_dhchap_key(nvme_ctrl_t c, const char *key);
+        self.libnvme.nvme_host_set_dhchap_key.argtypes = [ctypes.POINTER(NVME_CTRL), ctypes.c_char_p]
+        self.libnvme.nvme_host_set_dhchap_key.restype = None 
 
     @staticmethod
     def get_libnvme_path():
@@ -311,7 +325,9 @@ class Libnvme():
 
         return self.ret_status
 
-    def submit_connect_cmd(self, transport, address, svcid, nqn, kato=None, duplicate=False, hostnqn=None, hostid=None, nr_io_queues=None):
+    def submit_connect_cmd(self, transport, address, svcid, nqn, kato=None,
+                           duplicate=False, hostnqn=None, hostid=None, nr_io_queues=None,
+                             dhchap_host=None, dhchap_ctrl=None):
         """
         Submit a connect command to establish a connection with an NVMe fabric device.
 
@@ -333,6 +349,10 @@ class Libnvme():
         cfg = NVME_FABRICS_CONFIG()
         self.libnvme.nvmf_default_config(ctypes.byref(cfg))
 
+        if duplicate:
+            print("Imhere")
+            cfg.duplicate_connect = True
+
         r = self.libnvme.nvme_scan(None)
         h = self.libnvme.nvme_default_host(r)
 
@@ -344,6 +364,13 @@ class Libnvme():
 
         if not c:
             return 2, "Failed to allocate memory to ctrl"
+        
+        if dhchap_host:
+            self.libnvme.nvme_host_set_dhchap_key(h, dhchap_host.encode())
+
+        if dhchap_ctrl:
+            self.libnvme.nvme_ctrl_set_dhchap_key(c, dhchap_ctrl.encode())
+
 
         self.ret_status = self.libnvme.nvmf_add_ctrl(h, c, ctypes.byref(cfg))
 
@@ -370,20 +397,20 @@ class Libnvme():
         Raises:
             NameError: If device path is not in correct format.
         """
-        if not dev_name:
+        if not dev_name and not nqn:
             dev_name = self.dev_name
+        if dev_name:
+            if re.match(r"\A/dev/nvme[0-9]+\Z", dev_name):
+                dev_name = dev_name[5:]
 
-        if re.match(r"\A/dev/nvme[0-9]+\Z", dev_name):
-            dev_name = dev_name[5:]
+            if re.match(r"\A/dev/nvme[0-9]+n[0-9]+\Z", dev_name):
+                dev_name = dev_name[5:-2]
 
-        if re.match(r"\A/dev/nvme[0-9]+n[0-9]+\Z", dev_name):
-            dev_name = dev_name[5:-2]
-
-        if not dev_name or len(dev_name) == 0:
+        if (not dev_name or len(dev_name) == 0) and not nqn:
             raise NameError(
                 f"Cannot disconnect this device: {dev_name}")
 
-        print("Disconnecting . . .")
+        print(f"Disconnecting {dev_name if dev_name else (nqn if nqn else None)} . . .")
         ctrl = None
 
         r = self.libnvme.nvme_scan(None)
@@ -397,6 +424,12 @@ class Libnvme():
                     if got_name == dev_name:
                         ctrl = c
                         break
+                    
+                    got_nqn = str(self.libnvme.nvme_ctrl_get_subsysnqn(c))[2:-1]
+                    if got_nqn == nqn:
+                        ctrl = c
+                        break
+
                     c = self.libnvme.nvme_subsystem_next_ctrl(s, c)
                     if not c:
                         break
@@ -431,3 +464,10 @@ class Libnvme():
         response.sf.CRD = 0
         response.sf.SCT = 0
         response.sf.SC = 0
+if __name__ == '__main__':
+    lib = Libnvme("")
+    nqn = "nqn.2023-01.com.samsung.semiconductor:665e905a-bfde-11d3-01aa-a8a159fba2e6_0_0"
+    lib.submit_connect_cmd("tcp", "10.0.0.220", "4420", nqn)
+    lib.submit_connect_cmd("tcp", "10.0.0.220", "4420", nqn, duplicate=True)
+
+    #lib.submit_disconnect_cmd(nqn)

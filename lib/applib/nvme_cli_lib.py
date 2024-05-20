@@ -187,7 +187,8 @@ class NVMeCLILib():
         """
         opcode = command.cdw0.OPC
         nsid = command.NSID
-        cmd = f"nvme admin-passthru {self.dev_path} --opcode={opcode} -n {nsid}"
+        cmd_base = "/usr/sbin/nvme"
+        cmd = f"{cmd_base} admin-passthru {self.dev_path} --opcode={opcode} -n {nsid}"
         cmd = f"{cmd} --cdw2={command.cdw2.raw} --cdw3={command.cdw3.raw}"
         cmd = f"{cmd} --cdw10={command.cdw10.raw} --cdw11={command.cdw11.raw}"
         cmd = f"{cmd} --cdw12={command.cdw12.raw} --cdw13={command.cdw13.raw}"
@@ -207,8 +208,8 @@ class NVMeCLILib():
         Returns:
             Tuple[int, bytes]: A tuple containing the status code and the stdout or stderr.
         """
-
-        cmd = "nvme discover"
+        cmd_base = "/usr/sbin/nvme"
+        cmd = f"{cmd_base} discover"
         cmd = f"{cmd} -t {transport}"
         cmd = f"{cmd} -a {address}"
         cmd = f"{cmd} -s {svcid}"
@@ -220,7 +221,8 @@ class NVMeCLILib():
             return status, self.stderr
 
     def submit_connect_cmd(self, transport, address, svcid, nqn, kato=None,
-                           duplicate=False, hostnqn=None, hostid=None, nr_io_queues=None):
+                           duplicate=False, hostnqn=None, hostid=None, nr_io_queues=None,
+                             dhchap_host=None, dhchap_ctrl=None):
         """
         Submit a connect command to establish a connection with an NVMe fabric device.
 
@@ -239,7 +241,8 @@ class NVMeCLILib():
         Returns:
             Tuple[int, bytes]: A tuple containing the status code and the stdout or stderr.
         """
-        cmd = "nvme connect"
+        cmd_base = "/usr/sbin/nvme"
+        cmd = f"{cmd_base} connect"
         cmd = f"{cmd} -t {transport}"
         cmd = f"{cmd} -a {address}"
         cmd = f"{cmd} -s {svcid}"
@@ -254,6 +257,11 @@ class NVMeCLILib():
             cmd = f"{cmd} -i {nr_io_queues}"
         if duplicate:
             cmd = f"{cmd} -D"
+        if dhchap_host:
+            cmd = f"{cmd} -S {dhchap_host}"
+        if dhchap_ctrl:
+            cmd = f"{cmd} -C {dhchap_ctrl}"
+        
         status = self.execute_cmd(cmd)
 
         alreadyConnected = self.stderr.decode().strip().endswith(
@@ -283,7 +291,8 @@ class NVMeCLILib():
         Raises:
             NameError: If device path is not in correct format.
         """
-        cmd = "nvme disconnect"
+        cmd_base = "/usr/sbin/nvme"
+        cmd = f"{cmd_base} disconnect"
         if nqn:
             cmd = f"{cmd} -n {nqn}"
         elif device_path:
@@ -316,7 +325,8 @@ class NVMeCLILib():
             Tuple[int, bytes]: A tuple containing the status code and the stdout or stderr.
 
         """
-        cmd = "nvme list-subsys -o json"
+        cmd_base = "/usr/sbin/nvme"
+        cmd = f"{cmd_base} list-subsys -o json"
         status = self.execute_cmd(cmd)
         if status == 0:
             return status, self.stdout
@@ -337,7 +347,8 @@ class NVMeCLILib():
                 absolute namespace paths.
             - If execution fails, tuple contains status code and stderr.
         """
-        cmd = "nvme list-ns"
+        cmd_base = "/usr/sbin/nvme"
+        cmd = f"{cmd_base} list-ns"
         cmd = f"{cmd} {self.dev_path}"
         status = self.execute_cmd(cmd)
         if status == 0:
