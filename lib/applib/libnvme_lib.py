@@ -8,7 +8,7 @@ interaction with NVMe devices, and it abstracts the complexities
 of dealing with the libnvme APIs and it's source code.
 """
 import sys
-sys.path.insert(1, "/root/nihal223/nvmfabtest/")
+sys.path.insert(1, "./../nvmfabtest/")
 from lib.cmdlib.commands_lib import NVMeCommandLib
 from lib.structlib.struct_base_lib import GenericCommand
 from lib.structlib.nvme_struct_main_lib import NVMeCommand, NVMeRspStruct
@@ -464,10 +464,3 @@ class Libnvme():
         response.sf.CRD = 0
         response.sf.SCT = 0
         response.sf.SC = 0
-if __name__ == '__main__':
-    lib = Libnvme("")
-    nqn = "nqn.2023-01.com.samsung.semiconductor:665e905a-bfde-11d3-01aa-a8a159fba2e6_0_0"
-    lib.submit_connect_cmd("tcp", "10.0.0.220", "4420", nqn)
-    lib.submit_connect_cmd("tcp", "10.0.0.220", "4420", nqn, duplicate=True)
-
-    #lib.submit_disconnect_cmd(nqn)
