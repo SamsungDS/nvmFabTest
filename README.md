@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # nvmfabtest
 NVMe-oF Compliance Test Suite
 
@@ -167,14 +166,16 @@ class TestNVMeConnect:
         offset = 0x14
         nvme_cmd.cmd.generic_command.cdw11.raw = offset
 
-        # Allocate memory for the expected response according to the command and store in nvme_cmd.buff
+        # Allocate memory for the expected response 
+        # according to the command and store in nvme_cmd.buff
         get_property_value = ctypes.c_uint64()
             nvme_cmd.buff = ctypes.addressof(get_property_value)
 
         # Send the command
         res_status = self.controller.app.submit_passthru(nvme_cmd, verify_rsp=True, async_run=False)
         
-        # Make Testing assertions according to scenario using the response data and response status
+        # Make Testing assertions according to scenario 
+        # using the response data and response status
         if res_status!=0:
             assert False
         if get_property_value.value == 0:
@@ -187,7 +188,8 @@ class TestNVMeConnect:
 
         print("\n\nTeardown TestCase: Connect Command")
         
-        # Any memory freeing or disconnections to be made after test case completion
+        # Any memory freeing or disconnections to be made 
+        # after test case completion
         
         print("-"*100)
 ```
@@ -216,6 +218,3 @@ Documented on confluence [here](https://confluence.samsungds.net/display/SSQ/Tes
 Documented on confluence [here](https://confluence.samsungds.net/pages/viewpage.action?pageId=1555525450)
 
 
-=======
-NVMe-oF Complaince Test Suite
->>>>>>> 6be96b8d44b564761eb2aa080197269b2f59c256

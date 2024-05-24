@@ -1,6 +1,20 @@
 '''
-Sends Property Get Command for all offsets and verify that
-non-zero response is obtained.
+Send a Property Get command (FCTYPE=04h) with the following reserved
+offset value:
+0Ch-0Fh INTMS
+10h-13h INTMC
+18h-1Bh Reserved
+24h-27h AQA
+28h-2Fh ASQ
+30h-37h ACQ
+38h-3Bh CMBLOC
+3Ch-3Fh CMBSZ
+40h-EFFh Reserved
+F00h-FFFh Reserved
+1000h-12FFh Reserved
+
+Verify that the Property Get commands completed with status “Success”
+and all values returned were 0h
 '''
 import ctypes
 import pytest
@@ -10,7 +24,7 @@ from test_cases.conftest import dummy
 from src.macros import *
 
 
-class TestNVMePropertyGet:
+class TestNVMeIdentify:
     
     @pytest.fixture(scope='function', autouse=True)
     def setup_method(self, dummy):
@@ -26,8 +40,9 @@ class TestNVMePropertyGet:
         ''' Sending the command and verifying response '''
 
         nvme_cmd = self.controller.cmdlib.get_property_get_cmd()
-        offsets =  [0, 0x08, 0x14, 0x1C]
-        
+        offsets =  [0x0C, 0x10, 0x18, 0x24, 0x28,
+                    0x30, 0x38, 0x3C, 0x40, 0xF00, 0x1000]
+        fail = []
         for offset in offsets:
             get_property_value = ctypes.c_uint64()
             nvme_cmd.buff = ctypes.addressof(get_property_value)
@@ -41,12 +56,18 @@ class TestNVMePropertyGet:
             
             # self.controller.app.get_response(nvme_cmd)
             if res_status!=0:
-                assert False, f"Command failed with status code: {res_status}"
+                fail.append(offset)
+                
             get_property_hex_value = hex(get_property_value.value)
-            print(get_property_hex_value)
-            if get_property_value.value == 0:
-                assert False, f"No value obtained"
-            assert True
+
+            if get_property_value.value != 0:
+                fail.append(offset)
+                assert False, f"Value obtained {get_property_hex_value} but expected 0"
+
+        if len(fail) != 0:
+            passed = [a for a in offsets if a not in fail] 
+            assert False, f"Failed for offsets: {fail}\nPassed for offsets {passed}"
+        assert True
 
     def teardown_method(self):
         ''' Teardown of Test Case '''

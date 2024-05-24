@@ -11,7 +11,7 @@ from lib.structlib.struct_admin_data_lib import IdentifyControllerData
 from lib.devlib.device_lib import ConnectDetails, Controller
 
 
-class TestNVMeConnect:
+class TestNVMeDisconnect:
     '''
     Send a disconnect command to a fabric device.
     Expected output: Disconnect command response is successful
@@ -44,7 +44,7 @@ class TestNVMeConnect:
             if status_code != 0:
                 raise ConnectionError(f"Connect Command failed with Status Code {status_code}")
 
-    def test_diconnect(self, connectDetails: ConnectDetails):
+    def test_disconnect(self, connectDetails: ConnectDetails):
         ''' Performing test by sending disconnect command '''
         status, res = self.controller.app.submit_disconnect_cmd(
             nqn=NVME_DISCOVERY_NQN)

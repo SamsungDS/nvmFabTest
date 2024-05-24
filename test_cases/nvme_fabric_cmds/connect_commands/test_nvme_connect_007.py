@@ -64,7 +64,7 @@ class TestNVMeConnectNQN:
         svc = connectDetails.svcid
         nqn = self.nqn
 
-        nqn = nqn+"ZzZ%$d"
+        nqn = INVALID_NQN
         # Start Connect Command
         status, response = self.controller.app.submit_connect_cmd(
             transport=tr, address=addr, svcid=svc, nqn=nqn, duplicate=True)

@@ -6,7 +6,7 @@
     "connectDetails": {
         "transport": "tcp",
         "addr": "10.0.0.220",
-        "svcid": "1153",
+        "svcid": "4420",
         "index": 0
     },
     "libnvme_path": "auto"

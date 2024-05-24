@@ -1,0 +1,52 @@
+'''
+Send a Property Get command (FCTYPE=04h) with an invalid offset 
+(01h-07h CAP) that is not at the beginning of the property
+
+Verify that the Property Get command fails
+'''
+import ctypes
+import pytest
+from lib.devlib.device_lib import Controller
+from lib.structlib.struct_admin_data_lib import IdentifyControllerData
+from test_cases.conftest import dummy
+from src.macros import *
+
+
+class TestNVMeIdentify:
+    
+    @pytest.fixture(scope='function', autouse=True)
+    def setup_method(self, dummy):
+        ''' Setup Test Case by initialization of objects '''
+        print("\n", "-"*100)
+        print("Setup TestCase: Identify Controller")
+        self.dummy = dummy
+        device = self.dummy.device
+        application = self.dummy.application
+        self.controller = Controller(device, application)
+
+    def test_property_get_cmd(self, dummy):
+        ''' Sending the command and verifying response '''
+
+        nvme_cmd = self.controller.cmdlib.get_property_get_cmd()
+
+        offset = INVALID_PROPERTY_OFFSET
+        get_property_value = ctypes.c_uint64()
+        nvme_cmd.buff = ctypes.addressof(get_property_value)
+        nvme_cmd.cmd.generic_command.cdw11.raw = offset
+        
+        if offset in OFFSETS_64BIT:
+            nvme_cmd.cmd.generic_command.cdw10.raw = True
+        else:
+            nvme_cmd.cmd.generic_command.cdw10.raw = False
+        res_status = self.controller.app.submit_passthru(nvme_cmd,
+                                                            verify_rsp=True, async_run=False)
+        
+        # self.controller.app.get_response(nvme_cmd)
+        if res_status==0:
+            assert False, "Command passed unexpectedly"
+        assert True
+
+    def teardown_method(self):
+        ''' Teardown of Test Case '''
+        print("Teardown TestCase: Identify Controller")
+        print("-"*100)

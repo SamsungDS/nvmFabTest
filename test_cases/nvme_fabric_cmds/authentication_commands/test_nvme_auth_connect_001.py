@@ -11,7 +11,7 @@ from lib.structlib.struct_admin_data_lib import IdentifyControllerData
 from lib.devlib.device_lib import ConnectDetails, Controller
 
 
-class TestNVMeConnect:
+class TestNVMeAuthConnect:
     '''
     Send a connect command with host dhchap set.
     Expected output: Connect command response is successful
@@ -30,7 +30,7 @@ class TestNVMeConnect:
         application = self.dummy.application
         self.controller = Controller(device, application)
 
-    def test_connect_discovery(self, connectDetails: ConnectDetails):
+    def test_auth_connect_host_dhchap(self, connectDetails: ConnectDetails):
         ''' Performing test by sending connect command to discovery NQN '''
 
         tr = connectDetails.transport

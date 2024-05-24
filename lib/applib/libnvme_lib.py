@@ -8,7 +8,7 @@ interaction with NVMe devices, and it abstracts the complexities
 of dealing with the libnvme APIs and it's source code.
 """
 import sys
-sys.path.insert(1, "/root/nihal223/nvmfabtest/")
+sys.path.insert(1, "./../nvmfabtest/")
 from lib.cmdlib.commands_lib import NVMeCommandLib
 from lib.structlib.struct_base_lib import GenericCommand
 from lib.structlib.nvme_struct_main_lib import NVMeCommand, NVMeRspStruct
@@ -33,10 +33,10 @@ class Libnvme():
         """
         if re.match(r"\A/dev/nvme[0-9]+(n[0-9]+)?\Z", dev_path):
             self.dev_name = dev_path[5:]
-            print(self.dev_name)
+            print("Default configured device for libnvme: ", self.dev_name)
         elif re.match(r"\Anvme[0-9]+(n[0-9]+)?\Z", dev_path):
             self.dev_name = dev_path
-            print(self.dev_name)
+            print("Default configured device for libnvme: ", self.dev_name)
         elif not dev_path:
             pass
         else:
@@ -45,6 +45,7 @@ class Libnvme():
             raise NameError(
                 dev_path, " not in format of /dev/nvmeX or /dev/nvmeXnY or nvmeX or nvmeXnY")
 
+        self.connectedDeviceName = None
         self.command = None
         self.response = None
         self.cmdlib = NVMeCommandLib("libnvme")
@@ -349,34 +350,44 @@ class Libnvme():
         cfg = NVME_FABRICS_CONFIG()
         self.libnvme.nvmf_default_config(ctypes.byref(cfg))
 
-        if duplicate:
-            print("Imhere")
-            cfg.duplicate_connect = True
-
         r = self.libnvme.nvme_scan(None)
+        
         h = self.libnvme.nvme_default_host(r)
 
         if not h:
             return 1, "Failed to allocate memory to host"
 
         c = self.libnvme.nvme_create_ctrl(r, nqn.encode(
-        ), transport.encode(), address.encode(), None, None, svcid.encode())
+        ), transport.encode(), address.encode(), cfg.host_traddr, cfg.host_iface, svcid.encode())
 
         if not c:
             return 2, "Failed to allocate memory to ctrl"
-        
+
+        # bys = bytes(cfg)
+        # count=0
+        # for b in bys:
+        #     print(count,":",format(b, '08b'))
+        #     count=count+1
+
+        if kato:
+            cfg.keep_alive_tmo = kato
+        if duplicate:
+            cfg.duplicate_connect = duplicate
+        if nr_io_queues:
+            cfg.nr_io_queues = nr_io_queues
         if dhchap_host:
             self.libnvme.nvme_host_set_dhchap_key(h, dhchap_host.encode())
-
         if dhchap_ctrl:
             self.libnvme.nvme_ctrl_set_dhchap_key(c, dhchap_ctrl.encode())
-
-
+        
         self.ret_status = self.libnvme.nvmf_add_ctrl(h, c, ctypes.byref(cfg))
 
         if self.ret_status < 0:
             return 3, "No controller found"
-        print(f"Successfully connected: {transport} {address} {svcid} {nqn}")
+        got_name = str(self.libnvme.nvme_ctrl_get_name(c))[2:-1]
+        self.connectedDeviceName = got_name
+        print(f"Successfully connected to {transport} {address} {svcid} {nqn}")
+        print("Device Name (self.connectedDeviceName):", got_name)
 
         return 0, ""
 
@@ -467,7 +478,9 @@ class Libnvme():
 if __name__ == '__main__':
     lib = Libnvme("")
     nqn = "nqn.2023-01.com.samsung.semiconductor:665e905a-bfde-11d3-01aa-a8a159fba2e6_0_0"
-    lib.submit_connect_cmd("tcp", "10.0.0.220", "4420", nqn)
-    lib.submit_connect_cmd("tcp", "10.0.0.220", "4420", nqn, duplicate=True)
+    # lib.submit_connect_cmd("tcp", "10.0.0.220", "4420", nqn)
+    # lib.submit_connect_cmd("tcp", "10.0.0.220", "4420", nqn, duplicate=True)
+
+    lib.submit_connect_cmd("tcp", "10.0.0.220", "4420", nqn, nr_io_queues=31)
 
     #lib.submit_disconnect_cmd(nqn)

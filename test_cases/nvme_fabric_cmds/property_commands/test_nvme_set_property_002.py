@@ -1,8 +1,8 @@
 '''
-Sends Property Set Command to initiate Normal Shutdown peration by
-setting the Shutdown Notification (CC.SHN) field
+Send a Property Set command to set Memory Page Size Maximum (MPSMAX)
+in the controller capabilities(read-only field).
 
-Verify that the shutdown completes.
+Verify that the command fails due to read-only block.
 '''
 import ctypes
 import pytest,sys
@@ -45,9 +45,9 @@ class TestNVMePropertySet:
 
         nvme_cmd = self.controller.cmdlib.get_property_set_cmd()
 
-        offset = OFFSET_CONTROLLER_CONFIGURATION
+        offset = OFFSET_CONTROLLER_CAPABILITIES
 
-        set_value = self.get_property_value | (1 << 14)
+        set_value = self.get_property_value | (7 << 52)
 
         if offset in OFFSETS_64BIT:
             nvme_cmd.cmd.generic_command.cdw10.raw = True
@@ -61,24 +61,17 @@ class TestNVMePropertySet:
         res_status = self.controller.app.submit_passthru(nvme_cmd,
                                                             verify_rsp=True, async_run=False)
         # Verifying Property Set success
-        if res_status!=0:
-            assert False, "Property Set failed"
+        if res_status==0:
+            assert False, f"Property Set passed for read-only field"
 
         # time.sleep(0) # Use if want to wait before checking 
         
-        # Verifying Shutdown success by checking if base command fails
-        nvme_cmd = self.controller.cmdlib.get_identify_controller_cmd()
-        res_status = self.controller.app.submit_passthru(
-            nvme_cmd, verify_rsp=True, async_run=False)
-        if res_status == 0:
-            assert False, "Non-fabric command passed after Shutdown Notification"
-        
-        # Verifying Shutdown success by checking if fabric command passes
-        nvme_cmd = self.controller.cmdlib.get_property_get_cmd()
-        res_status = self.controller.app.submit_passthru(
-            nvme_cmd, verify_rsp=True, async_run=False)
-        if res_status != 0:
-            assert False, "Fabric command failed after Shutdown Notification"
+        # # Verifying Shutdown success by checking if fabric command passes
+        # nvme_cmd = self.controller.cmdlib.get_property_get_cmd()
+        # res_status = self.controller.app.submit_passthru(
+        #     nvme_cmd, verify_rsp=True, async_run=False)
+        # if res_status != 0:
+        #     assert False, "Fabric command failed after Shutdown Notification"
         
         assert True
 
