@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+*.swp
+*~
+.vscode/
+tags
+logs/
+reports/
+*.html
+*.pytest_cache
+*.txt
+try.py
+*.pcap
