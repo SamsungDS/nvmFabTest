@@ -27,6 +27,7 @@ class TestNVMeConnectIOQueues:
         device = self.dummy.device
         application = self.dummy.application
         self.controller = Controller(device, application)
+        self.connected_paths = []
 
         tr = connectDetails.transport
         addr = connectDetails.address
@@ -43,14 +44,6 @@ class TestNVMeConnectIOQueues:
 
         self.nqn = self.controller.app.get_nqn_from_discover(response, index)
         # End Discover Command
-
-        # List-subsys
-        status, response = self.controller.app.submit_list_subsys_cmd()
-        if status != 0:
-            print("-- -- TestCase Setup Error: Check if nvme cli tool is installed")
-            return status, response
-        self.all_nvme_setup: list = re.findall(r"nvme\d", response.decode())
-        self.all_nvme_setup.sort()
 
         print("Setup Complete")
         print("-"*35, "\n")
@@ -69,48 +62,25 @@ class TestNVMeConnectIOQueues:
             # Start Connect Command
             status, response = self.controller.app.submit_connect_cmd(
                 transport=tr, address=addr, svcid=svc, nqn=nqn, duplicate=True, nr_io_queues=nr_io_queues)
-
             if status == 0:
+                self.connected_paths.append(response)
                 assert True
             else:
                 assert False, "Connect failed for different number of io queues"
-
-            # Getting connection path
-            status, response = self.controller.app.submit_list_subsys_cmd()
-            if status != 0:
-                print("-- -- TestCase Setup Error: Check if nvme cli tool is installed")
-                return status, response
-            all_nvme_devices: list = re.findall(r"nvme\d", response.decode())
-            all_nvme_devices.sort()
-
-            if len(all_nvme_devices)-len(self.all_nvme_setup) == 1:
-                path = "/dev/" + all_nvme_devices[-1]
-            # Start Disconnect Command
-            status, res = self.controller.app.submit_disconnect_cmd(
-                device_path=path)
-            if status != 0:
-                assert False, "Disconnect failed for different number of io queues"
-            else:
-                assert True
 
     def teardown_method(self):
         ''' Teardown test case by disconnecting the device '''
 
         print("\n\n", '-'*35)
         print("Teardown TestCase: Connect Command with different number of IO queues")
-        status, response = self.controller.app.submit_list_subsys_cmd()
-        if status != 0:
-            print("-- -- TestCase Setup Error: Check if nvme cli tool is installed")
-            return status, response
-
-        self.all_nvme_teardown: list = re.findall(r"nvme\d", response.decode())
-        self.all_nvme_teardown.sort()
-
-        if len(self.all_nvme_teardown)-len(self.all_nvme_setup) == 1:
-            path = "/dev/" + self.all_nvme_teardown[-1]
+        
+        for path in self.connected_paths:
+            if not path or path=='':
+                continue
             status, res = self.controller.app.submit_disconnect_cmd(
-                device_path=path)
+                    device_path=path)
             if status != 0:
                 raise Exception(f"Disconnect failed: {res}")
+            
         print("Teardown Complete")
         print("-"*100)

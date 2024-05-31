@@ -58,12 +58,13 @@ def connectByIP(app: NVMeCLILib, cmd_lib: NVMeCommandLib, connect_details):
     if status != 0:
         print("-- -- Command failed. Check if nvme cli tool is installed")
         return status, response
-
     status, alreadyConnected, response = parse_for_already_connected(
         response, connect_details, nqn)
+    print("-- Already connected: ", alreadyConnected)
     if status != 0:
-        print(f"-- -- Session Setup Error: {response}")
+        print(f"-- -- Session Setup Error: {status, response}")
         return status, response
+    
 
     if not alreadyConnected:
         print("-- -- Device not connected, attempting connection.")
@@ -74,19 +75,7 @@ def connectByIP(app: NVMeCLILib, cmd_lib: NVMeCommandLib, connect_details):
             print(
                 "-- -- Session Setup Error: Connect failed. Check the configuration details")
             return status, response
-        # if status==1:
-        #     print("-- -- Device already connected. Fetching device_path.")
 
-        # Verify connection and set device path
-        status, response = app.submit_list_subsys_cmd()
-        if status != 0:
-            print("-- -- Command failed. Check if nvme cli tool is installed")
-            return status, response
-
-        status, response = get_dev_from_subsys(response, nqn)
-        if status != 0:
-            print(f"-- -- Session Setup Error: {response}")
-            return status, response
     print("-- Device connected. Fetching device_path.")
     dev_path = response
     return 0, dev_path
@@ -134,7 +123,6 @@ def dummy(session_setup):
     """ Fixture for providing Device Config details """
     dev_path = session_setup
     dum = DeviceConfig(dev_path, ts_config["app_name"])
-    # dum = DeviceConfig(dev_path, ts_config["app_name"])
     return dum
 
 

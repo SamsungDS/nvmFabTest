@@ -10,7 +10,7 @@ from src.utils.nvme_utils import *
 from test_cases.conftest import dummy
 from lib.devlib.device_lib import ConnectDetails, Controller
 
-
+@pytest.mark.skipif(True, reason="nvme-cli corrects the host-id before sending")
 class TestNVMeConnectHostID:
     """Test case class for testing the Connect Command with Host ID cleared to 0h."""
 
@@ -24,6 +24,7 @@ class TestNVMeConnectHostID:
         device = self.dummy.device
         application = self.dummy.application
         self.controller = Controller(device, application)
+        self.connected_path = None
 
         tr = connectDetails.transport
         addr = connectDetails.address
@@ -40,15 +41,6 @@ class TestNVMeConnectHostID:
 
         self.nqn = self.controller.app.get_nqn_from_discover(response, index)
         # End Discover Command
-
-        # List-subsys
-        status, response = self.controller.app.submit_list_subsys_cmd()
-        if status != 0:
-            print("-- -- TestCase Setup Error: Check if nvme cli tool is installed")
-            return status, response
-
-        self.all_nvme_setup: list = re.findall(r"nvme\d", response.decode())
-        self.all_nvme_setup.sort()
 
         print("Setup Complete")
         print("-"*35, "\n")
@@ -71,6 +63,7 @@ class TestNVMeConnectHostID:
             print("-- Expected Failure in Connect Command")
             assert True
         else:
+            self.connected_path = response
             assert False, "Connect passed for Host ID cleared to 0h"
 
     def teardown_method(self):
@@ -78,18 +71,9 @@ class TestNVMeConnectHostID:
 
         print("\n\n", '-'*35)
         print("Teardown TestCase: Connect Command with Host ID cleared to 0h")
-        status, response = self.controller.app.submit_list_subsys_cmd()
-        if status != 0:
-            print("-- -- TestCase Setup Error: Check if nvme cli tool is installed")
-            return status, response
-
-        self.all_nvme_teardown: list = re.findall(r"nvme\d", response.decode())
-        self.all_nvme_teardown.sort()
-        if len(self.all_nvme_teardown)-len(self.all_nvme_setup) == 1:
-            path = "/dev/" + self.all_nvme_teardown[-1]
-
+        if self.connected_path:
             status, res = self.controller.app.submit_disconnect_cmd(
-                device_path=path)
+                    device_path=self.connected_path)
             if status != 0:
                 raise Exception(f"Disconnect failed: {res}")
         print("Teardown Complete")
