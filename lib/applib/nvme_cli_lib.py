@@ -23,6 +23,7 @@ class NVMeCLILib():
                 Defaults to None.
         """
         self.version = ""
+        self.old_verion = False
         self.dev_version = ""
         self.app_version = ""
         self.app_path = ""
@@ -34,7 +35,7 @@ class NVMeCLILib():
         self.nvme_list = []
         self.subsys_list = []
 
-    staticmethod
+    @staticmethod
     def mapping(value, start, end):
         """ Extracts a subset of bits from a given integer value
 
@@ -187,7 +188,7 @@ class NVMeCLILib():
         """
         opcode = command.cdw0.OPC
         nsid = command.NSID
-        cmd_base = "/usr/sbin/nvme"
+        cmd_base = ("/usr/sbin/" if self.old_verion else "" )+"nvme"
         cmd = f"{cmd_base} admin-passthru {self.dev_path} --opcode={opcode} -n {nsid}"
         cmd = f"{cmd} --cdw2={command.cdw2.raw} --cdw3={command.cdw3.raw}"
         cmd = f"{cmd} --cdw10={command.cdw10.raw} --cdw11={command.cdw11.raw}"
@@ -208,7 +209,7 @@ class NVMeCLILib():
         Returns:
             Tuple[int, bytes]: A tuple containing the status code and the stdout or stderr.
         """
-        cmd_base = "/usr/sbin/nvme"
+        cmd_base = ("/usr/sbin/" if self.old_verion else "" )+"nvme"
         cmd = f"{cmd_base} discover"
         cmd = f"{cmd} -t {transport}"
         cmd = f"{cmd} -a {address}"
@@ -217,99 +218,6 @@ class NVMeCLILib():
         status = self.execute_cmd(cmd)
         if status == 0:
             return 0, self.stdout
-        else:
-            return status, self.stderr
-
-    def submit_connect_cmd(self, transport, address, svcid, nqn, kato=None,
-                           duplicate=False, hostnqn=None, hostid=None, nr_io_queues=None,
-                             dhchap_host=None, dhchap_ctrl=None):
-        """
-        Submit a connect command to establish a connection with an NVMe fabric device.
-
-        Args:
-            transport (str): The transport type for the connection.
-            address (str): The address of the NVMe device.
-            svcid (str): The service ID for the connection.
-            nqn (str): The NVMe Qualified Name (NQN) of the device.
-            kato (int, optional): Keep Alive Timeout (KATO) value in milliseconds.
-            duplicate (bool, optional): Flag indicating whether to allow duplicate
-                connection.
-            hostnqn (str, optional): The NVMe Qualified Name (NQN) of the host.
-            hostid (str, optional): The host ID for the connection.
-            nr_io_queues (int, optional): The number of I/O queues to be used.
-
-        Returns:
-            Tuple[int, bytes]: A tuple containing the status code and the stdout or stderr.
-        """
-        cmd_base = "/usr/sbin/nvme"
-        cmd = f"{cmd_base} connect"
-        cmd = f"{cmd} -t {transport}"
-        cmd = f"{cmd} -a {address}"
-        cmd = f"{cmd} -s {svcid}"
-        cmd = f"{cmd} -n {nqn}"
-        if kato != None:
-            cmd = f"{cmd} -k {kato}"
-        if hostnqn != None:
-            cmd = f"{cmd} -q {hostnqn}"
-        if hostid != None:
-            cmd = f"{cmd} -I {hostid}"
-        if nr_io_queues != None:
-            cmd = f"{cmd} -i {nr_io_queues}"
-        if duplicate:
-            cmd = f"{cmd} -D"
-        if dhchap_host:
-            cmd = f"{cmd} -S {dhchap_host}"
-        if dhchap_ctrl:
-            cmd = f"{cmd} -C {dhchap_ctrl}"
-        
-        status = self.execute_cmd(cmd)
-
-        alreadyConnected = self.stderr.decode().strip().endswith(
-            "Operation already in progress")
-
-        if status == 0:
-            return 0, self.stdout
-        else:
-            if alreadyConnected:
-                return status, "Already connected to device."
-            return status, self.stderr
-
-    def submit_disconnect_cmd(self, nqn=None, device_path=None):
-        """
-        Submits a disconnect command to the NVMe fabric device.
-        If no arguments are given, then it will disconnect the dev_name attribute
-            stored in the object. 
-        If dev_name is not set, then raise error.
-
-        Args:
-            nqn (str, optional): The NQN of the device to disconnect.
-            device_path (str, optional): The path of the device to disconnect.  
-
-        Returns:
-            Tuple[int, bytes]: A tuple containing the status code and the stdout or stderr.
-
-        Raises:
-            NameError: If device path is not in correct format.
-        """
-        cmd_base = "/usr/sbin/nvme"
-        cmd = f"{cmd_base} disconnect"
-        if nqn:
-            cmd = f"{cmd} -n {nqn}"
-        elif device_path:
-            if not re.match(r"\A/dev/nvme[0-9]+\Z", device_path):
-                raise NameError(
-                    f"Cannot disconnect this device: {device_path}")
-            cmd = f"{cmd} -d {device_path}"
-        else:
-            if not re.match(r"\A/dev/nvme[0-9]+\Z", self.dev_path):
-                raise NameError(
-                    f"Cannot disconnect this device: {self.dev_path}")
-            cmd = f"{cmd} -d {self.dev_path}"
-
-        status = self.execute_cmd(cmd)
-
-        if status == 0:
-            return status, self.stdout
         else:
             return status, self.stderr
 
@@ -325,7 +233,7 @@ class NVMeCLILib():
             Tuple[int, bytes]: A tuple containing the status code and the stdout or stderr.
 
         """
-        cmd_base = "/usr/sbin/nvme"
+        cmd_base = ("/usr/sbin/" if self.old_verion else "" )+"nvme"
         cmd = f"{cmd_base} list-subsys -o json"
         status = self.execute_cmd(cmd)
         if status == 0:
@@ -347,7 +255,7 @@ class NVMeCLILib():
                 absolute namespace paths.
             - If execution fails, tuple contains status code and stderr.
         """
-        cmd_base = "/usr/sbin/nvme"
+        cmd_base = ("/usr/sbin/" if self.old_verion else "" )+"nvme"
         cmd = f"{cmd_base} list-ns"
         cmd = f"{cmd} {self.dev_path}"
         status = self.execute_cmd(cmd)
@@ -396,10 +304,9 @@ class NVMeCLILib():
             if not response:
                 print("Empty response ")
                 return ret_status
-
-            if len(self.stderr) == 0:
-                ctypes.memmove(nvme_cmd.buff, self.stdout, 4096)
-                return 0
+            
+            ctypes.memmove(nvme_cmd.buff, self.stdout, 4096)
+            return 0
 
         if command.cdw0.OPC == 0x7f:
             # Fabric Command
@@ -426,3 +333,96 @@ class NVMeCLILib():
                 ctypes.memmove(nvme_cmd.buff, value.to_bytes(8, 'little'), 8)
 
             return 0
+        
+    def submit_connect_cmd(self, transport, address, svcid, nqn, kato=None,
+                           duplicate=False, hostnqn=None, hostid=None, nr_io_queues=None,
+                             dhchap_host=None, dhchap_ctrl=None):
+        """
+        Submit a connect command to establish a connection with an NVMe fabric device.
+
+        Args:
+            transport (str): The transport type for the connection.
+            address (str): The address of the NVMe device.
+            svcid (str): The service ID for the connection.
+            nqn (str): The NVMe Qualified Name (NQN) of the device.
+            kato (int, optional): Keep Alive Timeout (KATO) value in milliseconds.
+            duplicate (bool, optional): Flag indicating whether to allow duplicate
+                connection.
+            hostnqn (str, optional): The NVMe Qualified Name (NQN) of the host.
+            hostid (str, optional): The host ID for the connection.
+            nr_io_queues (int, optional): The number of I/O queues to be used.
+
+        Returns:
+            Tuple[int, bytes]: A tuple containing the status code and the stdout or stderr.
+        """
+        cmd_base = ("/usr/sbin/" if self.old_verion else "" )+"nvme"
+        cmd = f"{cmd_base} connect"
+        cmd = f"{cmd} -t {transport}"
+        cmd = f"{cmd} -a {address}"
+        cmd = f"{cmd} -s {svcid}"
+        cmd = f"{cmd} -n {nqn}"
+        if kato != None:
+            cmd = f"{cmd} -k {kato}"
+        if hostnqn != None:
+            cmd = f"{cmd} -q {hostnqn}"
+        if hostid != None:
+            cmd = f"{cmd} -I {hostid}"
+        if nr_io_queues != None:
+            cmd = f"{cmd} -i {nr_io_queues}"
+        if duplicate:
+            cmd = f"{cmd} -D"
+        if dhchap_host:
+            cmd = f"{cmd} -S {dhchap_host}"
+        if dhchap_ctrl:
+            cmd = f"{cmd} -C {dhchap_ctrl}"
+        
+        status = self.execute_cmd(cmd)
+
+        alreadyConnected = self.stderr.decode().strip().endswith(
+            "Operation already in progress")
+
+        if status == 0:
+            return 0, "/dev/"+self.stdout[-6:-1].decode()
+        else:
+            if alreadyConnected:
+                return status, "Already connected to device."
+            return status, self.stderr
+
+    def submit_disconnect_cmd(self, nqn=None, device_path=None):
+        """
+        Submits a disconnect command to the NVMe fabric device.
+        If no arguments are given, then it will disconnect the dev_name attribute
+            stored in the object. 
+        If dev_name is not set, then raise error.
+
+        Args:
+            nqn (str, optional): The NQN of the device to disconnect.
+            device_path (str, optional): The path of the device to disconnect.  
+
+        Returns:
+            Tuple[int, bytes]: A tuple containing the status code and the stdout or stderr.
+
+        Raises:
+            NameError: If device path is not in correct format.
+        """
+        cmd_base = ("/usr/sbin/" if self.old_verion else "" )+"nvme"
+        cmd = f"{cmd_base} disconnect"
+        if nqn:
+            cmd = f"{cmd} -n {nqn}"
+        elif device_path:
+            if not re.match(r"\A/dev/nvme[0-9]+\Z", device_path):
+                raise NameError(
+                    f"Cannot disconnect this device: {device_path}")
+            cmd = f"{cmd} -d {device_path}"
+        else:
+            if not re.match(r"\A/dev/nvme[0-9]+\Z", self.dev_path):
+                raise NameError(
+                    f"Cannot disconnect this device: {self.dev_path}")
+            cmd = f"{cmd} -d {self.dev_path}"
+
+        status = self.execute_cmd(cmd)
+
+        if status == 0:
+            return status, self.stdout
+        else:
+            return status, self.stderr
