@@ -23,7 +23,6 @@ class NVMeCLILib():
                 Defaults to None.
         """
         self.version = ""
-        self.old_verion = False
         self.dev_version = ""
         self.app_version = ""
         self.app_path = ""
@@ -74,7 +73,7 @@ class NVMeCLILib():
         self.ret_code = process.returncode
 
         if len(self.stderr) != 0 and self.ret_code != 0:
-            print("-- -- Command execution failed")
+            print(f"-- -- Command execution failed: {self.stderr[:40]}")
             return 1
         print("-- -- Command execution success")
         return 0
@@ -188,7 +187,7 @@ class NVMeCLILib():
         """
         opcode = command.cdw0.OPC
         nsid = command.NSID
-        cmd_base = ("/usr/sbin/" if self.old_verion else "" )+"nvme"
+        cmd_base = "nvme"
         cmd = f"{cmd_base} admin-passthru {self.dev_path} --opcode={opcode} -n {nsid}"
         cmd = f"{cmd} --cdw2={command.cdw2.raw} --cdw3={command.cdw3.raw}"
         cmd = f"{cmd} --cdw10={command.cdw10.raw} --cdw11={command.cdw11.raw}"
@@ -209,7 +208,7 @@ class NVMeCLILib():
         Returns:
             Tuple[int, bytes]: A tuple containing the status code and the stdout or stderr.
         """
-        cmd_base = ("/usr/sbin/" if self.old_verion else "" )+"nvme"
+        cmd_base = "nvme"
         cmd = f"{cmd_base} discover"
         cmd = f"{cmd} -t {transport}"
         cmd = f"{cmd} -a {address}"
@@ -233,7 +232,7 @@ class NVMeCLILib():
             Tuple[int, bytes]: A tuple containing the status code and the stdout or stderr.
 
         """
-        cmd_base = ("/usr/sbin/" if self.old_verion else "" )+"nvme"
+        cmd_base = "nvme"
         cmd = f"{cmd_base} list-subsys -o json"
         status = self.execute_cmd(cmd)
         if status == 0:
@@ -255,7 +254,7 @@ class NVMeCLILib():
                 absolute namespace paths.
             - If execution fails, tuple contains status code and stderr.
         """
-        cmd_base = ("/usr/sbin/" if self.old_verion else "" )+"nvme"
+        cmd_base = "nvme"
         cmd = f"{cmd_base} list-ns"
         cmd = f"{cmd} {self.dev_path}"
         status = self.execute_cmd(cmd)
@@ -263,7 +262,7 @@ class NVMeCLILib():
             ns_paths = []
             lines = self.stdout.decode().splitlines()
             for i in range(len(lines)):
-                ns_paths.append(self.dev_path+'n'+lines[i][-1])
+                ns_paths.append(self.dev_path+'n'+chr(ord(lines[i][lines[i].find(']')-1])+1))
             return status, ns_paths
         else:
             return status, self.stderr
@@ -355,7 +354,7 @@ class NVMeCLILib():
         Returns:
             Tuple[int, bytes]: A tuple containing the status code and the stdout or stderr.
         """
-        cmd_base = ("/usr/sbin/" if self.old_verion else "" )+"nvme"
+        cmd_base = "nvme"
         cmd = f"{cmd_base} connect"
         cmd = f"{cmd} -t {transport}"
         cmd = f"{cmd} -a {address}"
@@ -382,7 +381,8 @@ class NVMeCLILib():
             "Operation already in progress")
 
         if status == 0:
-            return 0, "/dev/"+self.stdout[-6:-1].decode()
+            ind = self.stdout.decode().find(':')
+            return 0, "/dev/"+self.stdout[ind+2:-1].decode()
         else:
             if alreadyConnected:
                 return status, "Already connected to device."
@@ -405,7 +405,7 @@ class NVMeCLILib():
         Raises:
             NameError: If device path is not in correct format.
         """
-        cmd_base = ("/usr/sbin/" if self.old_verion else "" )+"nvme"
+        cmd_base = "nvme"
         cmd = f"{cmd_base} disconnect"
         if nqn:
             cmd = f"{cmd} -n {nqn}"

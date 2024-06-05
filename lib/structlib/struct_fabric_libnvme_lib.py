@@ -156,7 +156,7 @@ class NVME_CTRL(ctypes.Structure):
     Represents the "nvme_ctrl" structure in libnvme.
     """
 
-    _pack_ = 1
+    #_pack_ = 1
     _fields_ = [("entry", LIST_NODE),
                 ("paths", LIST_HEAD),
                 ("namespaces", LIST_HEAD),

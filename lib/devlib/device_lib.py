@@ -29,7 +29,7 @@ class Controller():
         self.cmdlib = NVMeCommandLib(dev_name, app_name)
         self.dev_name = dev_name
         self.app_name = app_name
-        if app_name.lower() == "nvme-cli":
+        if app_name.lower() == "nvme-cli"  or app_name.lower() == "nvmecli":
             self.app = NVMeCLILib(dev_name)
         elif app_name.lower() == "libnvme":
             self.app = Libnvme(dev_name)

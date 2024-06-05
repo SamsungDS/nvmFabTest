@@ -33,12 +33,14 @@ class TestNVMeIdentify:
         nvme_cmd = self.controller.cmdlib.get_identify_controller_cmd()
 
         result = IdentifyControllerData()
+        
+        
         nvme_cmd.buff = ctypes.addressof(result)
 
         res_status = self.controller.app.submit_passthru(
             nvme_cmd, verify_rsp=True, async_run=False)
         if res_status != 0:
-            assert False
+            assert False, f"Identify failed: {res_status}"
 
         self.controller.app.get_response(nvme_cmd)
         print("Status Code: ", nvme_cmd.rsp.response.sf.SC)

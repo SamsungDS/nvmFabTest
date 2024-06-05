@@ -4,6 +4,7 @@ Expected output: Connect command response is successful
 '''
 
 import pytest
+import re
 from src.macros import *
 from src.utils.nvme_utils import *
 from test_cases.conftest import dummy
@@ -18,20 +19,17 @@ class TestNVMeAuthConnect:
     '''
 
     @pytest.fixture(scope='function', autouse=True)
-    def setup_method(self, dummy):
+    def setup_method(self, dummy, connectDetails: ConnectDetails):
         ''' Setup Test Case by initialization of objects '''
 
         print("\n", "-"*100)
-        print("Setup TestCase: Connect Command")
+        print("Setup TestCase: Auth Connect Command")
 
         self.connectIsSuccess = None
         self.dummy = dummy
         device = self.dummy.device
         application = self.dummy.application
         self.controller = Controller(device, application)
-
-    def test_auth_connect_ctrl_dhchap(self, connectDetails: ConnectDetails):
-        ''' Performing test by sending connect command to discovery NQN '''
 
         tr = connectDetails.transport
         addr = connectDetails.address
@@ -48,6 +46,25 @@ class TestNVMeAuthConnect:
 
         self.nqn = self.controller.app.get_nqn_from_discover(response, index)
         # End Discover Command
+
+        # List-subsys
+        status, response = self.controller.app.submit_list_subsys_cmd()
+        if status != 0:
+            print("-- -- TestCase Setup Error: Check if nvme cli tool is installed")
+            return status, response
+        self.all_nvme_setup: list = re.findall(r"nvme\d", response.decode())
+        self.all_nvme_setup.sort()
+
+        print("Setup Done: Auth Connect Command")
+        print("-"*35, "\n")
+
+    def test_auth_connect_ctrl_dhchap(self, connectDetails: ConnectDetails):
+        ''' Performing test by sending connect command to discovery NQN '''
+
+        tr = connectDetails.transport
+        addr = connectDetails.address
+        svc = connectDetails.svcid
+        index = connectDetails.index
 
         dhchap_ctrl = "dummydummydummydummydummydummydu"
 
@@ -68,12 +85,22 @@ class TestNVMeAuthConnect:
 
     def teardown_method(self):
         '''Teardown test case by disconnecting '''
-
         print("\n\nTeardown TestCase: Auth Connect Command")
-        if self.connectIsSuccess:
+
+        status, response = self.controller.app.submit_list_subsys_cmd()
+        if status != 0:
+            print("-- -- TestCase Setup Error: Check if nvme cli tool is installed")
+            return status, response
+
+        self.all_nvme_teardown: list = re.findall(r"nvme\d", response.decode())
+        self.all_nvme_teardown.sort()
+        if len(self.all_nvme_teardown)-len(self.all_nvme_setup) == 1:
+            path = "/dev/" + self.all_nvme_teardown[-1]
+
             status, res = self.controller.app.submit_disconnect_cmd(
-                nqn=self.nqn)
+                device_path=path)
             if status != 0:
-                raise Exception(
-                    f"Disconnect from discovery controller failed: {res}")
+                raise Exception(f"Disconnect failed: {res}")
+        
+        print("Teardown Complete: Auth Connect Command")
         print("-"*100)

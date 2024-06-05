@@ -9,6 +9,5 @@
         "svcid": "4420",
         "index": 0
     },
-    "libnvme_path": "auto"
+    "libnvme_path": "assets/libnvme.so"
 }
- 

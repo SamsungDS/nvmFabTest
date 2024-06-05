@@ -12,7 +12,7 @@ from test_cases.conftest import dummy
 from src.macros import *
 
 
-class TestNVMeIdentify:
+class TestNVMePropertyGet:
     
     @pytest.fixture(scope='function', autouse=True)
     def setup_method(self, dummy):

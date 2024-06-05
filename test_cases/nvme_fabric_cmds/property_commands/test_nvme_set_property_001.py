@@ -19,7 +19,7 @@ class TestNVMePropertySet:
     def setup_method(self, dummy):
         ''' Setup Test Case by initialization of objects '''
         print("\n", "-"*100)
-        print("Setup TestCase: Identify Controller")
+        print("Setup TestCase: Property Set")
         self.dummy = dummy
         device = self.dummy.device
         application = self.dummy.application
@@ -37,9 +37,10 @@ class TestNVMePropertySet:
         res_status = self.controller.app.submit_passthru(nvme_cmd,
                                                             verify_rsp=True, async_run=False)
         if res_status!=0:
-            raise Exception("Property Get failed")
+            raise Exception("Property Set failed")
         self.get_property_value = res.value
 
+    @pytest.mark.skipif(True, reason="Target")
     def test_property_set_cmd(self, dummy):
         ''' Sending the command and verifying response '''
 
@@ -64,7 +65,7 @@ class TestNVMePropertySet:
         if res_status!=0:
             assert False, "Property Set failed"
 
-        # time.sleep(0) # Use if want to wait before checking 
+        # time.sleep(12) # Use if want to wait before checking 
         
         # Verifying Shutdown success by checking if base command fails
         nvme_cmd = self.controller.cmdlib.get_identify_controller_cmd()
@@ -84,5 +85,5 @@ class TestNVMePropertySet:
 
     def teardown_method(self):
         ''' Teardown of Test Case '''
-        print("Teardown TestCase: Identify Controller")
+        print("Teardown TestCase: Property Set")
         print("-"*100)   

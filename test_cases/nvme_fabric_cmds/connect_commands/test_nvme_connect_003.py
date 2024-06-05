@@ -85,7 +85,7 @@ class TestNVMeConnectKato:
 
         if TestNVMeConnectKato.isChangeNotificationSupported:
             status, res = self.controller.app.submit_connect_cmd(
-                tr, addr, svc, nqn, KATO_NONZERO)
+                tr, addr, svc, nqn, KATO_NONZERO, duplicate=True)
             self.controller.app.get_response(nvme_cmd)
             status_code = nvme_cmd.rsp.response.sf.SC
             if status == 0 and status_code == 0:

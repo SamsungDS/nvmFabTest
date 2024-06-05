@@ -1,7 +1,6 @@
 """ Generic utilities used in the framework. """
 import json
 
-
 def get_dev_from_subsys(response, nqn):
     """
     Retrieves the device path associated with a given NQN from the response.
@@ -15,8 +14,9 @@ def get_dev_from_subsys(response, nqn):
     """
     
     js = json.loads(response)
-
+    js = js[0]
     try:
+        
         for subsystem in js["Subsystems"]:
             if nqn == subsystem['NQN'].strip():
                 subsys_name = subsystem['Name'].strip()
@@ -49,7 +49,7 @@ def parse_for_already_connected(response, connect_details, nqn):
     """
     
     js = json.loads(response)
-
+    js = js[0]
     tr = connect_details["transport"]
     addr = connect_details["addr"]
     svc = connect_details["svcid"]
@@ -57,12 +57,13 @@ def parse_for_already_connected(response, connect_details, nqn):
     try:
         for subsystem in js["Subsystems"]:
             if nqn == subsystem['NQN'].strip():
-                if subsystem['Paths'][0]["Transport"] == tr:
-                    if subsystem['Paths'][0]["Address"] == f"traddr={addr} trsvcid={svc}":
-                        subsys_name = subsystem['Name'].strip()
-                        dev_path = f"/dev/nvme{subsys_name[-1]}"
+                paths = subsystem['Paths']
+                if paths[0]["Transport"] == tr and paths[0]["Address"] == f"traddr={addr},trsvcid={svc}":
 
-                        return 0, True, dev_path
+                    dev_name = paths[0]['Name'].strip()
+                    dev_path = f"/dev/{dev_name}"
+
+                    return 0, True, dev_path
         return 0, False, "NQN not found in the given response"
 
     except json.JSONDecodeError as e:

@@ -19,7 +19,7 @@ class TestNVMePropertySet:
     def setup_method(self, dummy):
         ''' Setup Test Case by initialization of objects '''
         print("\n", "-"*100)
-        print("Setup TestCase: Identify Controller")
+        print("Setup TestCase: Property Set")
         self.dummy = dummy
         device = self.dummy.device
         application = self.dummy.application
@@ -77,5 +77,5 @@ class TestNVMePropertySet:
 
     def teardown_method(self):
         ''' Teardown of Test Case '''
-        print("Teardown TestCase: Identify Controller")
+        print("Teardown TestCase: Property Set")
         print("-"*100)   

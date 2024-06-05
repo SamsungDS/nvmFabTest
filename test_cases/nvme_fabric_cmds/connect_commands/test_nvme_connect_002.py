@@ -86,7 +86,7 @@ class TestNVMeConnectKato:
         nvme_cmd = self.controller.cmdlib.get_nvme_cmd()
 
         status, res = self.controller.app.submit_connect_cmd(
-            tr, addr, svc, nqn, KATO_ZERO)
+            tr, addr, svc, nqn, KATO_ZERO, duplicate=True)
         self.controller.app.get_response(nvme_cmd)
         status_code = nvme_cmd.rsp.response.sf.SC
         if status == 0 and status_code == 0:

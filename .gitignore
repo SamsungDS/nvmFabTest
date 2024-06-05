@@ -10,4 +10,5 @@ reports/
 *.pytest_cache
 *.txt
 try.py
+time_compare.py
 *.pcap

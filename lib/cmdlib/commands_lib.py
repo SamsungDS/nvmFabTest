@@ -20,7 +20,7 @@ class NVMeCommandLib:
         """ Constructor """
         self.dev_name = dev_name
         self.app_name = app_name.lower()
-        if app_name.lower() == "nvme-cli":
+        if app_name.lower() == "nvme-cli" or app_name.lower() == "nvmecli":
             pass  # self.app = NVMeCLILib(dev_name)
         elif app_name.lower() == "libnvme":
             pass  # self.app = Libnvme(dev_name)
