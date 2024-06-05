@@ -12,3 +12,4 @@ reports/
 try.py
 time_compare.py
 *.pcap
+*.zip
