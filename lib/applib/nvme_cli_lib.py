@@ -73,7 +73,7 @@ class NVMeCLILib():
         self.ret_code = process.returncode
 
         if len(self.stderr) != 0 and self.ret_code != 0:
-            print(f"-- -- Command execution failed: {self.stderr[:40]}")
+            print(f"-- -- Command execution failed: {self.stderr[:100]}")
             return 1
         print("-- -- Command execution success")
         return 0
@@ -196,7 +196,7 @@ class NVMeCLILib():
 
         return cmd
 
-    def submit_discover_cmd(self, transport, address, svcid):
+    def submit_discover_cmd(self, transport, address, svcid, hostnqn=None):
         """
         Submit a discover command to the NVMe device.
 
@@ -213,7 +213,9 @@ class NVMeCLILib():
         cmd = f"{cmd} -t {transport}"
         cmd = f"{cmd} -a {address}"
         cmd = f"{cmd} -s {svcid}"
-        cmd = f"{cmd}"
+
+        if hostnqn:
+            cmd = f"{cmd} -q {hostnqn}"
         status = self.execute_cmd(cmd)
         if status == 0:
             return 0, self.stdout

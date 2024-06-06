@@ -479,10 +479,11 @@ class Libnvme():
 if __name__ == '__main__':
     lib = Libnvme("")
     nqn = NVME_DISCOVERY_NQN
-    # lib.submit_connect_cmd("tcp", "10.0.0.220", "4420", nqn)
+    #nqn = "nqn.2023-01.com.samsung.semiconductor:665e905a-bfde-11d3-01aa-a8a159fba2e6_0_0"
+    lib.submit_connect_cmd("tcp", "10.0.0.220", "4420", nqn)
     # lib.submit_connect_cmd("tcp", "10.0.0.220", "4420", nqn, duplicate=True)
 
     # lib.submit_connect_cmd("tcp", "10.0.0.220", "4420", nqn, nr_io_queues=31)
 
     # lib.submit_disconnect_cmd(dev_name="/dev/nvme2")
-    lib.submit_disconnect_cmd(nqn)
+    # lib.submit_disconnect_cmd(nqn)
