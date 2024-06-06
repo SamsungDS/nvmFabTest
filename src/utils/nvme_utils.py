@@ -57,13 +57,16 @@ def parse_for_already_connected(response, connect_details, nqn):
     try:
         for subsystem in js["Subsystems"]:
             if nqn == subsystem['NQN'].strip():
-                paths = subsystem['Paths']
-                if paths[0]["Transport"] == tr and paths[0]["Address"] == f"traddr={addr},trsvcid={svc}":
+                path = subsystem['Paths'][0]
+                check = path["Transport"] == tr
+                check = check and path["Address"].split(',')[0]==f"traddr={addr}"
+                check = check and path["Address"].split(',')[1]==f"trsvcid={svc}"
 
-                    dev_name = paths[0]['Name'].strip()
+                if check:
+                    dev_name = path['Name'].strip()
                     dev_path = f"/dev/{dev_name}"
-
                     return 0, True, dev_path
+                
         return 0, False, "NQN not found in the given response"
 
     except json.JSONDecodeError as e:
