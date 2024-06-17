@@ -306,7 +306,7 @@ class Libnvme():
             self.ret_status = libnvme_submit_admin_passthru(
                 self.device_descriptor, ctypes.addressof(command), None)
             if self.ret_status != 0:
-                print("-- -- Command execution unsuccessful: ", self.ret_status)
+                print("-- -- Command execution unsuccessful: ", hex(self.ret_status))
 
         if command.cdw0.OPC == 0x7f:
             # Fabric Command
@@ -320,7 +320,7 @@ class Libnvme():
             self.ret_status = libnvme_submit_admin_passthru(
                 self.device_descriptor, ctypes.addressof(command), nvme_cmd.buff)
             if self.ret_status != 0:
-                print("-- -- Command execution unsuccessful: ", self.ret_status)
+                print("-- -- Command execution unsuccessful: ", hex(self.ret_status))
 
         return self.ret_status
 
@@ -355,8 +355,8 @@ class Libnvme():
         if not h:
             return 1, "Failed to allocate memory to host"
 
-        c = self.libnvme.nvme_create_ctrl(r, nqn.encode(
-        ), transport.encode(), address.encode(), cfg.host_traddr, cfg.host_iface, svcid.encode())
+        c = self.libnvme.nvme_create_ctrl(r, nqn.encode(),
+        transport.encode(), address.encode(), cfg.host_traddr, cfg.host_iface, svcid.encode())
 
         if not c:
             return 2, "Failed to allocate memory to ctrl"
@@ -381,7 +381,8 @@ class Libnvme():
         self.ret_status = self.libnvme.nvmf_add_ctrl(h, c, ctypes.byref(cfg))
 
         if self.ret_status < 0:
-            return 3, "No controller found"
+            return self.ret_status, "No controller found"
+        
         got_name = str(self.libnvme.nvme_ctrl_get_name(c))[2:-1]
         self.connectedDeviceName = got_name
         print(f"-- Successfully connected to {transport} {address} {svcid} {nqn}")
@@ -477,10 +478,11 @@ class Libnvme():
         response.sf.SC = 0
         
 if __name__ == '__main__':
-    lib = Libnvme("")
+    lib = Libnvme("nvme2")
     nqn = NVME_DISCOVERY_NQN
-    #nqn = "nqn.2023-01.com.samsung.semiconductor:665e905a-bfde-11d3-01aa-a8a159fba2e6_0_0"
-    lib.submit_connect_cmd("tcp", "10.0.0.220", "4420", nqn)
+    # nqn = "nqn.2023-01.com.samsung.semiconductor:665e905a-bfde-11d3-01aa-a8a159fba2e6_0_0"
+    print("tcp", "10.0.0.220", "4420", nqn)
+    print(lib.submit_connect_cmd("tcp", "10.0.0.220", "4420", nqn))
     # lib.submit_connect_cmd("tcp", "10.0.0.220", "4420", nqn, duplicate=True)
 
     # lib.submit_connect_cmd("tcp", "10.0.0.220", "4420", nqn, nr_io_queues=31)

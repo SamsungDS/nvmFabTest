@@ -61,22 +61,20 @@ class TestNVMePropertySet:
         
         res_status = self.controller.app.submit_passthru(nvme_cmd,
                                                             verify_rsp=True, async_run=False)
-        # Verifying Property Set success
-        if res_status==0 and cc_en==1:
-            assert False, f"Property Set passed for CC.AMS when CC.EN is 1"
-
+        self.controller.app.get_response(nvme_cmd)
+        SC = nvme_cmd.rsp.response.sf.SC
+        
+        # Verifying Property Set
+        if cc_en==1:
+            if res_status==0:
+                assert False, f"Property Set passed for CC.AMS when CC.EN is 1"
+            if SC != 0x82:
+                assert False, f"Property Set failed with unexpected status {SC}"+\
+                    "for CC.AMS when CC.EN is 1"
+            
         if res_status!=0 and cc_en==0:
             assert False, f"Property Set failed for CC.AMS when CC.EN is 0"
-    
-        # time.sleep(0) # Use if want to wait before checking 
-        
-        # # Verifying Shutdown success by checking if fabric command passes
-        # nvme_cmd = self.controller.cmdlib.get_property_get_cmd()
-        # res_status = self.controller.app.submit_passthru(
-        #     nvme_cmd, verify_rsp=True, async_run=False)
-        # if res_status != 0:
-        #     assert False, "Fabric command failed after Shutdown Notification"
-        
+
         assert True
 
     def teardown_method(self):

@@ -41,9 +41,13 @@ class TestNVMePropertyGet:
         res_status = self.controller.app.submit_passthru(nvme_cmd,
                                                             verify_rsp=True, async_run=False)
         
-        # self.controller.app.get_response(nvme_cmd)
+        self.controller.app.get_response(nvme_cmd)
+        SC = nvme_cmd.rsp.response.sf.SC
         if res_status==0:
             assert False, "Command passed unexpectedly"
+        if SC!=0x2:
+            assert False, f"Command failed with unexpected status code: {hex(SC)}"
+            
         assert True
 
     def teardown_method(self):

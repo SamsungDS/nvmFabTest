@@ -29,7 +29,7 @@ class NVMeCLILib():
         self.data_buffer = ""
         self.dev_path = dev_path
         self.command = None
-        self.response = None
+        #self.nvme_cmd.rsp.response = None
         self.err_code = 0
         self.nvme_list = []
         self.subsys_list = []
@@ -73,8 +73,8 @@ class NVMeCLILib():
         self.ret_code = process.returncode
 
         if len(self.stderr) != 0 and self.ret_code != 0:
-            print(f"-- -- Command execution failed: {self.stderr[:100]}")
-            return 1
+            print(f"-- -- Command execution failed: {self.stderr[:112]}")
+            return self.ret_code
         print("-- -- Command execution success")
         return 0
 
@@ -127,24 +127,25 @@ class NVMeCLILib():
         Returns:
             bool: Indicates success or failure
         """
-        self.response = nvme_cmd.rsp.response
+        #nvme_cmd.rsp.response = nvme_cmd.rsp.response
         try:
             if self.ret_code != 0:
                 completion_val = list(
                     bytes(rsp if rsp else self.stderr).decode('ascii').split(":"))
                 val = re.findall(r'\((.*?)\)', completion_val[-1])
                 src = int(val[0], 16)
-                self.response.sf.DNR = NVMeCLILib.mapping(src, 14, 15)
-                self.response.sf.M = NVMeCLILib.mapping(src, 13, 14)
-                self.response.sf.CRD = NVMeCLILib.mapping(src, 11, 13)
-                self.response.sf.SCT = NVMeCLILib.mapping(src, 8, 11)
-                self.response.sf.SC = NVMeCLILib.mapping(src, 0, 8)
+                nvme_cmd.rsp.response.sf.DNR = NVMeCLILib.mapping(src, 14, 15)
+                nvme_cmd.rsp.response.sf.M = NVMeCLILib.mapping(src, 13, 14)
+                nvme_cmd.rsp.response.sf.CRD = NVMeCLILib.mapping(src, 11, 13)
+                nvme_cmd.rsp.response.sf.SCT = NVMeCLILib.mapping(src, 8, 11)
+                nvme_cmd.rsp.response.sf.SC = NVMeCLILib.mapping(src, 0, 8)
+                
             else:
-                self.response.DNR = 0
-                self.response.sf.M = 0
-                self.response.sf.CRD = 0
-                self.response.sf.SCT = 0
-                self.response.sf.SC = 0
+                nvme_cmd.rsp.response.sf.DNR = 0
+                nvme_cmd.rsp.response.sf.M = 0
+                nvme_cmd.rsp.response.sf.CRD = 0
+                nvme_cmd.rsp.response.sf.SCT = 0
+                nvme_cmd.rsp.response.sf.SC = 0
         except Exception as e:
             pass
         return True
@@ -306,7 +307,7 @@ class NVMeCLILib():
                 print("Empty response ")
                 return ret_status
             
-            ctypes.memmove(nvme_cmd.buff, self.stdout, 4096)
+            ctypes.memmove(nvme_cmd.buff, self.stdout, data_len)
             return 0
 
         if command.cdw0.OPC == 0x7f:

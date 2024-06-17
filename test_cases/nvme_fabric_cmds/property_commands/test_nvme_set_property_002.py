@@ -36,6 +36,7 @@ class TestNVMePropertySet:
             nvme_cmd.cmd.generic_command.cdw10.raw = False
         res_status = self.controller.app.submit_passthru(nvme_cmd,
                                                             verify_rsp=True, async_run=False)
+        
         if res_status!=0:
             raise Exception("Property Get failed")
         self.get_property_value = res.value
@@ -44,9 +45,7 @@ class TestNVMePropertySet:
         ''' Sending the command and verifying response '''
 
         nvme_cmd = self.controller.cmdlib.get_property_set_cmd()
-
         offset = OFFSET_CONTROLLER_CAPABILITIES
-
         set_value = self.get_property_value | (7 << 52)
 
         if offset in OFFSETS_64BIT:
@@ -60,18 +59,14 @@ class TestNVMePropertySet:
         
         res_status = self.controller.app.submit_passthru(nvme_cmd,
                                                             verify_rsp=True, async_run=False)
+        self.controller.app.get_response(nvme_cmd)
+
         # Verifying Property Set success
         if res_status==0:
             assert False, f"Property Set passed for read-only field"
-
-        # time.sleep(0) # Use if want to wait before checking 
-        
-        # # Verifying Shutdown success by checking if fabric command passes
-        # nvme_cmd = self.controller.cmdlib.get_property_get_cmd()
-        # res_status = self.controller.app.submit_passthru(
-        #     nvme_cmd, verify_rsp=True, async_run=False)
-        # if res_status != 0:
-        #     assert False, "Fabric command failed after Shutdown Notification"
+        SC = nvme_cmd.rsp.response.sf.SC
+        if SC != 0x82:
+            assert False, f"Property Set failed with unexpected status code: {SC}"
         
         assert True
 

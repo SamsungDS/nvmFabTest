@@ -30,7 +30,7 @@ class NVMeCmdStruct(ctypes.Union):
         get_feature_cmd (GenericCommand): Represents the get feature command.
     """
     
-    _pack_ = 1
+    # _pack_ = 1
     _fields_ = [("generic_command", GenericCommand),
                 ("delete_io_subq_cmd", GenericCommand),         # OPC 0x0
                 ("create_io_subq_cmd", GenericCommand),         # OPC 0x1
@@ -57,7 +57,7 @@ class NVMeRspStruct(ctypes.Union):
         identify_rsp (Response): The response structure for identify commands.
     """
     
-    _pack_ = 1
+    # _pack_ = 1
     _fields_ = [("response", Response),
                 ("identify_rsp", Response)]
 
@@ -67,7 +67,7 @@ class NVMeDataStruct(ctypes.Union):
     Represents a data structure for NVMe devices.
     """
 
-    _pack_ = 1
+    # _pack_ = 1
     _fields_ = [("identify_ctrl_data", IdentifyControllerData)]
 
 
@@ -84,7 +84,7 @@ class NVMeCommand(ctypes.Structure):
         timeout_ms (ctypes.c_uint32): Command timeout in milliseconds.
     """
     
-    _pack_ = 1
+    # _pack_ = 1
     _fields_ = [("cmd", NVMeCmdStruct),         # NVMe Command
                 ("rsp", NVMeRspStruct),         # NVMe Response
                 ("buff", ctypes.c_void_p),      # NVMe Data Buffer

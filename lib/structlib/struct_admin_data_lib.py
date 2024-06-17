@@ -5,7 +5,7 @@ import ctypes
 
 class NVMSR(ctypes.Structure): #Byte 253
     """Structure representing NVM Enclosure and Storage Device information."""
-    _pack_ = 1
+    # _pack_ = 1
     _fields_ = [("Reserved", ctypes.c_uint8, 6), #bits 7-2 
                 ("NVMEE", ctypes.c_uint8, 1), #bit 1 #NVMeEnclosure
                 ("NVMESD", ctypes.c_uint8, 1), #bit 0 #NVMeStorageDevice
@@ -15,7 +15,7 @@ class NVMSR(ctypes.Structure): #Byte 253
 class VWCI(ctypes.Structure): #Byte 254
     """Structure representing VPD Write Cycle Information."""
 
-    _pack_ = 1
+    # _pack_ = 1
     _fields_ = [("VWCRV", ctypes.c_uint8, 1), #bit 7 #VPD Write Cycle Remaining Valid
                 ("VWCR", ctypes.c_uint8, 7), #bits 6-0 #VPD Write Cycles Remaining
                 ]
@@ -24,7 +24,7 @@ class VWCI(ctypes.Structure): #Byte 254
 class MEC(ctypes.Structure): #Byte 255
     """Structure representing Management Endpoint Capabilities."""
     
-    _pack_ = 1
+    # _pack_ = 1
     _fields_ = [("Reserved", ctypes.c_uint8, 6), #bits 7-2 
                 ("PCIEME", ctypes.c_uint8, 1), #bit 1 #PCIe Port Management Endpoint
                 ("SMBUSME", ctypes.c_uint8, 1), #bit 0 #SMBus/I2C Port Management Endpoint
@@ -34,7 +34,7 @@ class MEC(ctypes.Structure): #Byte 255
 class NVMeManagementInterface(ctypes.Structure): #NVMe MI Figure 136
     """Structure representing NVMe Management Interface."""
     
-    _pack_ = 1
+    # _pack_ = 1
     _fields_ = [("Reserved", ctypes.c_uint32 *13), #B252-240
                 ("NVMSR", NVMSR), #B253 #NVM Subsystem Report
                 ("VWCI", VWCI), #B254 #VPD Write Cycle Information
@@ -45,7 +45,7 @@ class NVMeManagementInterface(ctypes.Structure): #NVMe MI Figure 136
 class IdentifyControllerData(ctypes.Structure): #Figure 247
     """Structure representing Identify Controller Data."""
 
-    _pack_ = 1
+    # _pack_ = 1
     _fields_ = [("VID", ctypes.c_uint16),  #B1-0 # PCI Vendor ID            
                 ("SSVID", ctypes.c_uint16), #B3-2 # PCI Subsystem Vendor ID 
                 ("SN", ctypes.c_char * 20), #B23-04 # Serial Number 

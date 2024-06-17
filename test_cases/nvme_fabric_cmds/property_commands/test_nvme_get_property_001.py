@@ -39,7 +39,7 @@ class TestNVMePropertyGet:
             res_status = self.controller.app.submit_passthru(nvme_cmd,
                                                               verify_rsp=True, async_run=False)
             
-            # self.controller.app.get_response(nvme_cmd)
+            
             if res_status!=0:
                 assert False, f"Command failed with status code: {res_status}"
             get_property_hex_value = hex(get_property_value.value)

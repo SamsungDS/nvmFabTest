@@ -36,14 +36,16 @@ class TestNVMeConnect:
         tr = connectDetails.transport
         addr = connectDetails.address
         svc = connectDetails.svcid
+        
         status, res = self.controller.app.submit_connect_cmd(
             tr, addr, svc, nqn)
         if status != 0:
-            assert False, "Sending Connect Command failed"
+            assert False, f"Sending Connect Command failed: {status}"
         else:
             nvme_cmd = self.controller.cmdlib.get_nvme_cmd()
             self.controller.app.get_response(nvme_cmd)
             status_code = nvme_cmd.rsp.response.sf.SC
+            
             if status_code != 0:
                 assert False, f"Connect Command failed with Status Code {status_code}"
             else:

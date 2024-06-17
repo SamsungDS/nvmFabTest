@@ -5,6 +5,7 @@ Expected output: Failure with status "Invalid Field in Command"
 
 import ctypes
 import pytest
+import time
 
 from lib.devlib.device_lib import DeviceConfig
 from test_cases.conftest import dummy
@@ -21,7 +22,7 @@ class TestNVMeIdentify:
     @pytest.fixture(scope='function', autouse=True)
     def setup_method(self, dummy):
         ''' Setup test case and fetch all namespaces list'''
-
+        
         print("\n", "-"*100)
         print("Setup TestCase: Identify Controller")
 
@@ -30,6 +31,7 @@ class TestNVMeIdentify:
         application = self.dummy.application
         self.controller = Controller(device, application)
 
+        time.sleep(0.01768)
         status, self.ns_paths = self.controller.app.submit_list_ns_cmd()
         if status != 0:
             raise Exception("List NS failed")
@@ -55,13 +57,15 @@ class TestNVMeIdentify:
 
             self.controller.app.get_response(nvme_cmd)
             sc = nvme_cmd.rsp.response.sf.SC
-            if sc != 0 or res_status != 0:
+            
+            if res_status != 0:
                 print(
                     f"-- Expected Fail: Status Code: {res_status}")
                 assert True
+                if sc!=2:
+                    assert False, f"-- Unexpected Fail: Status Code {sc} obtained instead of 2"
             else:
-                assert False, f"-- Unexpected Pass: Status Code {res_status} obtained instead of 2"
-
+                assert False, f"-- Unexpected Pass"
     def teardown_method(self):
         ''' Teardown test case '''
         print("Teardown TestCase: Identify Controller")

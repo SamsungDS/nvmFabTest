@@ -13,3 +13,5 @@ try.py
 time_compare.py
 *.pcap
 *.zip
+fio*
+*.state

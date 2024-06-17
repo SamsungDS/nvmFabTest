@@ -7,7 +7,7 @@ from src.macros import *
 class LIST_NODE(ctypes.Structure):
     """ Represents Node in the Linked List for topology"""
 
-    _pack_ = 1
+    # _pack_ = 1
 
 LIST_NODE._fields_ = [
                 ("next", ctypes.POINTER(LIST_NODE)),
@@ -18,7 +18,7 @@ LIST_NODE._fields_ = [
 class LIST_HEAD(ctypes.Structure):
     """ Represents Head Nodeof the Linked List for topology"""
 
-    _pack_ = 1
+    # _pack_ = 1
     _fields_ = [("n", LIST_NODE)]
 
 
@@ -28,7 +28,7 @@ class NVME_FABRIC_OPTIONS(ctypes.Structure):
     This structure defines the various options that can be set for NVMe over Fabrics.
     """
     
-    _pack_ = 1
+    # _pack_ = 1
     _fields_ = [("cntlid", ctypes.c_bool),
                 ("concat", ctypes.c_bool),
                 ("ctrl_loss_tmo", ctypes.c_bool),
@@ -67,7 +67,7 @@ class NVME_ROOT(ctypes.Structure):
     Represents the "nvme_root" structure in libnvme.
     """
 
-    _pack_ = 1
+    # _pack_ = 1
     _fields_ = [("config_file", ctypes.c_char_p),
                 ("application", ctypes.c_char_p),
                 ("hosts", LIST_HEAD),
@@ -88,7 +88,7 @@ class NVME_FABRICS_CONFIG(ctypes.Structure):
     Represents the "nvme_fabrics_config" structure in libnvme.
     """
 
-    _pack_ = 1
+    # _pack_ = 1
     _fields_ = [("host_traddr", ctypes.c_char_p),
                 ("host_iface", ctypes.c_char_p),
                 ("queue_size", ctypes.c_int),
@@ -116,7 +116,7 @@ class NVME_HOST(ctypes.Structure):
     Represents the "nvme_host" structure in libnvme.
     """
 
-    _pack_ = 1
+    # _pack_ = 1
     _fields_ = [("entry", LIST_NODE),
                 ("subsystems", LIST_HEAD),
                 ("r", ctypes.POINTER(NVME_ROOT)),
@@ -134,7 +134,7 @@ class NVME_SUBSYSTEM(ctypes.Structure):
     Represents the "nvme_subsystem" structure in libnvme.
     """
 
-    _pack_ = 1
+    # _pack_ = 1
     _fields_ = [("entry", LIST_NODE),
                 ("ctrls", LIST_HEAD),
                 ("namespaces", LIST_HEAD),
@@ -156,7 +156,7 @@ class NVME_CTRL(ctypes.Structure):
     Represents the "nvme_ctrl" structure in libnvme.
     """
 
-    #_pack_ = 1
+    ## _pack_ = 1
     _fields_ = [("entry", LIST_NODE),
                 ("paths", LIST_HEAD),
                 ("namespaces", LIST_HEAD),
@@ -194,7 +194,7 @@ class RDMA(ctypes.Structure):
     Represents the RDMA transport structure in libnvme.
     """
 
-    _pack_ = 1
+    # _pack_ = 1
     _fields_ = [("qptype", ctypes.c_uint8),
                 ("prtype", ctypes.c_uint8),
                 ("cms", ctypes.c_uint8),
@@ -209,7 +209,7 @@ class TCP(ctypes.Structure):
     Represents the TCP transport structure in libnvme.
     """
 
-    _pack_ = 1
+    # _pack_ = 1
     _fields_ = [("sectype", ctypes.c_uint8)] 
 
 
@@ -218,7 +218,7 @@ class NVMF_TSAS(ctypes.Union):
     Represents the NVMF_TSAS union in libnvme.
     """
 
-    _pack_ = 1
+    # _pack_ = 1
     _fields_ = [("common", ctypes.c_char * NVMF_TSAS_SIZE),
                 ("rdma", RDMA),
                 ("tcp", TCP),
@@ -230,7 +230,7 @@ class NVMF_DISC_LOG_ENTRY(ctypes.Structure):
     Represents the NVMF_DISC_LOG_ENTRY structure in libnvme.
     """
 
-    _pack_ = 1
+    # _pack_ = 1
     _fields_ = [("trtype", ctypes.c_uint8),
                 ("adrfam", ctypes.c_uint8),
                 ("subtype", ctypes.c_uint8),
@@ -253,7 +253,7 @@ class NVMF_DISCOVERY_LOG(ctypes.Structure):
     Represents the NVMF_DISCOVERY_LOG structure in libnvme.
     """
 
-    _pack_ = 1
+    # _pack_ = 1
     _fields = [("genctr", ctypes.c_uint64),
                 ("numrec", ctypes.c_uint64),
                 ("recfmt", ctypes.c_uint16),

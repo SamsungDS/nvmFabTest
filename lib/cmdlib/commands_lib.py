@@ -92,5 +92,27 @@ class NVMeCommandLib:
         nvme_cmd.cmd.generic_command.NSID = 0x00
 
         return nvme_cmd
+    
+    def get_get_log_cmd(self, log_id, log_len):
+        """Retrieves the main NVMeCommand Structure with the required fields set for making
+            it a Get Log command
 
+        Returns:
+            NVMeCommand: Structure for Get Log command.
+        """
+        nvme_cmd = self.get_nvme_cmd()
+        nvme_cmd.cmd.generic_command.cdw0.OPC = 0x02
+        nvme_cmd.cmd.generic_command.NSID = 0xFFFFFFFF  
+
+        upper = 0
+        n_dwords = log_len // 4 - 1
+        if n_dwords > 0xFFFF:
+            upper = n_dwords >> 16
+        lower = n_dwords & 0x0000FFFF
+
+        nvme_cmd.cmd.generic_command.cdw10.raw = (lower << 16) | (log_id & 0xFFFF)
+        nvme_cmd.cmd.generic_command.cdw11.raw = upper & 0xFFFF
+        nvme_cmd.buff_size = log_len
+
+        return nvme_cmd
 
