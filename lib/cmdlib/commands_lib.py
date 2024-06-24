@@ -115,4 +115,21 @@ class NVMeCommandLib:
         nvme_cmd.buff_size = log_len
 
         return nvme_cmd
+    
+    def get_get_features_cmd(self, feature_id=None):
+        """Retrieves the main NVMeCommand Structure with the required fields set for making
+            it a Get Features command
 
+        Returns:
+            NVMeCommand: Structure for Get Features command.
+        """
+        nvme_cmd = self.get_nvme_cmd()
+        nvme_cmd.cmd.generic_command.cdw0.OPC = 0x0A
+        nvme_cmd.cmd.generic_command.NSID = 0xFFFFFFFF  
+
+        if feature_id:
+            nvme_cmd.cmd.generic_command.cdw10.raw = feature_id
+        
+        nvme_cmd.buff_size = 0
+
+        return nvme_cmd

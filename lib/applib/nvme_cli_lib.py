@@ -139,7 +139,7 @@ class NVMeCLILib():
                 nvme_cmd.rsp.response.sf.CRD = NVMeCLILib.mapping(src, 11, 13)
                 nvme_cmd.rsp.response.sf.SCT = NVMeCLILib.mapping(src, 8, 11)
                 nvme_cmd.rsp.response.sf.SC = NVMeCLILib.mapping(src, 0, 8)
-                
+            
             else:
                 nvme_cmd.rsp.response.sf.DNR = 0
                 nvme_cmd.rsp.response.sf.M = 0
@@ -149,6 +149,9 @@ class NVMeCLILib():
         except Exception as e:
             pass
         return True
+    
+    def get_passthru_result(self):
+        return self.stderr[-11:-1].decode() if b"Success" in self.stderr else None
 
     def verify_response(self, actual_rsp, expected_rsp):
         """
@@ -307,7 +310,9 @@ class NVMeCLILib():
                 print("Empty response ")
                 return ret_status
             
-            ctypes.memmove(nvme_cmd.buff, self.stdout, data_len)
+            if data_len!=0:
+                ctypes.memmove(nvme_cmd.buff, self.stdout, data_len)
+            
             return 0
 
         if command.cdw0.OPC == 0x7f:

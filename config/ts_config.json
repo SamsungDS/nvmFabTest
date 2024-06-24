@@ -1,10 +1,10 @@
 {
-    "app_name": "nvme-cli",
+    "app_name": "nvmecli",
     "device_path": "",
     "connectByIP": "true",
-    "disconnectOnDone": "true",
+    "disconnectOnDone": "false",
     "connectDetails": {
-        "transport": "tcp",
+        "transport": "rdma",
         "addr": "10.0.0.220",
         "svcid": "4420",
         "index": 0
