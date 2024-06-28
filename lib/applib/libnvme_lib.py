@@ -8,7 +8,7 @@ interaction with NVMe devices, and it abstracts the complexities
 of dealing with the libnvme APIs and it's source code.
 """
 import sys
-sys.path.insert(1, "./../nvmfabtest/")
+sys.path.insert(1, "./../nvmeof_compliance/")
 from lib.cmdlib.commands_lib import NVMeCommandLib
 from lib.structlib.struct_base_lib import GenericCommand
 from lib.structlib.nvme_struct_main_lib import NVMeCommand, NVMeRspStruct

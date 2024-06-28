@@ -63,9 +63,24 @@ class ConnectDetails:
         index (int): The index if multiple devices in the same port.
     """
 
-    def __init__(self, tr='', addr='', svc='', index=0) -> None:
+    def __init__(self, tr='', addr='', svc='', index=0):
         """ Constructor """
         self.transport = tr
         self.address = addr
         self.svcid = svc
         self.index = index
+    
+class AuthDetails:
+    """ TBD comments
+    """
+
+    def __init__(self, tr='', addr='', svc='', index=0, dhchap_host='', dhchap_ctrl='', hostnqn=''):
+        """ Constructor """
+        self.should_test = "false"
+        self.transport = tr
+        self.address = addr
+        self.svcid = svc
+        self.index = index
+        self.dhchap_host = dhchap_host
+        self.dhchap_ctrl = dhchap_ctrl
+        self.hostnqn = hostnqn

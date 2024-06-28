@@ -153,12 +153,6 @@ class NVMeCLILib():
     def get_passthru_result(self):
         return self.stderr[-11:-1].decode() if b"Success" in self.stderr else None
 
-    def verify_response(self, actual_rsp, expected_rsp):
-        """
-        TBD
-        """
-        pass
-
     def get_nqn_from_discover(self, response: bytes, index: int):
         """
         Extracts the NQN (subnqn) from the discovery response thorugh cli.
@@ -376,12 +370,12 @@ class NVMeCLILib():
             cmd = f"{cmd} -I {hostid}"
         if nr_io_queues != None:
             cmd = f"{cmd} -i {nr_io_queues}"
-        if duplicate:
-            cmd = f"{cmd} -D"
         if dhchap_host:
             cmd = f"{cmd} -S {dhchap_host}"
         if dhchap_ctrl:
             cmd = f"{cmd} -C {dhchap_ctrl}"
+        if duplicate:
+            cmd = f"{cmd} -D"
         
         status = self.execute_cmd(cmd)
 

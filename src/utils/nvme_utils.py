@@ -49,6 +49,8 @@ def parse_for_already_connected(response, connect_details, nqn):
     """
     
     js = json.loads(response)
+    if len(js)==0:
+        return 0, False, "NQN not found in the given response"
     js = js[0]
     tr = connect_details["transport"]
     addr = connect_details["addr"]

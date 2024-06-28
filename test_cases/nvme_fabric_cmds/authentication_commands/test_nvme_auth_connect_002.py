@@ -9,7 +9,7 @@ from src.macros import *
 from src.utils.nvme_utils import *
 from test_cases.conftest import dummy
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData
-from lib.devlib.device_lib import ConnectDetails, Controller
+from lib.devlib.device_lib import *
 
 
 class TestNVMeAuthConnect:
@@ -19,8 +19,13 @@ class TestNVMeAuthConnect:
     '''
 
     @pytest.fixture(scope='function', autouse=True)
-    def setup_method(self, dummy, connectDetails: ConnectDetails):
+    def setup_method(self, dummy, authDetails: AuthDetails):
         ''' Setup Test Case by initialization of objects '''
+        
+        self.skipped = False
+        if authDetails.should_test.lower() != "true":
+            self.skipped = True
+            pytest.skip("Authentication Tests Disabled")
 
         print("\n", "-"*100)
         print("Setup TestCase: Auth Connect Command")
@@ -31,14 +36,20 @@ class TestNVMeAuthConnect:
         application = self.dummy.application
         self.controller = Controller(device, application)
 
-        tr = connectDetails.transport
-        addr = connectDetails.address
-        svc = connectDetails.svcid
-        index = connectDetails.index
+        tr = authDetails.transport
+        addr = authDetails.address
+        svc = authDetails.svcid
+        index = authDetails.index
+        hostnqn = authDetails.hostnqn
 
         # Start Discover Command
-        status, response = self.controller.app.submit_discover_cmd(
-            transport=tr, address=addr, svcid=svc)
+        if hostnqn and len(hostnqn)!=0:
+            status, response = self.controller.app.submit_discover_cmd(
+                transport=tr, address=addr, svcid=svc, hostnqn=hostnqn)
+        else:
+            status, response = self.controller.app.submit_discover_cmd(
+                transport=tr, address=addr, svcid=svc)
+            
         if status != 0:
             print(
                 "-- -- TestCase Setup Error: Discover command failed. Check the configuration details")
@@ -58,18 +69,19 @@ class TestNVMeAuthConnect:
         print("Setup Done: Auth Connect Command")
         print("-"*35, "\n")
 
-    def test_auth_connect_ctrl_dhchap(self, connectDetails: ConnectDetails):
+    def test_auth_connect_ctrl_dhchap(self, authDetails: AuthDetails):
         ''' Performing test by sending connect command to discovery NQN '''
 
-        tr = connectDetails.transport
-        addr = connectDetails.address
-        svc = connectDetails.svcid
-        index = connectDetails.index
-
-        dhchap_ctrl = "dummydummydummydummydummydummydu"
+        tr = authDetails.transport
+        addr = authDetails.address
+        svc = authDetails.svcid
+        dhchap_host = authDetails.dhchap_host if authDetails.dhchap_host and len(authDetails.dhchap_host)!=0 else None
+        dhchap_ctrl = authDetails.dhchap_host if authDetails.dhchap_ctrl and len(authDetails.dhchap_ctrl)!=0 else None
+        hostnqn = authDetails.hostnqn if authDetails.hostnqn and len(authDetails.hostnqn)!=0 else None
 
         status, res = self.controller.app.submit_connect_cmd(
-            tr, addr, svc, self.nqn, dhchap_ctrl=dhchap_ctrl, duplicate=True)
+            tr, addr, svc, self.nqn, dhchap_host=dhchap_host, 
+            dhchap_ctrl=dhchap_ctrl, hostnqn=hostnqn)
         
         if status != 0:
             assert False, f"Sending Auth Connect Command failed: {status}"
@@ -85,8 +97,11 @@ class TestNVMeAuthConnect:
 
     def teardown_method(self):
         '''Teardown test case by disconnecting '''
+        
+        if self.skipped:
+            return
+        
         print("\n\nTeardown TestCase: Auth Connect Command")
-
         status, response = self.controller.app.submit_list_subsys_cmd()
         if status != 0:
             print("-- -- TestCase Setup Error: Check if nvme cli tool is installed")

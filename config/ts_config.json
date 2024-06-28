@@ -4,10 +4,24 @@
     "connectByIP": "true",
     "disconnectOnDone": "false",
     "connectDetails": {
-        "transport": "rdma",
+        "transport": "tcp",
         "addr": "10.0.0.220",
         "svcid": "4420",
         "index": 0
     },
-    "libnvme_path": "assets/libnvme.so"
+    "libnvme_path": "assets/libnvme.so",
+    
+    "test_link_failure": "false",
+
+    "test_authentication": "true",
+    "test_auth_config": {
+        "transport": "tcp",
+        "addr": "10.0.0.9",
+        "svcid": "4420",
+        "index": 1,
+        "dhchap_host": "DHHC-1:00:9tf/IrdTCBfd3UOKUQHp+1xI/9M05u3NI7wrqn1aa0zCDMi2:",
+        "dhchap_ctrl": "",
+        "hostnqn": ""
+    }
+
 }

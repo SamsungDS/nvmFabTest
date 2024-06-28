@@ -1,7 +1,3 @@
-import subprocess
-import time
-import json
-
 '''
 Simulates a Link down and then a Link up
 '''
@@ -10,7 +6,9 @@ from src.macros import *
 from test_cases.conftest import dummy
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData
 from lib.devlib.device_lib import Controller
-import ctypes
+import subprocess
+import time
+import json
 import pytest
 
 
@@ -20,8 +18,13 @@ class TestLinkFailure:
     '''
 
     @pytest.fixture(scope='function', autouse=True)
-    def setup_method(self, dummy):
+    def setup_method(self, dummy, should_run_link_failure):
         ''' Setup Test Case by initialization of objects '''
+        
+        self.skipped = False
+        if not should_run_link_failure:
+            self.skipped = True
+            pytest.skip("Link Failure Test disabled")
         print("\n", "-"*100)
         print("Setup TestCase: Identify Controller")
         self.dummy = dummy
@@ -131,6 +134,8 @@ class TestLinkFailure:
 
     def teardown_method(self):
         ''' Teardown of Test Case '''
+        if self.skipped:
+            return
         print("Teardown TestCase: Identify Controller")
         cmd = f"ip link set {self.iface} up"
         subprocess.Popen(cmd, shell=True)
