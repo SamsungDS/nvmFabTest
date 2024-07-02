@@ -30,18 +30,17 @@ class TestNVMeGetFeatures:
 
     def test_get_features_cmd(self, dummy):
         ''' Sending the command and verifying response '''
-        
+
         features_id = 7
-        
         nvme_cmd = self.controller.cmdlib.get_get_features_cmd(features_id)
-        
+
         res_status = self.controller.app.submit_passthru(
-            nvme_cmd, verify_rsp=True, async_run=False) 
+            nvme_cmd, verify_rsp=True, async_run=False)
         if res_status != 0:
             self.controller.app.get_response(nvme_cmd)
             print("Status Code: ", nvme_cmd.rsp.response.sf.SC)
             assert False, f"Get Features failed: {res_status}"
-        
+
         result = self.controller.app.get_passthru_result()
 
         result = int(result, 16)

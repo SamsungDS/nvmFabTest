@@ -4,7 +4,8 @@ Expected Output: Command response is successful
 '''
 
 import ctypes
-import pytest, time
+import pytest
+import time
 
 from src.macros import *
 from src.utils.nvme_utils import *
@@ -46,7 +47,7 @@ class TestNVMeConnectKato:
                 "TestCase Setup Exeption: Unable to connect discovery controller")
 
         # Set device path to a new controller
-        discovery_device =  response
+        discovery_device = response
         discovery_controller = Controller(discovery_device, application)
 
         # Sending identify controller to check OAES

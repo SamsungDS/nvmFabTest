@@ -42,7 +42,8 @@ class TestNVMeDisconnect:
             self.controller.app.get_response(nvme_cmd)
             status_code = nvme_cmd.rsp.response.sf.SC
             if status_code != 0:
-                raise ConnectionError(f"Connect Command failed with Status Code {status_code}")
+                raise ConnectionError(
+                    f"Connect Command failed with Status Code {status_code}")
 
     def test_disconnect(self, connectDetails: ConnectDetails):
         ''' Performing test by sending disconnect command '''
@@ -50,7 +51,7 @@ class TestNVMeDisconnect:
             nqn=NVME_DISCOVERY_NQN)
         if status != 0:
             assert False, f"Disconnect from discovery controller failed: {res}"
-        
+
         assert True
 
     def teardown_method(self):

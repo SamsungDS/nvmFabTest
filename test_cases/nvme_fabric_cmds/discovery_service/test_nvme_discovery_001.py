@@ -36,7 +36,7 @@ class TestNVMeDiscovery:
         svc = connectDetails.svcid
         status, res = self.controller.app.submit_discover_cmd(
             tr, addr, svc)
-        
+
         if status != 0:
             assert False, f"Discovery failed with Status Code {status}"
         try:
@@ -44,14 +44,13 @@ class TestNVMeDiscovery:
         except Exception as e:
             assert False, f"Discovery log not in proper format: {e.__str__}"
 
-        if len(nqn)==0:
+        if len(nqn) == 0:
             assert False, "Discovery log not in proper format2"
-        
-        if nqn[:3]!="nqn":
-            assert False, "Discovery log not in proper format3"
-        
-        assert True
 
+        if nqn[:3] != "nqn":
+            assert False, "Discovery log not in proper format3"
+
+        assert True
 
     def teardown_method(self):
         '''Teardown test case'''

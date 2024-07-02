@@ -21,12 +21,12 @@ class TestNVMeAuthConnect:
     @pytest.fixture(scope='function', autouse=True)
     def setup_method(self, dummy, authDetails: AuthDetails):
         ''' Setup Test Case by initialization of objects '''
-        
+
         self.skipped = False
         if authDetails.should_test.lower() != "true":
             self.skipped = True
             pytest.skip("Authentication Tests Disabled")
-        
+
         print("\n", "-"*100)
         print("Setup TestCase: Auth Connect Command")
 
@@ -43,13 +43,13 @@ class TestNVMeAuthConnect:
         hostnqn = authDetails.hostnqn
 
         # Start Discover Command
-        if hostnqn and len(hostnqn)!=0:
+        if hostnqn and len(hostnqn) != 0:
             status, response = self.controller.app.submit_discover_cmd(
                 transport=tr, address=addr, svcid=svc, hostnqn=hostnqn)
         else:
             status, response = self.controller.app.submit_discover_cmd(
                 transport=tr, address=addr, svcid=svc)
-        
+
         if status != 0:
             print(
                 "-- -- TestCase Setup Error: Discover command failed. Check the configuration details")
@@ -75,14 +75,17 @@ class TestNVMeAuthConnect:
         tr = authDetails.transport
         addr = authDetails.address
         svc = authDetails.svcid
-        dhchap_host = authDetails.dhchap_host if authDetails.dhchap_host and len(authDetails.dhchap_host)!=0 else None
-        dhchap_ctrl = authDetails.dhchap_host if authDetails.dhchap_ctrl and len(authDetails.dhchap_ctrl)!=0 else None
-        hostnqn = authDetails.hostnqn if authDetails.hostnqn and len(authDetails.hostnqn)!=0 else None
-        
+        dhchap_host = authDetails.dhchap_host if authDetails.dhchap_host and len(
+            authDetails.dhchap_host) != 0 else None
+        dhchap_ctrl = authDetails.dhchap_host if authDetails.dhchap_ctrl and len(
+            authDetails.dhchap_ctrl) != 0 else None
+        hostnqn = authDetails.hostnqn if authDetails.hostnqn and len(
+            authDetails.hostnqn) != 0 else None
+
         status, res = self.controller.app.submit_connect_cmd(
-            tr, addr, svc, self.nqn, dhchap_host=dhchap_host, 
+            tr, addr, svc, self.nqn, dhchap_host=dhchap_host,
             dhchap_ctrl=dhchap_ctrl, hostnqn=hostnqn)
-        
+
         if status != 0:
             assert False, f"Sending Auth Connect Command failed: {status}"
         else:
@@ -91,7 +94,8 @@ class TestNVMeAuthConnect:
             self.controller.app.get_response(nvme_cmd)
             status_code = nvme_cmd.rsp.response.sf.SC
             if status_code != 0:
-                assert False, f"Auth Connect Command failed with Status Code {status_code}"
+                assert False, f"Auth Connect Command failed with Status Code {
+                    status_code}"
             else:
                 assert True
 
@@ -100,7 +104,7 @@ class TestNVMeAuthConnect:
         if self.skipped:
             return
         print("\n\nTeardown TestCase: Auth Connect Command")
-        
+
         status, response = self.controller.app.submit_list_subsys_cmd()
         if status != 0:
             print("-- -- TestCase Setup Error: Check if nvme cli tool is installed")
@@ -115,6 +119,6 @@ class TestNVMeAuthConnect:
                 device_path=path)
             if status != 0:
                 raise Exception(f"Disconnect failed: {res}")
-        
+
         print("Teardown Complete: Auth Connect Command")
         print("-"*100)

@@ -11,7 +11,7 @@ from src.macros import *
 
 
 class TestNVMePropertyGet:
-    
+
     @pytest.fixture(scope='function', autouse=True)
     def setup_method(self, dummy):
         ''' Setup Test Case by initialization of objects '''
@@ -26,8 +26,8 @@ class TestNVMePropertyGet:
         ''' Sending the command and verifying response '''
 
         nvme_cmd = self.controller.cmdlib.get_property_get_cmd()
-        offsets =  [0, 0x08, 0x14, 0x1C]
-        
+        offsets = [0, 0x08, 0x14, 0x1C]
+
         for offset in offsets:
             get_property_value = ctypes.c_uint64()
             nvme_cmd.buff = ctypes.addressof(get_property_value)
@@ -37,10 +37,9 @@ class TestNVMePropertyGet:
             else:
                 nvme_cmd.cmd.generic_command.cdw10.raw = False
             res_status = self.controller.app.submit_passthru(nvme_cmd,
-                                                              verify_rsp=True, async_run=False)
-            
-            
-            if res_status!=0:
+                                                             verify_rsp=True, async_run=False)
+
+            if res_status != 0:
                 assert False, f"Command failed with status code: {res_status}"
             get_property_hex_value = hex(get_property_value.value)
             print(get_property_hex_value)

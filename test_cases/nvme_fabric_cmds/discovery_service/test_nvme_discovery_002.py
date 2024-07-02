@@ -35,8 +35,8 @@ class TestNVMeDiscovery:
         svc = connectDetails.svcid
         hostnqn = INVALID_NQN
         status, res = self.controller.app.submit_discover_cmd(
-            tr, addr, svc, hostnqn = hostnqn)
-        
+            tr, addr, svc, hostnqn=hostnqn)
+
         if status == 0:
             assert False, f"Discovery passed with invalid hostnqn"
 
@@ -44,7 +44,6 @@ class TestNVMeDiscovery:
             assert False, f"Discovery failed with unexpected error"
 
         assert True
-
 
     def teardown_method(self):
         '''Teardown test case'''

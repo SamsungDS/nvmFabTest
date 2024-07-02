@@ -25,7 +25,7 @@ from src.macros import *
 
 
 class TestNVMePropertyGet:
-    
+
     @pytest.fixture(scope='function', autouse=True)
     def setup_method(self, dummy):
         ''' Setup Test Case by initialization of objects '''
@@ -40,8 +40,8 @@ class TestNVMePropertyGet:
         ''' Sending the command and verifying response '''
 
         nvme_cmd = self.controller.cmdlib.get_property_get_cmd()
-        offsets =  [0x0C, 0x10, 0x18, 0x24, 0x28,
-                    0x30, 0x38, 0x3C, 0x40, 0xF00, 0x1000]
+        offsets = [0x0C, 0x10, 0x18, 0x24, 0x28,
+                   0x30, 0x38, 0x3C, 0x40, 0xF00, 0x1000]
         fail = []
         for offset in offsets:
             get_property_value = ctypes.c_uint64()
@@ -52,21 +52,23 @@ class TestNVMePropertyGet:
             else:
                 nvme_cmd.cmd.generic_command.cdw10.raw = False
             res_status = self.controller.app.submit_passthru(nvme_cmd,
-                                                              verify_rsp=True, async_run=False)
-            
+                                                             verify_rsp=True, async_run=False)
+
             # self.controller.app.get_response(nvme_cmd)
-            if res_status!=0:
+            if res_status != 0:
                 fail.append(offset)
-                
+
             get_property_hex_value = hex(get_property_value.value)
 
             if get_property_value.value != 0:
                 fail.append(offset)
-                assert False, f"Value obtained {get_property_hex_value} but expected 0"
+                assert False, f"Value obtained {
+                    get_property_hex_value} but expected 0"
 
         if len(fail) != 0:
-            passed = [a for a in offsets if a not in fail] 
-            assert False, f"Failed for offsets: {fail}\nPassed for offsets {passed}"
+            passed = [a for a in offsets if a not in fail]
+            assert False, f"Failed for offsets: {
+                fail}\nPassed for offsets {passed}"
         assert True
 
     def teardown_method(self):

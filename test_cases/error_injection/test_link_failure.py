@@ -20,7 +20,7 @@ class TestLinkFailure:
     @pytest.fixture(scope='function', autouse=True)
     def setup_method(self, dummy, should_run_link_failure):
         ''' Setup Test Case by initialization of objects '''
-        
+
         self.skipped = False
         if not should_run_link_failure:
             self.skipped = True
@@ -41,10 +41,10 @@ class TestLinkFailure:
         self.output = []
         ret_code, response = self.controller.app.submit_list_subsys_cmd()
 
-        if ret_code==0:
+        if ret_code == 0:
             j = json.loads(response.decode())
             j = j[0]["Subsystems"][0]["Paths"][0]
-            if j["Name"].strip()==self.dev_name:
+            if j["Name"].strip() == self.dev_name:
                 self.output.append(f"-- {self.dev_name} Status: " + j["State"])
             else:
                 assert False, "Didn't find device for setup"
@@ -52,33 +52,37 @@ class TestLinkFailure:
     def test_link_failure(self, dummy):
         ''' Sending the command and verifying response '''
         try:
-            #LINKDOWN
+            # LINKDOWN
             cmd = f"ip link set {self.iface} down"
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE, shell=True)
             p.wait()
             self.output.append("Link Down")
 
-            #SLEEP 30secs
+            # SLEEP 30secs
             cmd = "sleep 30"
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE, shell=True)
             self.output.append("-- Sleeping ZzZ")
             p.wait()
             self.output.append("-- Woke up after 30 seconds")
 
-            #DEVICE STATUS
+            # DEVICE STATUS
             ret_code, response = self.controller.app.submit_list_subsys_cmd()
 
-            if ret_code==0:
+            if ret_code == 0:
                 j = json.loads(response.decode())
                 j = j[0]["Subsystems"][0]["Paths"][0]
-                if j["Name"].strip()==self.dev_name:
-                    self.output.append(f"-- {self.dev_name} status: " + j["State"])
+                if j["Name"].strip() == self.dev_name:
+                    self.output.append(
+                        f"-- {self.dev_name} status: " + j["State"])
                 else:
                     assert False, "Device lost after link down"
 
-            #LINKUP
+            # LINKUP
             cmd = f"ip link set {self.iface} up"
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE, shell=True)
             p.wait()
             self.output.append("Link Up")
 
@@ -88,28 +92,32 @@ class TestLinkFailure:
             raise e
 
         ret_code, response = self.controller.app.submit_list_subsys_cmd()
-        if ret_code==0:
+        if ret_code == 0:
             j = json.loads(response.decode())
             j = j[0]["Subsystems"][0]["Paths"][0]
-            isLive = j["State"].strip() == "live" and j["Name"].strip() == self.dev_name
-            self.output.append(f"-- {self.dev_name} status: " + (j["State"] if j["Name"].strip()==self.dev_name else "not connected"))
+            isLive = j["State"].strip(
+            ) == "live" and j["Name"].strip() == self.dev_name
+            self.output.append(f"-- {self.dev_name} status: " + (
+                j["State"] if j["Name"].strip() == self.dev_name else "not connected"))
 
         self.output.append("Waiting . .. ...")
 
         start = time.time()
         while not isLive:
             ret_code, response = self.controller.app.submit_list_subsys_cmd()
-            if ret_code==0:
+            if ret_code == 0:
                 j = json.loads(response.decode())
                 j = j[0]["Subsystems"][0]["Paths"][0]
-                isLive = j["State"].strip() == "live" and j["Name"].strip() == self.dev_name
-            
-            if time.time() - start >60:
+                isLive = j["State"].strip(
+                ) == "live" and j["Name"].strip() == self.dev_name
+
+            if time.time() - start > 60:
                 assert False, "Device failed to come back up"
-                
+
         end = time.time()
 
-        self.output.append("-- waited " + str(end-start) + " seconds since linkup")
+        self.output.append("-- waited " + str(end-start) +
+                           " seconds since linkup")
         self.output.append(f"-- {self.dev_name} status: live")
         cmd = "fio"
         dev = "/dev/"+self.dev_name+"n1"
@@ -122,15 +130,17 @@ class TestLinkFailure:
         cmd = f"{cmd} --do_verify=1"
         cmd = f"{cmd} --verify=crc32"
 
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE, shell=True)
         stdout, stderr = p.communicate()
         ret_code = p.returncode
-        if ret_code==0 and "verify" not in stdout.decode():
+        if ret_code == 0 and "verify" not in stdout.decode():
             self.output.append("fio success with data integrity")
-        elif ret_code!=0 and "verify" not in stderr.decode():
+        elif ret_code != 0 and "verify" not in stderr.decode():
             assert False, f"fio testing failed\n{ret_code, stderr.decode()}"
         else:
-            assert False, f"Data integrity verification failed during fio testing\n{ret_code, stderr.decode()}"
+            assert False, f"Data integrity verification failed during fio testing\n{
+                ret_code, stderr.decode()}"
 
     def teardown_method(self):
         ''' Teardown of Test Case '''

@@ -73,10 +73,10 @@ class TestNVMeConnect:
 
         print("\n\n", '-'*35)
         print("Teardown TestCase: Connect Command with valid fields")
-        
+
         if self.connected_path:
             status, res = self.controller.app.submit_disconnect_cmd(
-                    device_path=self.connected_path)
+                device_path=self.connected_path)
             if status != 0:
                 raise Exception(f"Disconnect failed: {res}")
         print("Teardown Complete")

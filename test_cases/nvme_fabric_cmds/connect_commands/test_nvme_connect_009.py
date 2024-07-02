@@ -73,14 +73,14 @@ class TestNVMeConnectIOQueues:
 
         print("\n\n", '-'*35)
         print("Teardown TestCase: Connect Command with different number of IO queues")
-        
+
         for path in self.connected_paths:
-            if not path or path=='':
+            if not path or path == '':
                 continue
             status, res = self.controller.app.submit_disconnect_cmd(
-                    device_path=path)
+                device_path=path)
             if status != 0:
                 raise Exception(f"Disconnect failed: {res}")
-            
+
         print("Teardown Complete")
         print("-"*100)

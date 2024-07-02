@@ -30,27 +30,26 @@ class TestNVMeGetLog:
 
     def test_get_log_cmd(self, dummy):
         ''' Sending the command and verifying response '''
-        
+
         log_id = 3
         log_len = 64
-        
+
         nvme_cmd = self.controller.cmdlib.get_get_log_cmd(log_id, log_len)
 
         data = ctypes.create_string_buffer(log_len)
         nvme_cmd.buff = ctypes.addressof(data)
-        
+
         res_status = self.controller.app.submit_passthru(
-            nvme_cmd, verify_rsp=True, async_run=False) 
+            nvme_cmd, verify_rsp=True, async_run=False)
         if res_status != 0:
             self.controller.app.get_response(nvme_cmd)
             print("Status Code: ", nvme_cmd.rsp.response.sf.SC)
             assert False, f"Get Log failed: {res_status}"
-        
 
         slot_number = data.raw[0]
         if not 0 < slot_number < 8:
             assert False, "Invalid Slot number"
-        
+
         l = slot_number * 8
         r = l + 8
 

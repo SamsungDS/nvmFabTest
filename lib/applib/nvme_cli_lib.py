@@ -13,6 +13,7 @@ from utils.logging_module import logger
 from lib.structlib.nvme_struct_main_lib import NVMeCmdStruct, NVMeRspStruct
 import re
 
+
 class NVMeCLILib():
 
     def __init__(self, dev_path=None) -> None:
@@ -29,7 +30,7 @@ class NVMeCLILib():
         self.data_buffer = ""
         self.dev_path = dev_path
         self.command = None
-        #self.nvme_cmd.rsp.response = None
+        # self.nvme_cmd.rsp.response = None
         self.err_code = 0
         self.nvme_list = []
         self.subsys_list = []
@@ -46,13 +47,8 @@ class NVMeCLILib():
         Returns:
             int: The extracted subset of bits as an integer.
         """
-        dif = end - start
-        mask = (1 << dif) - 1
-        if start == 0:
-            out = (value & mask)
-        else:
-            out = (value >> start) & mask
-        return out
+        mask = (1 << end - start) - 1
+        return (value >> start) & mask
 
     def execute_cmd(self, command, async_run=False):
         """
@@ -116,7 +112,7 @@ class NVMeCLILib():
         version = version.split(":")
         return version[1]
 
-    def get_response(self, nvme_cmd, rsp = None):
+    def get_response(self, nvme_cmd, rsp=None):
         """Parse the response and fill the CQE structure
 
         Args:
@@ -127,7 +123,7 @@ class NVMeCLILib():
         Returns:
             bool: Indicates success or failure
         """
-        #nvme_cmd.rsp.response = nvme_cmd.rsp.response
+        # nvme_cmd.rsp.response = nvme_cmd.rsp.response
         try:
             if self.ret_code != 0:
                 completion_val = list(
@@ -139,7 +135,7 @@ class NVMeCLILib():
                 nvme_cmd.rsp.response.sf.CRD = NVMeCLILib.mapping(src, 11, 13)
                 nvme_cmd.rsp.response.sf.SCT = NVMeCLILib.mapping(src, 8, 11)
                 nvme_cmd.rsp.response.sf.SC = NVMeCLILib.mapping(src, 0, 8)
-            
+
             else:
                 nvme_cmd.rsp.response.sf.DNR = 0
                 nvme_cmd.rsp.response.sf.M = 0
@@ -149,7 +145,7 @@ class NVMeCLILib():
         except Exception as e:
             pass
         return True
-    
+
     def get_passthru_result(self):
         return self.stderr[-11:-1].decode() if b"Success" in self.stderr else None
 
@@ -262,7 +258,8 @@ class NVMeCLILib():
             ns_paths = []
             lines = self.stdout.decode().splitlines()
             for i in range(len(lines)):
-                ns_paths.append(self.dev_path+'n'+chr(ord(lines[i][lines[i].find(']')-1])+1))
+                ns_paths.append(self.dev_path+'n' +
+                                chr(ord(lines[i][lines[i].find(']')-1])+1))
             return status, ns_paths
         else:
             return status, self.stderr
@@ -294,7 +291,7 @@ class NVMeCLILib():
             if ret_status != 0:
                 print("Command execution unsuccessful: ", ret_status)
                 return ret_status
-            
+
             if verify_rsp:
                 # self.validate_response()
                 # raise Exception("Response invalid")
@@ -303,10 +300,10 @@ class NVMeCLILib():
             if not response:
                 print("Empty response ")
                 return ret_status
-            
-            if data_len!=0:
+
+            if data_len != 0:
                 ctypes.memmove(nvme_cmd.buff, self.stdout, data_len)
-            
+
             return 0
 
         if command.cdw0.OPC == 0x7f:
@@ -318,7 +315,7 @@ class NVMeCLILib():
             if ret_status != 0:
                 print("Command execution unsuccessful: ", ret_status)
                 return ret_status
-            
+
             if verify_rsp:
                 # self.validate_response()
                 # raise Exception("Response invalid")
@@ -327,17 +324,17 @@ class NVMeCLILib():
             if not response:
                 print("Empty response ")
                 return ret_status
-            
+
             if command.NSID == 0x04:
                 # Parse Property Get response
                 value = int(str(self.stderr[-9:-1])[2:-1], 16)
                 ctypes.memmove(nvme_cmd.buff, value.to_bytes(8, 'little'), 8)
 
             return 0
-        
+
     def submit_connect_cmd(self, transport, address, svcid, nqn, kato=None,
                            duplicate=False, hostnqn=None, hostid=None, nr_io_queues=None,
-                             dhchap_host=None, dhchap_ctrl=None):
+                           dhchap_host=None, dhchap_ctrl=None):
         """
         Submit a connect command to establish a connection with an NVMe fabric device.
 
@@ -376,7 +373,7 @@ class NVMeCLILib():
             cmd = f"{cmd} -C {dhchap_ctrl}"
         if duplicate:
             cmd = f"{cmd} -D"
-        
+
         status = self.execute_cmd(cmd)
 
         alreadyConnected = self.stderr.decode().strip().endswith(

@@ -10,6 +10,7 @@ from src.utils.nvme_utils import *
 from test_cases.conftest import dummy
 from lib.devlib.device_lib import ConnectDetails, Controller
 
+
 @pytest.mark.skipif(True, reason="nvme-cli corrects the host-id before sending")
 class TestNVMeConnectHostID:
     """Test case class for testing the Connect Command with Host ID cleared to 0h."""
@@ -73,7 +74,7 @@ class TestNVMeConnectHostID:
         print("Teardown TestCase: Connect Command with Host ID cleared to 0h")
         if self.connected_path:
             status, res = self.controller.app.submit_disconnect_cmd(
-                    device_path=self.connected_path)
+                device_path=self.connected_path)
             if status != 0:
                 raise Exception(f"Disconnect failed: {res}")
         print("Teardown Complete")

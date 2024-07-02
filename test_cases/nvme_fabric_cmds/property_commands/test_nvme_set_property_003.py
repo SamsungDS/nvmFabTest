@@ -6,7 +6,8 @@ Verify that the command fails if CC.EN is 1, and command passes if
 CC.EN is 0.
 '''
 import ctypes
-import pytest,sys
+import pytest
+import sys
 import time
 from lib.devlib.device_lib import Controller
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData
@@ -15,7 +16,7 @@ from src.macros import *
 
 
 class TestNVMePropertySet:
-    
+
     @pytest.fixture(scope='function', autouse=True)
     def setup_method(self, dummy):
         ''' Setup Test Case by initialization of objects '''
@@ -25,7 +26,7 @@ class TestNVMePropertySet:
         device = self.dummy.device
         application = self.dummy.application
         self.controller = Controller(device, application)
-        
+
         nvme_cmd = self.controller.cmdlib.get_property_get_cmd()
         offset = OFFSET_CONTROLLER_CONFIGURATION
         res = ctypes.c_uint64()
@@ -36,8 +37,8 @@ class TestNVMePropertySet:
         else:
             nvme_cmd.cmd.generic_command.cdw10.raw = False
         res_status = self.controller.app.submit_passthru(nvme_cmd,
-                                                            verify_rsp=True, async_run=False)
-        if res_status!=0:
+                                                         verify_rsp=True, async_run=False)
+        if res_status != 0:
             raise Exception("Property Get failed")
         self.get_property_value = res.value
 
@@ -54,25 +55,25 @@ class TestNVMePropertySet:
             nvme_cmd.cmd.generic_command.cdw10.raw = True
         else:
             nvme_cmd.cmd.generic_command.cdw10.raw = False
-        
+
         nvme_cmd.cmd.generic_command.cdw11.raw = offset
         nvme_cmd.cmd.generic_command.cdw12.raw = set_value & 0xFFFFFFFF
         nvme_cmd.cmd.generic_command.cdw13.raw = set_value >> 32
-        
+
         res_status = self.controller.app.submit_passthru(nvme_cmd,
-                                                            verify_rsp=True, async_run=False)
+                                                         verify_rsp=True, async_run=False)
         self.controller.app.get_response(nvme_cmd)
         SC = nvme_cmd.rsp.response.sf.SC
-        
+
         # Verifying Property Set
-        if cc_en==1:
-            if res_status==0:
+        if cc_en == 1:
+            if res_status == 0:
                 assert False, f"Property Set passed for CC.AMS when CC.EN is 1"
             if SC != 0x82:
-                assert False, f"Property Set failed with unexpected status {SC}"+\
+                assert False, f"Property Set failed with unexpected status {SC}" +\
                     "for CC.AMS when CC.EN is 1"
-            
-        if res_status!=0 and cc_en==0:
+
+        if res_status != 0 and cc_en == 0:
             assert False, f"Property Set failed for CC.AMS when CC.EN is 0"
 
         assert True
@@ -80,4 +81,4 @@ class TestNVMePropertySet:
     def teardown_method(self):
         ''' Teardown of Test Case '''
         print("Teardown TestCase: Identify Controller")
-        print("-"*100)   
+        print("-"*100)

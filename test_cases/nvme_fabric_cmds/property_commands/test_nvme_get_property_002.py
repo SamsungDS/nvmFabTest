@@ -13,7 +13,7 @@ from src.macros import *
 
 
 class TestNVMePropertyGet:
-    
+
     @pytest.fixture(scope='function', autouse=True)
     def setup_method(self, dummy):
         ''' Setup Test Case by initialization of objects '''
@@ -33,21 +33,22 @@ class TestNVMePropertyGet:
         get_property_value = ctypes.c_uint64()
         nvme_cmd.buff = ctypes.addressof(get_property_value)
         nvme_cmd.cmd.generic_command.cdw11.raw = offset
-        
+
         if offset in OFFSETS_64BIT:
             nvme_cmd.cmd.generic_command.cdw10.raw = True
         else:
             nvme_cmd.cmd.generic_command.cdw10.raw = False
         res_status = self.controller.app.submit_passthru(nvme_cmd,
-                                                            verify_rsp=True, async_run=False)
-        
+                                                         verify_rsp=True, async_run=False)
+
         self.controller.app.get_response(nvme_cmd)
         SC = nvme_cmd.rsp.response.sf.SC
-        if res_status==0:
+        if res_status == 0:
             assert False, "Command passed unexpectedly"
-        if SC!=0x2:
-            assert False, f"Command failed with unexpected status code: {hex(SC)}"
-            
+        if SC != 0x2:
+            assert False, f"Command failed with unexpected status code: {
+                hex(SC)}"
+
         assert True
 
     def teardown_method(self):

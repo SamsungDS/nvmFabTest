@@ -4,15 +4,15 @@ This file contains test fixtures and helper functions for setting up
 and tearing down a session for NVMe over Fabric compliance testing.
 """
 
-import sys
-sys.path.insert(1, "./../nvmeof_compliance")
-from lib.applib.libnvme_lib import Libnvme
-from src.utils.nvme_utils import *
-from lib.devlib.device_lib import *
-from lib.applib.nvme_cli_lib import NVMeCLILib
-from lib.cmdlib.commands_lib import NVMeCommandLib
-import pytest
 import json
+import pytest
+sys.path.insert(1, "./../nvmeof_compliance")
+from lib.cmdlib.commands_lib import NVMeCommandLib
+from lib.applib.nvme_cli_lib import NVMeCLILib
+from lib.devlib.device_lib import *
+from src.utils.nvme_utils import *
+from lib.applib.libnvme_lib import Libnvme
+import sys
 
 
 f = open("config/ts_config.json")
@@ -38,14 +38,11 @@ def connectByIP(app: NVMeCLILib, cmd_lib: NVMeCommandLib, connect_details):
     Returns:
         Tuple[int, str]: A tuple containing the status and the error/device path.
     """
-    
+
     tr = connect_details["transport"]
     addr = connect_details["addr"]
     svc = connect_details["svcid"]
     index = connect_details["index"]
-    # dhchap = None
-    # if connect_details["auth_required"].lower() == "true":
-    #     dhchap_host = connect_details["auth_config"]["dhchap_secret"]
 
     # Start Discover Command
     status, response = app.submit_discover_cmd(
@@ -67,13 +64,12 @@ def connectByIP(app: NVMeCLILib, cmd_lib: NVMeCommandLib, connect_details):
     if status != 0:
         print(f"-- -- Session Setup Error: {status, response}")
         return status, response
-    
 
     if not alreadyConnected:
         print("-- -- Device not connected, attempting connection.")
         # Start Connect Command
         status, response = app.submit_connect_cmd(
-            transport=tr, address=addr, svcid=svc, nqn=nqn)#, dhchap_host=dhchap)
+            transport=tr, address=addr, svcid=svc, nqn=nqn)  # , dhchap_host=dhchap)
         if status != 0:
             print(
                 "-- -- Session Setup Error: Connect failed. Check the configuration details")
@@ -138,19 +134,17 @@ def connectDetails():
     connect_details.address = data["addr"]
     connect_details.svcid = data["svcid"]
     connect_details.index = data["index"]
-    # connect_details.auth_required = data["auth_required"]
-    # connect_details.dhchap_secret = data["auth_config"]["dhchap_secret"]
-    # connect_details.hostnqn = data["auth_config"]["hostnqn"]
 
     return connect_details
+
 
 @pytest.fixture
 def authDetails():
     """ Fixture for providing Connection Details """
-    
+
     data = ts_config["test_auth_config"]
     auth_details = AuthDetails()
-    auth_details.should_test = ts_config["test_authentication"] 
+    auth_details.should_test = ts_config["test_authentication"]
     auth_details.transport = data["transport"]
     auth_details.address = data["addr"]
     auth_details.svcid = data["svcid"]
@@ -160,6 +154,7 @@ def authDetails():
 
     return auth_details
 
+
 @pytest.fixture
 def should_run_link_failure():
     """ Fixture for providing Connection Details """
@@ -168,4 +163,4 @@ def should_run_link_failure():
     if data.lower() == "true":
         return True
     else:
-        return False 
+        return False

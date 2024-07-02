@@ -17,7 +17,7 @@ class TestNVMeConnectNQN:
     Verify connect command with NVM Subsystem NQN value - "not matching" the values that the NVM subsystem is configured to support.
     Expected output: Failure with status "Connect Invalid Parameters"
     '''
-    
+
     @pytest.fixture(scope='function', autouse=True)
     def setup_method(self, dummy, connectDetails: ConnectDetails):
         ''' Setup test case by getting discovering the NQN '''
@@ -73,12 +73,12 @@ class TestNVMeConnectNQN:
 
         print("\n\n", '-'*35)
         print("Teardown TestCase: Connect Command with invalid subsystem NQN")
-        
+
         if self.connected_path:
             status, res = self.controller.app.submit_disconnect_cmd(
-                    device_path=self.connected_path)
+                device_path=self.connected_path)
             if status != 0:
                 raise Exception(f"Disconnect failed: {res}")
-        
+
         print("Teardown Complete")
         print("-"*100)

@@ -22,7 +22,7 @@ class TestNVMeIdentify:
     @pytest.fixture(scope='function', autouse=True)
     def setup_method(self, dummy):
         ''' Setup test case and fetch all namespaces list'''
-        
+
         print("\n", "-"*100)
         print("Setup TestCase: Identify Controller")
 
@@ -57,15 +57,17 @@ class TestNVMeIdentify:
 
             self.controller.app.get_response(nvme_cmd)
             sc = nvme_cmd.rsp.response.sf.SC
-            
+
             if res_status != 0:
                 print(
                     f"-- Expected Fail: Status Code: {res_status}")
                 assert True
-                if sc!=2:
-                    assert False, f"-- Unexpected Fail: Status Code {sc} obtained instead of 2"
+                if sc != 2:
+                    assert False, f"-- Unexpected Fail: Status Code {
+                        sc} obtained instead of 2"
             else:
                 assert False, f"-- Unexpected Pass"
+
     def teardown_method(self):
         ''' Teardown test case '''
         print("Teardown TestCase: Identify Controller")
