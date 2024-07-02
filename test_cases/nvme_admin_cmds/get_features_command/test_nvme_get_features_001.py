@@ -12,9 +12,8 @@ import pytest
 
 class TestNVMeGetFeatures:
     '''
-    Send Get Features Command to retrieve Firmware Slot information.
-    Check the Active Slot Number and verify that the firmware revision
-    in that slot is not cleared to 0h
+    Sends Get Features Command to retrieve the number of submission and completion queues.
+    Verify command executed successfully
     '''
 
     @pytest.fixture(scope='function', autouse=True)
