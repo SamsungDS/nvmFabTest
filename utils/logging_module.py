@@ -1,20 +1,18 @@
 """
 Module for creating a logger object which
 can be used Test Suite wide for logging.
+
+LOG LEVELS:
+* logger.trace("A trace message.")
+* logger.debug("A debug message.")
+* logger.info("An info message.")
+* logger.success("A success message.")
+* logger.warning("A warning message.")
+* logger.error("An error message.")
+* logger.critical("A critical message.")
+
 """
-import logging
-from pathlib import Path
 
-
-dir_path = "./logs/"
-file_path = "./logs/test.log"
-Path(dir_path).mkdir(parents=True, exist_ok=True)
-
-f = open(file_path, 'w')
-f.close()
-
-logging.basicConfig(filename=file_path,
-                    format='%(asctime)s %(message)s',
-                    filemode='w')
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+from loguru import logger
+logger.add("./logs/test_{time}.log", enqueue=True)
+logger.info("Log file created")

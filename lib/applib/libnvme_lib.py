@@ -10,6 +10,7 @@ of dealing with the libnvme APIs and it's source code.
 import json
 import re
 import os
+import sys
 sys.path.insert(1, "./../nvmeof_compliance/")
 from lib.structlib.struct_fabric_libnvme_lib import *
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData
@@ -18,7 +19,6 @@ from utils.logging_module import logger
 from lib.structlib.nvme_struct_main_lib import NVMeCommand, NVMeRspStruct
 from lib.structlib.struct_base_lib import GenericCommand
 from lib.cmdlib.commands_lib import NVMeCommandLib
-import sys
 
 
 class Libnvme():

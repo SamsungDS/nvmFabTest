@@ -62,16 +62,16 @@ class NVMeCLILib():
         Returns:
             int: 0 if the command execution is successful, 1 otherwise.
         """
-        print("-- Executing Command: ", command)
+        logger.info("-- Executing Command: {}", command)
         process = subprocess.Popen(
             command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         self.stdout, self.stderr = process.communicate()
         self.ret_code = process.returncode
 
         if len(self.stderr) != 0 and self.ret_code != 0:
-            print(f"-- -- Command execution failed: {self.stderr[:112]}")
+            logger.warning(f"-- -- Command execution failed: {self.stderr[:112]}")
             return self.ret_code
-        print("-- -- Command execution success")
+        logger.success("-- -- Command execution success")
         return 0
 
     def get_app_version(self):

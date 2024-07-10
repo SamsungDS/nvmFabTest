@@ -40,7 +40,7 @@ To install the NVMe-oF Compliance Test Suite, follow these steps:
    ```bash
    cd nvmfabtest
    ```
-3. Install dependencies:
+3. Install python dependencies:
    ```bash
    pip install -r requirements.txt
    ```

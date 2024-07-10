@@ -6,13 +6,13 @@ and tearing down a session for NVMe over Fabric compliance testing.
 
 import json
 import pytest
+import sys
 sys.path.insert(1, "./../nvmeof_compliance")
 from lib.cmdlib.commands_lib import NVMeCommandLib
 from lib.applib.nvme_cli_lib import NVMeCLILib
 from lib.devlib.device_lib import *
 from src.utils.nvme_utils import *
 from lib.applib.libnvme_lib import Libnvme
-import sys
 
 
 f = open("config/ts_config.json")

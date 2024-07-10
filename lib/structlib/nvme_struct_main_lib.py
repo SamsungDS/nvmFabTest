@@ -1,6 +1,5 @@
 """ Main structures library """
 
-
 import sys
 sys.path.insert(1, "./lib/structlib")
 from struct_admin_data_lib import *
