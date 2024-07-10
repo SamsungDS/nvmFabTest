@@ -6,7 +6,7 @@ retrieving command structures and command utilities.
 """
 from lib.structlib.nvme_struct_main_lib import NVMeCommand
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData
-
+from utils.logging_module import logger
 
 class NVMeCommandLib:
     """Initialize attributes
@@ -34,6 +34,8 @@ class NVMeCommandLib:
             NVMeCommand: Object of the NVMeCommand class which represents a C structure
         """
         nvme_cmd = NVMeCommand()
+
+        logger.trace("nvme_cmd returned from Commands Lib")
         return nvme_cmd
 
     def get_identify_cmd(self):
@@ -48,6 +50,7 @@ class NVMeCommandLib:
         nvme_cmd.cmd.identify_cmd.cdw0.OPC = 0x06
         nvme_cmd.cmd.identify_cmd.NSID = 0
 
+        logger.trace("nvme_cmd returned from Commands Lib")
         return nvme_cmd
 
     def get_identify_controller_cmd(self):
@@ -64,6 +67,8 @@ class NVMeCommandLib:
 
         # Making it identify-controller command
         nvme_cmd.cmd.identify_cmd.cdw10.raw = 0x01
+
+        logger.trace("nvme_cmd returned from Commands Lib")
         return nvme_cmd
 
     def get_property_get_cmd(self):
@@ -78,6 +83,8 @@ class NVMeCommandLib:
         nvme_cmd.cmd.generic_command.cdw0.OPC = 0x7f
         nvme_cmd.cmd.generic_command.NSID = 0x04
 
+        logger.trace("nvme_cmd returned from Commands Lib")
+
         return nvme_cmd
     
     def get_property_set_cmd(self):
@@ -90,6 +97,8 @@ class NVMeCommandLib:
         nvme_cmd = self.get_nvme_cmd()
         nvme_cmd.cmd.generic_command.cdw0.OPC = 0x7f
         nvme_cmd.cmd.generic_command.NSID = 0x00
+
+        logger.trace("nvme_cmd returned from Commands Lib")
 
         return nvme_cmd
     
@@ -114,6 +123,8 @@ class NVMeCommandLib:
         nvme_cmd.cmd.generic_command.cdw11.raw = upper & 0xFFFF
         nvme_cmd.buff_size = log_len
 
+        logger.trace("nvme_cmd returned from Commands Lib")
+
         return nvme_cmd
     
     def get_get_features_cmd(self, feature_id=None):
@@ -131,5 +142,7 @@ class NVMeCommandLib:
             nvme_cmd.cmd.generic_command.cdw10.raw = feature_id
         
         nvme_cmd.buff_size = 0
+        
+        logger.trace("nvme_cmd returned from Commands Lib")
 
         return nvme_cmd
