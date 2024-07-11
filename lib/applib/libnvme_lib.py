@@ -33,14 +33,14 @@ class Libnvme():
         """
         if re.match(r"\A/dev/nvme[0-9]+(n[0-9]+)?\Z", dev_path):
             self.dev_name = dev_path[5:]
-            print("-- Default configured device for libnvme: ", self.dev_name)
+            logger.info("-- Default configured device for libnvme: ", self.dev_name)
         elif re.match(r"\Anvme[0-9]+(n[0-9]+)?\Z", dev_path):
             self.dev_name = dev_path
-            print("-- Default configured device for libnvme: ", self.dev_name)
+            logger.info("-- Default configured device for libnvme: ", self.dev_name)
         elif not dev_path:
             pass
         else:
-            print("--",
+            logger.error("--",
                   dev_path, " not in format of /dev/nvmeX or /dev/nvmeXnY or nvmeX or nvmeXnY")
             raise NameError(
                 dev_path, " not in format of /dev/nvmeX or /dev/nvmeXnY or nvmeX or nvmeXnY")
@@ -50,7 +50,7 @@ class Libnvme():
         self.response = None
         self.cmdlib = NVMeCommandLib("libnvme")
         libnvme_path = Libnvme.get_libnvme_path()
-        print(f"-- libnvme initializing, using path {libnvme_path}")
+        logger.info(f"-- libnvme initializing, using path {libnvme_path}")
         self.libnvme = ctypes.CDLL(libnvme_path)
 
         # void nvmf_default_config(struct nvme_fabrics_config *cfg);
@@ -200,7 +200,7 @@ class Libnvme():
                 if "libnvme.so" in files:
                     return os.path.join(root, "libnvme.so")
 
-            print("--",
+            logger.error("--",
                   "Not able to find libnvme.so. Give the path manually in ts_config.json.")
             raise FileNotFoundError(
                 "Not able to find libnvme.so. Give the path manually in ts_config.json.")
@@ -208,7 +208,7 @@ class Libnvme():
         elif ts_config["libnvme_path"].endswith("libnvme.so") and os.path.isfile(ts_config["libnvme_path"]):
             return ts_config["libnvme_path"]
         else:
-            print(
+            logger.error(
                 "-- libnvme.so path not correct. Set to \"auto\" to find automatically.")
             raise FileNotFoundError(
                 "libnvme.so path not correct. Set to \"auto\" to find automatically.")
@@ -257,7 +257,7 @@ class Libnvme():
         libnvme_submit_admin_passthru.argtypes = [
             ctypes.c_int32, ctypes.c_void_p, ctypes.c_void_p]
         libnvme_submit_admin_passthru.restype = ctypes.c_int32
-        print("-- Structure passed to libnvme is at address ",
+        logger.debug("-- Structure passed to libnvme is at address ",
               hex(command.dptr.sgl.addr))
 
         status = libnvme_submit_admin_passthru(
@@ -289,11 +289,11 @@ class Libnvme():
             int: Status Code of the command execution.
         """
         command = nvme_cmd.cmd.generic_command
-        print("--",
+        logger.info("--",
               f"libnvme submit passthru: OPC:{command.cdw0.OPC} NSID:{command.NSID} CDW10:{command.cdw10.raw} CDW11:{command.cdw11.raw}")
         self.ret_status, error = self.nvme_open()
         if self.ret_status != 0:
-            print("-- --", error)
+            logger.warning("-- --", error)
             return self.ret_status
 
         if 0 <= command.cdw0.OPC <= 0x0D:
@@ -310,7 +310,7 @@ class Libnvme():
             self.ret_status = libnvme_submit_admin_passthru(
                 self.device_descriptor, ctypes.addressof(command), None)
             if self.ret_status != 0:
-                print("-- -- Command execution unsuccessful: ",
+                logger.warning("-- -- Command execution unsuccessful: ",
                       hex(self.ret_status))
 
         if command.cdw0.OPC == 0x7f:
@@ -325,7 +325,7 @@ class Libnvme():
             self.ret_status = libnvme_submit_admin_passthru(
                 self.device_descriptor, ctypes.addressof(command), nvme_cmd.buff)
             if self.ret_status != 0:
-                print("-- -- Command execution unsuccessful: ",
+                logger.info("-- -- Command execution unsuccessful: ",
                       hex(self.ret_status))
 
         return self.ret_status
@@ -370,7 +370,7 @@ class Libnvme():
         # bys = bytes(cfg)
         # count=0
         # for b in bys:
-        #     print(count,":",format(b, '08b'))
+        #     logger.info(count,":",format(b, '08b'))
         #     count=count+1
 
         if kato:
@@ -391,9 +391,9 @@ class Libnvme():
 
         got_name = str(self.libnvme.nvme_ctrl_get_name(c))[2:-1]
         self.connectedDeviceName = got_name
-        print(
+        logger.success(
             f"-- Successfully connected to {transport} {address} {svcid} {nqn}")
-        print("-- -- Device Name (self.connectedDeviceName):", got_name)
+        logger.info("-- -- Device Name (self.connectedDeviceName):", got_name)
 
         return 0, "/dev/" + got_name
 
@@ -427,7 +427,7 @@ class Libnvme():
             raise NameError(
                 f"Cannot disconnect this device: {dev_name}")
 
-        print(
+        logger.info(
             f"-- Disconnecting {dev_name if dev_name else (nqn if nqn else None)} . . .")
         ctrl = []
 
@@ -459,14 +459,17 @@ class Libnvme():
             break
 
         if len(ctrl) == 0:
-            print("-- -- Device not found")
+            logger.warning("-- -- Device not found")
             return 1, "Disconnect failed, device not found"
         i = 0
         for c in ctrl:
             self.ret_status = self.libnvme.nvme_disconnect_ctrl(c)
             i += 1
-        print((f"-- Disconnected {i} controller"+("" if i == 1 else "s"))
-              if self.ret_status == 0 else "Failed Disconnect")
+        if self.ret_status == 0:
+            logger.success((f"-- Disconnected {i} controller"+("" if i == 1 else "s")))
+        else:
+            logger.warning("Failed Disconnect")
+
         return self.ret_status, "Disconnect failed" if self.ret_status != 0 else ""
 
     def get_response(self, nvme_cmd):

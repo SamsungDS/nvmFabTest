@@ -13,6 +13,9 @@ LOG LEVELS:
 
 """
 
+import sys
 from loguru import logger
-logger.add("./logs/test_{time}.log", enqueue=True)
+
+logger.add("./logs/test_{time}.log", enqueue=True, backtrace=True)
+logger.add(sys.stdout, colorize=True)
 logger.info("Log file created")

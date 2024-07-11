@@ -36,7 +36,7 @@ class NVMeCmdStruct(ctypes.Union):
                 ("get_log_page_cmd", GetLogPageCommand),        # OPC 0x2
                 ("delete_io_comq_cmd", GenericCommand),         # OPC 0x4
                 ("create_io_comq_cmd", GenericCommand),         # OPC 0x5
-                ("identify_cmd", GenericLibnvmeCommand),              # OPC 0x6
+                ("identify_cmd", GenericCommand),              # OPC 0x6
                 ("abort_cmd", GenericCommand),                  # OPC 0x8
                 ("set_feature_cmd", GenericCommand),            # OPC 0x9
                 ("get_feature_cmd", GenericCommand),            # OPC 0xA

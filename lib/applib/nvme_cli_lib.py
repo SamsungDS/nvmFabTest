@@ -143,7 +143,7 @@ class NVMeCLILib():
                 nvme_cmd.rsp.response.sf.SCT = 0
                 nvme_cmd.rsp.response.sf.SC = 0
         except Exception as e:
-            pass
+            logger.exception(e)
         return True
 
     def get_passthru_result(self):
@@ -289,7 +289,7 @@ class NVMeCLILib():
             ret_status = self.execute_cmd(cmd)
 
             if ret_status != 0:
-                print("Command execution unsuccessful: ", ret_status)
+                logger.warning("Command execution unsuccessful: ", ret_status)
                 return ret_status
 
             if verify_rsp:
@@ -298,7 +298,7 @@ class NVMeCLILib():
                 pass
 
             if not response:
-                print("Empty response ")
+                logger.warning("Empty response ")
                 return ret_status
 
             if data_len != 0:
@@ -313,7 +313,7 @@ class NVMeCLILib():
             ret_status = self.execute_cmd(cmd)
 
             if ret_status != 0:
-                print("Command execution unsuccessful: ", ret_status)
+                logger.warning("Command execution unsuccessful: ", ret_status)
                 return ret_status
 
             if verify_rsp:
@@ -322,7 +322,7 @@ class NVMeCLILib():
                 pass
 
             if not response:
-                print("Empty response ")
+                logger.warning("Empty response ")
                 return ret_status
 
             if command.NSID == 0x04:

@@ -101,27 +101,6 @@ class CDW15(ctypes.Union):
     _fields_ = [("raw", ctypes.c_uint32)]
 
 
-class GenericLibnvmeCommand(ctypes.Structure):
-    """GenericLibnvmeCommand structure for Submission Queue Entry."""
-
-    # _pack_ = 1
-    _fields_ = [("cdw0", CDW0),  # 0 - 3
-                ("NSID", ctypes.c_uint32),  # 4 - 7
-                ("cdw2", CDW2),  # 8 - 11
-                ("cdw3", CDW3),  # 12 - 15
-                ("mptr", ctypes.c_uint64),  # 16 - 23
-                ("dptr", DPTR),  # 24 - 39
-                ("cdw10", CDW10),  # 40 - 43
-                ("cdw11", CDW11),  # 44 - 47
-                ("cdw12", CDW12),  # 48 - 51
-                ("cdw13", CDW13),  # 52 - 55
-                ("cdw14", CDW14),  # 56 - 59
-                ("cdw15", CDW15),  # 60 - 63
-                ("timeout_ms", ctypes.c_uint32),
-                ("result", ctypes.c_uint32),
-                ]
-
-
 class GenericCommand(ctypes.Structure):
     """GenericCommand structure for Submission Queue Entry."""
 
@@ -138,6 +117,8 @@ class GenericCommand(ctypes.Structure):
                 ("cdw13", CDW13),  # 52 - 55
                 ("cdw14", CDW14),  # 56 - 59
                 ("cdw15", CDW15),  # 60 - 63
+                ("timeout_ms", ctypes.c_uint32),
+                ("result", ctypes.c_uint32),
                 ]
 
 
