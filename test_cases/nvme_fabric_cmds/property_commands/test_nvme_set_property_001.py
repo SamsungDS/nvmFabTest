@@ -10,6 +10,7 @@ import sys
 import time
 from lib.devlib.device_lib import Controller
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData
+from utils.logging_module import logger
 from test_cases.conftest import dummy
 from src.macros import *
 
@@ -19,8 +20,8 @@ class TestNVMePropertySet:
     @pytest.fixture(scope='function', autouse=True)
     def setup_method(self, dummy):
         ''' Setup Test Case by initialization of objects '''
-        print("\n", "-"*100)
-        print("Setup TestCase: Property Set")
+        logger.info("\n", "-"*100)
+        logger.info("Setup TestCase: Property Set")
         self.dummy = dummy
         device = self.dummy.device
         application = self.dummy.application
@@ -64,6 +65,7 @@ class TestNVMePropertySet:
                                                          verify_rsp=True, async_run=False)
         # Verifying Property Set success
         if res_status != 0:
+            logger.log("FAIL", "Property Set failed")
             assert False, "Property Set failed"
 
         # time.sleep(12) # Use if want to wait before checking
@@ -73,6 +75,7 @@ class TestNVMePropertySet:
         res_status = self.controller.app.submit_passthru(
             nvme_cmd, verify_rsp=True, async_run=False)
         if res_status == 0:
+            logger.log("FAIL", "Non-fabric command passed after Shutdown Notification")
             assert False, "Non-fabric command passed after Shutdown Notification"
 
         # Verifying Shutdown success by checking if fabric command passes
@@ -80,11 +83,12 @@ class TestNVMePropertySet:
         res_status = self.controller.app.submit_passthru(
             nvme_cmd, verify_rsp=True, async_run=False)
         if res_status != 0:
+            logger.log("FAIL", "Fabric command failed after Shutdown Notification")
             assert False, "Fabric command failed after Shutdown Notification"
 
         assert True
 
     def teardown_method(self):
         ''' Teardown of Test Case '''
-        print("Teardown TestCase: Property Set")
-        print("-"*100)
+        logger.info("Teardown TestCase: Property Set")
+        logger.info("-"*100)

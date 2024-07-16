@@ -4,9 +4,8 @@ Expected Output: Command response is successful
 '''
 import ctypes
 import pytest
-
 from src.macros import *
-from src.utils.nvme_utils import *
+from utils.logging_module import logger
 from test_cases.conftest import dummy
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData
 from lib.devlib.device_lib import ConnectDetails, Controller
@@ -23,8 +22,8 @@ class TestNVMeConnectKato:
     @pytest.fixture(scope='function', autouse=True)
     def setup_method(self, dummy, connectDetails: ConnectDetails):
         ''' Setup by checking if Change Notification is supported by discovery service '''
-        print("\n", "-"*100)
-        print("Setup TestCase: Connect Command with KATO")
+        logger.info("\n", "-"*100)
+        logger.info("Setup TestCase: Connect Command with KATO")
         self.dummy = dummy
         device = self.dummy.device
         application = self.dummy.application
@@ -67,8 +66,8 @@ class TestNVMeConnectKato:
             TestNVMeConnectKato.isChangeNotificationSupported = False
         print("Change Notification is {}supported".format(
             "" if TestNVMeConnectKato.isChangeNotificationSupported else "not "))
-        print("Setup Done: Connect Command with KATO")
-        print("-"*35, "\n")
+        logger.info("Setup Done: Connect Command with KATO")
+        logger.info("-"*35, "\n")
 
     def test_connect_discovery_nonzero_kato(self, connectDetails: ConnectDetails):
         ''' Send Connect command with non-zero KATO value to Controller if
@@ -91,17 +90,18 @@ class TestNVMeConnectKato:
             if status == 0 and status_code == 0:
                 assert True
             else:
+                logger.log("FAIL", "Connect failed for NON-ZERO KATO")
                 assert False, "Connect failed for NON-ZERO KATO"
 
     def teardown_method(self):
         ''' Teardown test case by disconnecting discovery controller '''
 
         print("\n\n", '-'*35)
-        print("Teardown TestCase: Connect Command with KATO")
+        logger.info("Teardown TestCase: Connect Command with KATO")
 
         status, res = self.controller.app.submit_disconnect_cmd(
             nqn=NVME_DISCOVERY_NQN)
         if status != 0:
             raise Exception(
                 f"Disconnect from discovery controller failed: {res}")
-        print("-"*100)
+        logger.info("-"*100)

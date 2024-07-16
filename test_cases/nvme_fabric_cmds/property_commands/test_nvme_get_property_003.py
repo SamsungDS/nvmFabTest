@@ -20,6 +20,7 @@ import ctypes
 import pytest
 from lib.devlib.device_lib import Controller
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData
+from utils.logging_module import logger
 from test_cases.conftest import dummy
 from src.macros import *
 
@@ -29,8 +30,8 @@ class TestNVMePropertyGet:
     @pytest.fixture(scope='function', autouse=True)
     def setup_method(self, dummy):
         ''' Setup Test Case by initialization of objects '''
-        print("\n", "-"*100)
-        print("Setup TestCase: Identify Controller")
+        logger.info("\n", "-"*100)
+        logger.info("Setup TestCase: Property Get")
         self.dummy = dummy
         device = self.dummy.device
         application = self.dummy.application
@@ -62,16 +63,16 @@ class TestNVMePropertyGet:
 
             if get_property_value.value != 0:
                 fail.append(offset)
-                assert False, f"Value obtained {
-                    get_property_hex_value} but expected 0"
+                logger.log("FAIL", f"Value obtained {get_property_hex_value} but expected 0")
+                assert False, f"Value obtained {get_property_hex_value} but expected 0"
 
         if len(fail) != 0:
             passed = [a for a in offsets if a not in fail]
-            assert False, f"Failed for offsets: {
-                fail}\nPassed for offsets {passed}"
+            logger.log("FAIL", f"Failed for offsets: {fail}\nPassed for offsets {passed}")
+            assert False, f"Failed for offsets: {fail}\nPassed for offsets {passed}"
         assert True
 
     def teardown_method(self):
         ''' Teardown of Test Case '''
-        print("Teardown TestCase: Identify Controller")
-        print("-"*100)
+        logger.info("Teardown TestCase: Property Get")
+        logger.info("-"*100)

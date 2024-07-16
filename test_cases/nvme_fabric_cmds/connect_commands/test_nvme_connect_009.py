@@ -5,9 +5,8 @@ Expected: Connect Command successful
 
 import pytest
 import re
-
 from src.macros import *
-from src.utils.nvme_utils import *
+from utils.logging_module import logger
 from test_cases.conftest import dummy
 from lib.devlib.device_lib import ConnectDetails, Controller
 
@@ -21,8 +20,8 @@ class TestNVMeConnectIOQueues:
     def setup_method(self, dummy, connectDetails: ConnectDetails):
         ''' Setup test case by getting discovering the NQN '''
 
-        print("\n", "-"*100)
-        print("Setup TestCase: Connect Command with different number of IO queues")
+        logger.info("\n", "-"*100)
+        logger.info("Setup TestCase: Connect Command with different number of IO queues")
         self.dummy = dummy
         device = self.dummy.device
         application = self.dummy.application
@@ -45,8 +44,8 @@ class TestNVMeConnectIOQueues:
         self.nqn = self.controller.app.get_nqn_from_discover(response, index)
         # End Discover Command
 
-        print("Setup Complete")
-        print("-"*35, "\n")
+        logger.info("Setup Complete")
+        logger.info("-"*35, "\n")
 
     def test_connect_nr_io_queues(self, connectDetails: ConnectDetails):
         ''' Send Connect and Disconnect command with different number of IO queues '''
@@ -66,13 +65,14 @@ class TestNVMeConnectIOQueues:
                 self.connected_paths.append(response)
                 assert True
             else:
+                logger.log("FAIL", "Connect failed for different number of io queues")
                 assert False, "Connect failed for different number of io queues"
 
     def teardown_method(self):
         ''' Teardown test case by disconnecting the device '''
 
         print("\n\n", '-'*35)
-        print("Teardown TestCase: Connect Command with different number of IO queues")
+        logger.info("Teardown TestCase: Connect Command with different number of IO queues")
 
         for path in self.connected_paths:
             if not path or path == '':
@@ -82,5 +82,5 @@ class TestNVMeConnectIOQueues:
             if status != 0:
                 raise Exception(f"Disconnect failed: {res}")
 
-        print("Teardown Complete")
-        print("-"*100)
+        logger.info("Teardown Complete")
+        logger.info("-"*100)

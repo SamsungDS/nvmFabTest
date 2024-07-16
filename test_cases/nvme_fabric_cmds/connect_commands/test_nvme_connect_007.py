@@ -4,9 +4,8 @@ Expected output: Failure with status "Connect Invalid Parameters"
 '''
 import pytest
 import re
-
 from src.macros import *
-from src.utils.nvme_utils import *
+from utils.logging_module import logger
 from test_cases.conftest import dummy
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData
 from lib.devlib.device_lib import ConnectDetails, Controller
@@ -22,8 +21,8 @@ class TestNVMeConnectNQN:
     def setup_method(self, dummy, connectDetails: ConnectDetails):
         ''' Setup test case by getting discovering the NQN '''
 
-        print("\n", "-"*100)
-        print("Setup TestCase: Connect Command with invalid subsystem NQN")
+        logger.info("\n", "-"*100)
+        logger.info("Setup TestCase: Connect Command with invalid subsystem NQN")
         self.dummy = dummy
         device = self.dummy.device
         application = self.dummy.application
@@ -46,8 +45,8 @@ class TestNVMeConnectNQN:
         self.nqn = self.controller.app.get_nqn_from_discover(response, index)
         # End Discover Command
 
-        print("Setup Done: Connect Command with invalid subsystem NQN")
-        print("-"*35, "\n")
+        logger.info("Setup Done: Connect Command with invalid subsystem NQN")
+        logger.info("-"*35, "\n")
 
     def test_connect_invalid_subnqn(self, connectDetails: ConnectDetails):
         ''' Send Connect command with invalid subsystem NQN '''
@@ -66,13 +65,14 @@ class TestNVMeConnectNQN:
             assert True
         else:
             self.connected_path = response
+            logger.log("FAIL", "Connect passed for incorrect subsytem nqn")
             assert False, "Connect passed for incorrect subsytem nqn"
 
     def teardown_method(self):
         ''' Teardown test case by disconnecting the device '''
 
         print("\n\n", '-'*35)
-        print("Teardown TestCase: Connect Command with invalid subsystem NQN")
+        logger.info("Teardown TestCase: Connect Command with invalid subsystem NQN")
 
         if self.connected_path:
             status, res = self.controller.app.submit_disconnect_cmd(
@@ -80,5 +80,5 @@ class TestNVMeConnectNQN:
             if status != 0:
                 raise Exception(f"Disconnect failed: {res}")
 
-        print("Teardown Complete")
-        print("-"*100)
+        logger.info("Teardown Complete")
+        logger.info("-"*100)

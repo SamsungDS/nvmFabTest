@@ -6,6 +6,7 @@ from src.macros import *
 from test_cases.conftest import dummy
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData
 from lib.devlib.device_lib import Controller
+from utils.logging_module import logger
 import subprocess
 import time
 import json
@@ -25,8 +26,8 @@ class TestLinkFailure:
         if not should_run_link_failure:
             self.skipped = True
             pytest.skip("Link Failure Test disabled")
-        print("\n", "-"*100)
-        print("Setup TestCase: Identify Controller")
+        logger.info("\n", "-"*100)
+        logger.info("Setup TestCase: Link Failure")
         self.dummy = dummy
         device = self.dummy.device
         self.dev_name = self.dummy.device[5:]
@@ -47,6 +48,7 @@ class TestLinkFailure:
             if j["Name"].strip() == self.dev_name:
                 self.output.append(f"-- {self.dev_name} Status: " + j["State"])
             else:
+                logger.log("FAIL", "Didn't find device for setup")
                 assert False, "Didn't find device for setup"
 
     def test_link_failure(self, dummy):
@@ -77,6 +79,7 @@ class TestLinkFailure:
                     self.output.append(
                         f"-- {self.dev_name} status: " + j["State"])
                 else:
+                    logger.log("FAIL", "Device lost after link down")
                     assert False, "Device lost after link down"
 
             # LINKUP
@@ -87,6 +90,7 @@ class TestLinkFailure:
             self.output.append("Link Up")
 
         except Exception as e:
+            logger.exception(e)
             cmd = f"ip link set {self.iface} up"
             subprocess.Popen(cmd, shell=True)
             raise e
@@ -112,6 +116,7 @@ class TestLinkFailure:
                 ) == "live" and j["Name"].strip() == self.dev_name
 
             if time.time() - start > 60:
+                logger.log("FAIL", "Device failed to come back up")
                 assert False, "Device failed to come back up"
 
         end = time.time()
@@ -137,8 +142,12 @@ class TestLinkFailure:
         if ret_code == 0 and "verify" not in stdout.decode():
             self.output.append("fio success with data integrity")
         elif ret_code != 0 and "verify" not in stderr.decode():
+            logger.log("FAIL", f"fio testing failed\n{ret_code, stderr.decode()}")
             assert False, f"fio testing failed\n{ret_code, stderr.decode()}"
         else:
+            logger.log("FAIL", f"Data integrity verification failed during fio testing\n{
+                         ret_code, stderr.decode()}"
+                         )
             assert False, f"Data integrity verification failed during fio testing\n{
                 ret_code, stderr.decode()}"
 
@@ -146,12 +155,9 @@ class TestLinkFailure:
         ''' Teardown of Test Case '''
         if self.skipped:
             return
-        print("Teardown TestCase: Identify Controller")
+        logger.info("Teardown TestCase: Link Failure")
         cmd = f"ip link set {self.iface} up"
         subprocess.Popen(cmd, shell=True)
         for line in self.output:
-            print(line)
-        with open("linkupdownoutput.txt", "w") as f:
-            for l in self.output:
-                f.write(l+"\n")
-        print("-"*100)
+            logger.info(line)
+        logger.info("-"*100)

@@ -6,7 +6,7 @@ Expected output: Valid NQN retrieved
 
 import pytest
 from src.macros import *
-from src.utils.nvme_utils import *
+from utils.logging_module import logger
 from test_cases.conftest import dummy
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData
 from lib.devlib.device_lib import ConnectDetails, Controller
@@ -20,8 +20,8 @@ class TestNVMeDiscovery:
         Send a Get Log Page command to Discovery Controller and retrieve subsystem NQN
         Expected output: Valid NQN retrieved
         '''
-        print("\n", "-"*100)
-        print("Setup TestCase: Discovery Service")
+        logger.info("\n", "-"*100)
+        logger.info("Setup TestCase: Discovery Service")
 
         self.dummy = dummy
         device = self.dummy.device
@@ -42,18 +42,21 @@ class TestNVMeDiscovery:
         try:
             nqn = self.controller.app.get_nqn_from_discover(res, 0)
         except Exception as e:
+            logger.exception(e)
             assert False, f"Discovery log not in proper format: {e.__str__}"
 
         if len(nqn) == 0:
-            assert False, "Discovery log not in proper format2"
+            logger.log("FAIL", "Discovery log not in proper format")
+            assert False, "Discovery log not in proper format"
 
         if nqn[:3] != "nqn":
-            assert False, "Discovery log not in proper format3"
+            logger.log("FAIL", "Discovery log not in proper format")
+            assert False, "Discovery log not in proper format"
 
         assert True
 
     def teardown_method(self):
         '''Teardown test case'''
 
-        print("\n\nTeardown TestCase: Discovery Service")
-        print("-"*100)
+        logger.info("\n\nTeardown TestCase: Discovery Service")
+        logger.info("-"*100)

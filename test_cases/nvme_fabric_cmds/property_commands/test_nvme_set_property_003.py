@@ -11,6 +11,7 @@ import sys
 import time
 from lib.devlib.device_lib import Controller
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData
+from utils.logging_module import logger
 from test_cases.conftest import dummy
 from src.macros import *
 
@@ -20,8 +21,8 @@ class TestNVMePropertySet:
     @pytest.fixture(scope='function', autouse=True)
     def setup_method(self, dummy):
         ''' Setup Test Case by initialization of objects '''
-        print("\n", "-"*100)
-        print("Setup TestCase: Identify Controller")
+        logger.info("\n", "-"*100)
+        logger.info("Setup TestCase: Property Set")
         self.dummy = dummy
         device = self.dummy.device
         application = self.dummy.application
@@ -68,17 +69,21 @@ class TestNVMePropertySet:
         # Verifying Property Set
         if cc_en == 1:
             if res_status == 0:
+                logger.log("FAIL", "Property Set passed for CC.AMS when CC.EN is 1")
                 assert False, f"Property Set passed for CC.AMS when CC.EN is 1"
             if SC != 0x82:
-                assert False, f"Property Set failed with unexpected status {SC}" +\
+                logger.log("FAIL", f"Property Set failed with unexpected status {SC}" + \
+                           "for CC.AMS when CC.EN is 1")
+                assert False, f"Property Set failed with unexpected status {SC}" + \
                     "for CC.AMS when CC.EN is 1"
 
         if res_status != 0 and cc_en == 0:
+            logger.log("FAIL", "Property Set failed for CC.AMS when CC.EN is 0")
             assert False, f"Property Set failed for CC.AMS when CC.EN is 0"
 
         assert True
 
     def teardown_method(self):
         ''' Teardown of Test Case '''
-        print("Teardown TestCase: Identify Controller")
-        print("-"*100)
+        logger.info("Teardown TestCase: Property Set")
+        logger.info("-"*100)

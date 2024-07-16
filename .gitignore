@@ -15,3 +15,4 @@ time_compare.py
 *.zip
 fio*
 *.state
+*.log

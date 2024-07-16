@@ -4,6 +4,7 @@ non-zero response is obtained.
 '''
 import ctypes
 import pytest
+from utils.logging_module import logger
 from lib.devlib.device_lib import Controller
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData
 from test_cases.conftest import dummy
@@ -15,8 +16,8 @@ class TestNVMePropertyGet:
     @pytest.fixture(scope='function', autouse=True)
     def setup_method(self, dummy):
         ''' Setup Test Case by initialization of objects '''
-        print("\n", "-"*100)
-        print("Setup TestCase: Identify Controller")
+        logger.info("\n", "-"*100)
+        logger.info("Setup TestCase: Property Get")
         self.dummy = dummy
         device = self.dummy.device
         application = self.dummy.application
@@ -40,14 +41,16 @@ class TestNVMePropertyGet:
                                                              verify_rsp=True, async_run=False)
 
             if res_status != 0:
+                logger.log("FAIL", f"Command failed with status code: {res_status}")
                 assert False, f"Command failed with status code: {res_status}"
             get_property_hex_value = hex(get_property_value.value)
-            print(get_property_hex_value)
+            logger.info(get_property_hex_value)
             if get_property_value.value == 0:
+                logger.log("FAIL", "No value obtained")
                 assert False, f"No value obtained"
             assert True
 
     def teardown_method(self):
         ''' Teardown of Test Case '''
-        print("Teardown TestCase: Identify Controller")
-        print("-"*100)
+        logger.info("Teardown TestCase: Property Get")
+        logger.info("-"*100)

@@ -16,6 +16,7 @@ LOG LEVELS:
 import sys
 from loguru import logger
 
+logger.level("FAIL", no=35, color="<magenta>")
 logger.add("./logs/test_{time}.log", enqueue=True, backtrace=True)
-logger.add(sys.stdout, colorize=True)
+
 logger.info("Log file created")

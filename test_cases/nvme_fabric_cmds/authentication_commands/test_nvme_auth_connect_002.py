@@ -6,7 +6,7 @@ Expected output: Connect command response is successful
 import pytest
 import re
 from src.macros import *
-from src.utils.nvme_utils import *
+from utils.logging_module import logger
 from test_cases.conftest import dummy
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData
 from lib.devlib.device_lib import *
@@ -27,8 +27,8 @@ class TestNVMeAuthConnect:
             self.skipped = True
             pytest.skip("Authentication Tests Disabled")
 
-        print("\n", "-"*100)
-        print("Setup TestCase: Auth Connect Command")
+        logger.info("\n", "-"*100)
+        logger.info("Setup TestCase: Auth Connect Command")
 
         self.connectIsSuccess = None
         self.dummy = dummy
@@ -51,7 +51,7 @@ class TestNVMeAuthConnect:
                 transport=tr, address=addr, svcid=svc)
 
         if status != 0:
-            print(
+            logger.error(
                 "-- -- TestCase Setup Error: Discover command failed. Check the configuration details")
             raise Exception("TestCase Setup Exception")
 
@@ -61,13 +61,13 @@ class TestNVMeAuthConnect:
         # List-subsys
         status, response = self.controller.app.submit_list_subsys_cmd()
         if status != 0:
-            print("-- -- TestCase Setup Error: Check if nvme cli tool is installed")
+            logger.error("-- -- TestCase Setup Error: Check if nvme cli tool is installed")
             return status, response
         self.all_nvme_setup: list = re.findall(r"nvme\d", response.decode())
         self.all_nvme_setup.sort()
 
-        print("Setup Done: Auth Connect Command")
-        print("-"*35, "\n")
+        logger.info("Setup Done: Auth Connect Command")
+        logger.info("-"*35, "\n")
 
     def test_auth_connect_ctrl_dhchap(self, authDetails: AuthDetails):
         ''' Performing test by sending connect command to discovery NQN '''
@@ -87,6 +87,7 @@ class TestNVMeAuthConnect:
             dhchap_ctrl=dhchap_ctrl, hostnqn=hostnqn)
 
         if status != 0:
+            logger.log("FAIL", f"Sending Auth Connect Command failed: {status}")
             assert False, f"Sending Auth Connect Command failed: {status}"
         else:
             self.connectIsSuccess = True
@@ -94,6 +95,8 @@ class TestNVMeAuthConnect:
             self.controller.app.get_response(nvme_cmd)
             status_code = nvme_cmd.rsp.response.sf.SC
             if status_code != 0:
+                logger.log("FAIL",
+                            f"Auth Connect Command failed with Status Code {status_code}")
                 assert False, f"Auth Connect Command failed with Status Code {
                     status_code}"
             else:
@@ -105,10 +108,10 @@ class TestNVMeAuthConnect:
         if self.skipped:
             return
 
-        print("\n\nTeardown TestCase: Auth Connect Command")
+        logger.info("\n\nTeardown TestCase: Auth Connect Command")
         status, response = self.controller.app.submit_list_subsys_cmd()
         if status != 0:
-            print("-- -- TestCase Setup Error: Check if nvme cli tool is installed")
+            logger.error("-- -- TestCase Teardown Error")
             return status, response
 
         self.all_nvme_teardown: list = re.findall(r"nvme\d", response.decode())
@@ -121,5 +124,5 @@ class TestNVMeAuthConnect:
             if status != 0:
                 raise Exception(f"Disconnect failed: {res}")
 
-        print("Teardown Complete: Auth Connect Command")
-        print("-"*100)
+        logger.info("Teardown Complete: Auth Connect Command")
+        logger.info("-"*100)

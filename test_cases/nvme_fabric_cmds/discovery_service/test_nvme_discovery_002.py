@@ -5,7 +5,7 @@ Expected output: Discovery fails
 
 import pytest
 from src.macros import *
-from src.utils.nvme_utils import *
+from utils.logging_module import logger
 from test_cases.conftest import dummy
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData
 from lib.devlib.device_lib import ConnectDetails, Controller
@@ -19,8 +19,8 @@ class TestNVMeDiscovery:
         Send a Discovery Service with invalid host NQN
         Expected output: Discovery fails
         '''
-        print("\n", "-"*100)
-        print("Setup TestCase: Discovery Service")
+        logger.info("\n", "-"*100)
+        logger.info("Setup TestCase: Discovery Service")
 
         self.dummy = dummy
         device = self.dummy.device
@@ -38,9 +38,11 @@ class TestNVMeDiscovery:
             tr, addr, svc, hostnqn=hostnqn)
 
         if status == 0:
+            logger.log("FAIL", "Discovery passed with invalid hostnqn")
             assert False, f"Discovery passed with invalid hostnqn"
 
         if "Invalid argument" not in res.decode():
+            logger.log("FAIL", "Discovery failed with unexpected error")
             assert False, f"Discovery failed with unexpected error"
 
         assert True
@@ -48,5 +50,5 @@ class TestNVMeDiscovery:
     def teardown_method(self):
         '''Teardown test case'''
 
-        print("\n\nTeardown TestCase: Discovery Service")
-        print("-"*100)
+        logger.info("\n\nTeardown TestCase: Discovery Service")
+        logger.info("-"*100)

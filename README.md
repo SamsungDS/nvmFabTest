@@ -38,7 +38,7 @@ To install the NVMe-oF Compliance Test Suite, follow these steps:
    ```
 2. Navigate to the project directory:
    ```bash
-   cd nvmfabtest
+   cd nvmeof_compliance
    ```
 3. Install python dependencies:
    ```bash
@@ -186,12 +186,9 @@ class TestNVMeConnect:
     def teardown_method(self):
         '''Teardown test case'''
 
-        print("\n\nTeardown TestCase: Connect Command")
-        
         # Any memory freeing or disconnections to be made 
         # after test case completion
         
-        print("-"*100)
 ```
 
 ## Advantages of using libnvme in framework
@@ -208,13 +205,3 @@ class TestNVMeConnect:
 - Reduce the overhead of using subprocess and command response parsing
 
 - Option to use nvme-cli interface for nvme command execution as per requirement.
-
-## Test Cases
-
-Documented on confluence [here](https://confluence.samsungds.net/display/SSQ/Test+Cases)
-
-## Specification Mapping
-
-Documented on confluence [here](https://confluence.samsungds.net/pages/viewpage.action?pageId=1555525450)
-
-

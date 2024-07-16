@@ -4,9 +4,8 @@ Expected: Connect Command error
 '''
 import pytest
 import re
-
 from src.macros import *
-from src.utils.nvme_utils import *
+from utils.logging_module import logger
 from test_cases.conftest import dummy
 from lib.devlib.device_lib import ConnectDetails, Controller
 
@@ -19,8 +18,8 @@ class TestNVMeConnectHostID:
     def setup_method(self, dummy, connectDetails: ConnectDetails):
         ''' Setup test case by getting discovering the NQN '''
 
-        print("\n", "-"*100)
-        print("Setup TestCase: Connect Command with Host ID cleared to 0h")
+        logger.info("\n", "-"*100)
+        logger.info("Setup TestCase: Connect Command with Host ID cleared to 0h")
         self.dummy = dummy
         device = self.dummy.device
         application = self.dummy.application
@@ -43,8 +42,8 @@ class TestNVMeConnectHostID:
         self.nqn = self.controller.app.get_nqn_from_discover(response, index)
         # End Discover Command
 
-        print("Setup Complete")
-        print("-"*35, "\n")
+        logger.info("Setup Complete")
+        logger.info("-"*35, "\n")
 
     def test_connect_zero_hostid(self, connectDetails: ConnectDetails):
         ''' Send Connect command with Host ID cleared to 0h '''
@@ -65,17 +64,18 @@ class TestNVMeConnectHostID:
             assert True
         else:
             self.connected_path = response
+            logger.log("FAIL", "Connect passed for Host ID cleared to 0h")
             assert False, "Connect passed for Host ID cleared to 0h"
 
     def teardown_method(self):
         ''' Teardown test case by disconnecting the device '''
 
         print("\n\n", '-'*35)
-        print("Teardown TestCase: Connect Command with Host ID cleared to 0h")
+        logger.info("Teardown TestCase: Connect Command with Host ID cleared to 0h")
         if self.connected_path:
             status, res = self.controller.app.submit_disconnect_cmd(
                 device_path=self.connected_path)
             if status != 0:
                 raise Exception(f"Disconnect failed: {res}")
-        print("Teardown Complete")
-        print("-"*100)
+        logger.info("Teardown Complete")
+        logger.info("-"*100)

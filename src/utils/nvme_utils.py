@@ -1,5 +1,6 @@
 """ Generic utilities used in the framework. """
 import json
+from utils.logging_module import logger
 
 def get_dev_from_subsys(response, nqn):
     """
@@ -25,9 +26,11 @@ def get_dev_from_subsys(response, nqn):
         return 1, "NQN not found in the given response"
 
     except json.JSONDecodeError as e:
+        logger.exception(e)
         return 2, "Response is not in JSON format"
 
     except KeyError as e:
+        logger.exception(e)
         return 3, f"JSON does not have required keys as per list-subsys format: {str(e)}"
 
 
@@ -72,7 +75,9 @@ def parse_for_already_connected(response, connect_details, nqn):
         return 0, False, "NQN not found in the given response"
 
     except json.JSONDecodeError as e:
+        logger.exception(e)
         return 2, False,"Response is not in json format"
 
     except KeyError as e:
+        logger.exception(e)
         return 3, False,f"JSON does not have required keys as per list-subsys format: {str(e)}"

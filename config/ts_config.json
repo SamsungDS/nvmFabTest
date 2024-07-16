@@ -2,7 +2,7 @@
     "app_name": "nvmecli",
     "device_path": "",
     "connectByIP": "true",
-    "disconnectOnDone": "false",
+    "disconnectOnDone": "true",
     "connectDetails": {
         "transport": "tcp",
         "addr": "10.0.0.220",
@@ -13,7 +13,7 @@
     
     "test_link_failure": "false",
 
-    "test_authentication": "true",
+    "test_authentication": "false",
     "test_auth_config": {
         "transport": "tcp",
         "addr": "10.0.0.9",

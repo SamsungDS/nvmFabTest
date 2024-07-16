@@ -6,11 +6,11 @@ Expected output: Failure with status "Invalid Field in Command"
 import ctypes
 import pytest
 import time
-
 from lib.devlib.device_lib import DeviceConfig
 from test_cases.conftest import dummy
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData
 from lib.devlib.device_lib import Controller
+from utils.logging_module import logger
 
 
 class TestNVMeIdentify:
@@ -23,8 +23,8 @@ class TestNVMeIdentify:
     def setup_method(self, dummy):
         ''' Setup test case and fetch all namespaces list'''
 
-        print("\n", "-"*100)
-        print("Setup TestCase: Identify Controller")
+        logger.info("\n", "-"*100)
+        logger.info("Setup TestCase: Identify Controller")
 
         self.dummy = dummy
         device = self.dummy.device
@@ -51,7 +51,7 @@ class TestNVMeIdentify:
         for ns_path in self.ns_paths:
             self.controller.app.dev_name = ns_path
             self.controller.app.dev_path = ns_path
-            print(ns_path)
+            logger.info(ns_path)
             res_status = self.controller.app.submit_passthru(
                 nvme_cmd, verify_rsp=True, async_run=False)
 
@@ -59,21 +59,18 @@ class TestNVMeIdentify:
             sc = nvme_cmd.rsp.response.sf.SC
 
             if res_status != 0:
-                print(
+                logger.info(
                     f"-- Expected Fail: Status Code: {res_status}")
                 assert True
                 if sc != 2:
-                    assert False, f"-- Unexpected Fail: Status Code {
-                        sc} obtained instead of 2"
+                    logger.log(
+                        "FAIL", f"-- Unexpected Fail: Status Code {sc} obtained instead of 2")
+                    assert False, f"Unexpected Fail: Status Code {sc} obtained instead of 2"
             else:
+                logger.log("FAIL", "-- Unexpected Pass")
                 assert False, f"-- Unexpected Pass"
 
     def teardown_method(self):
         ''' Teardown test case '''
-        print("Teardown TestCase: Identify Controller")
-        print("-"*100)
-
-
-if __name__ == '__main__':
-    dum = DeviceConfig("/dev/nvme2", "nvme-cli")
-    TestNVMeIdentify().test_identify_cmd_all_ns(dum)
+        logger.info("Teardown TestCase: Identify Controller")
+        logger.info("-"*100)

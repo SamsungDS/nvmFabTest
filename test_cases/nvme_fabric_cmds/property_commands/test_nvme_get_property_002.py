@@ -8,6 +8,7 @@ import ctypes
 import pytest
 from lib.devlib.device_lib import Controller
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData
+from utils.logging_module import logger
 from test_cases.conftest import dummy
 from src.macros import *
 
@@ -17,8 +18,8 @@ class TestNVMePropertyGet:
     @pytest.fixture(scope='function', autouse=True)
     def setup_method(self, dummy):
         ''' Setup Test Case by initialization of objects '''
-        print("\n", "-"*100)
-        print("Setup TestCase: Identify Controller")
+        logger.info("\n", "-"*100)
+        logger.info("Setup TestCase: Property Get")
         self.dummy = dummy
         device = self.dummy.device
         application = self.dummy.application
@@ -44,8 +45,11 @@ class TestNVMePropertyGet:
         self.controller.app.get_response(nvme_cmd)
         SC = nvme_cmd.rsp.response.sf.SC
         if res_status == 0:
+            logger.log("FAIL", "Command passed unexpectedly")
             assert False, "Command passed unexpectedly"
         if SC != 0x2:
+            logger.log("FAIL", 
+                       f"Command failed with unexpected status code: {hex(SC)}")
             assert False, f"Command failed with unexpected status code: {
                 hex(SC)}"
 
@@ -53,5 +57,5 @@ class TestNVMePropertyGet:
 
     def teardown_method(self):
         ''' Teardown of Test Case '''
-        print("Teardown TestCase: Identify Controller")
-        print("-"*100)
+        logger.info("Teardown TestCase: Property Get")
+        logger.info("-"*100)

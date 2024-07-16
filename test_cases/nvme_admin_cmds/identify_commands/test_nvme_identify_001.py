@@ -3,12 +3,13 @@ Sends Identify Controller Command and verifies that the Serial Number has
 characters in the range of 20h to 7Eh in Identify Response Data Structure
 '''
 
+import ctypes
+import pytest
 from src.macros import *
 from test_cases.conftest import dummy
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData
+from utils.logging_module import logger
 from lib.devlib.device_lib import Controller
-import ctypes
-import pytest
 
 
 class TestNVMeIdentify:
@@ -20,8 +21,8 @@ class TestNVMeIdentify:
     @pytest.fixture(scope='function', autouse=True)
     def setup_method(self, dummy):
         ''' Setup Test Case by initialization of objects '''
-        print("\n", "-"*100)
-        print("Setup TestCase: Identify Controller")
+        logger.info("\n", "-"*100)
+        logger.info("Setup TestCase: Identify Controller")
         self.dummy = dummy
         device = self.dummy.device
         application = self.dummy.application
@@ -40,15 +41,16 @@ class TestNVMeIdentify:
             assert False, f"Identify failed: {res_status}"
 
         self.controller.app.get_response(nvme_cmd)
-        print("Status Code: ", nvme_cmd.rsp.response.sf.SC)
+        logger.info("Status Code: ", nvme_cmd.rsp.response.sf.SC)
 
         SN = result.SN.decode().strip()
         for char in SN:
             if not ASCII_MIN <= ord(char) < ASCII_MAX:
+                logger.log("FAIL", f"ASCII out of range: {ord(char)}")
                 assert False, f"ASCII out of range: {ord(char)}"
         assert True
 
     def teardown_method(self):
         ''' Teardown of Test Case '''
-        print("Teardown TestCase: Identify Controller")
-        print("-"*100)
+        logger.info("Teardown TestCase: Identify Controller")
+        logger.info("-"*100)

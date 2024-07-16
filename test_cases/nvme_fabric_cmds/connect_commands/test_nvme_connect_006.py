@@ -4,9 +4,8 @@ Expected output: Connect command response is successful
 '''
 import pytest
 import re
-
 from src.macros import *
-from src.utils.nvme_utils import *
+from utils.logging_module import logger
 from test_cases.conftest import dummy
 from lib.devlib.device_lib import ConnectDetails, Controller
 
@@ -21,8 +20,8 @@ class TestNVMeConnect:
     def setup_method(self, dummy, connectDetails: ConnectDetails):
         ''' Setup test case by getting discovering the NQN '''
 
-        print("\n", "-"*100)
-        print("Setup TestCase: Connect Command with valid fields")
+        logger.info("\n", "-"*100)
+        logger.info("Setup TestCase: Connect Command with valid fields")
 
         self.dummy = dummy
         device = self.dummy.device
@@ -45,8 +44,8 @@ class TestNVMeConnect:
 
         self.nqn = self.controller.app.get_nqn_from_discover(response, index)
 
-        print("Setup Done: Connect Command with Valid Fields")
-        print("-"*35, "\n")
+        logger.info("Setup Done: Connect Command with Valid Fields")
+        logger.info("-"*35, "\n")
 
     def test_connect_valid_fields(self, connectDetails: ConnectDetails):
         ''' Send Connect command with valid fields '''
@@ -66,18 +65,19 @@ class TestNVMeConnect:
             self.connected_path = response
             assert True
         else:
+            logger.log("FAIL", "Connect failed for valid fields")
             assert False, "Connect failed for valid fields"
 
     def teardown_method(self):
         ''' Teardown test case by disconnecting the device '''
 
         print("\n\n", '-'*35)
-        print("Teardown TestCase: Connect Command with valid fields")
+        logger.info("Teardown TestCase: Connect Command with valid fields")
 
         if self.connected_path:
             status, res = self.controller.app.submit_disconnect_cmd(
                 device_path=self.connected_path)
             if status != 0:
                 raise Exception(f"Disconnect failed: {res}")
-        print("Teardown Complete")
-        print("-"*100)
+        logger.info("Teardown Complete")
+        logger.info("-"*100)
