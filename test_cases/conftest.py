@@ -10,7 +10,7 @@ and tearing down a session for NVMe over Fabric compliance testing.
 import json
 import pytest
 import sys
-sys.path.insert(1, "./../nvmeof_compliance")
+sys.path.insert(1, "./")
 from lib.cmdlib.commands_lib import NVMeCommandLib
 from lib.applib.nvme_cli_lib import NVMeCLILib
 from lib.devlib.device_lib import *

@@ -14,7 +14,7 @@ f.close()
 
 def pytest_html_report_title(report):
     """ Setting Title for the HTML report generated"""
-    report.title = "Fabric Test Suite: NVMe over Fabric Compliance Test Report (nvmfabtest)"
+    report.title = "Fabric Test Suite: NVMe over Fabric Compliance Test Report (nvmFabTest)"
     report.additional_summary["prefix"] = "BLAH BLAH prefix"
     report.additional_summary["summary"] = "BLAH BLAH summary"
     report.additional_summary["postfix"] = "BLAH BLAH postfix"

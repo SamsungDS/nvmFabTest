@@ -1,8 +1,8 @@
-# FabTest
+# nvmFabTest
 NVMe-oF Compliance Test Suite
 
 ## Description
-nvmfabtest is a comprehensive test suite written in Python 
+nvmFabTest is a comprehensive test suite written in Python 
 It provides both the framework and test cases for ensuring compliance with NVMe-oF standards. The ultimate goal is to contribute to the open-source community by providing a reliable and feature-rich tool for validating adherence to NVMe-oF specifications.
 
 The framework provides two user configurable application options which can be used to communicate with the NVM device. These are [nvme-cli](https://github.com/linux-nvme/nvme-cli) and [libnvme](https://github.com/linux-nvme/libnvme).
@@ -38,7 +38,7 @@ To install the NVMe-oF Compliance Test Suite, follow these steps:
    ```
 2. Navigate to the project directory:
    ```bash
-   cd nvmeof_compliance
+   cd nvmfabtest #Change if project directory name is different
    ```
 3. Install python dependencies:
    ```bash
@@ -61,7 +61,7 @@ To use the NVMe-oF Compliance Test Suite, follow these steps:
             "svcid": "",
             "index": 0
         },
-        "libnvme_path": ""
+        "libnvme_path": "auto"
     }
     ```
     The available options for each field are:

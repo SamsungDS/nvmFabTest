@@ -14,7 +14,7 @@ import json
 import re
 import os
 import sys
-sys.path.insert(1, "./../nvmeof_compliance/")
+sys.path.insert(1, "./")
 from lib.structlib.struct_fabric_libnvme_lib import *
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData
 import ctypes
