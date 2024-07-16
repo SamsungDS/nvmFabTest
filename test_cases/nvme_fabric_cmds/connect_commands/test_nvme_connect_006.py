@@ -1,3 +1,6 @@
+# Copyright (c) 2024 Samsung Electronics Corporation
+# SPDX-License-Identifier: BSD-3-Clause
+
 '''
 Verify connect command with valid fields(SUBNQN, TRADDR, TRSVCID, TRTYPE).
 Expected output: Connect command response is successful

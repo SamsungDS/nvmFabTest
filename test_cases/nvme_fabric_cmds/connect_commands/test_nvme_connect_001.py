@@ -1,3 +1,6 @@
+# Copyright (c) 2024 Samsung Electronics Corporation
+# SPDX-License-Identifier: BSD-3-Clause
+
 '''
 Send a connect command to Discovery Controller with discovery NQN.
 Expected output: Connect command response is successful

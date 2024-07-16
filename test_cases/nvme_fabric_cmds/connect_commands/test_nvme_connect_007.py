@@ -1,3 +1,6 @@
+# Copyright (c) 2024 Samsung Electronics Corporation
+# SPDX-License-Identifier: BSD-3-Clause
+
 '''
 Verify connect command with NVM Subsystem NQN value - "not matching" the values that the NVM subsystem is configured to support.
 Expected output: Failure with status "Connect Invalid Parameters"

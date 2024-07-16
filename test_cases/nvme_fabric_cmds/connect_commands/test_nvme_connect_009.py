@@ -1,3 +1,6 @@
+# Copyright (c) 2024 Samsung Electronics Corporation
+# SPDX-License-Identifier: BSD-3-Clause
+
 '''
 Send Connect and Disconnect command with different number of IO queues.
 Expected: Connect Command successful

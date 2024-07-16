@@ -1,3 +1,6 @@
+# Copyright (c) 2024 Samsung Electronics Corporation
+# SPDX-License-Identifier: BSD-3-Clause
+
 """ File containing all macros for constants used throughout the Test Suite """
 
 KATO_ZERO                   = 0

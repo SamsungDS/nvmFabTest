@@ -1,3 +1,6 @@
+# Copyright (c) 2024 Samsung Electronics Corporation
+# SPDX-License-Identifier: BSD-3-Clause
+
 '''
 Send Get Log Command to retrieve Firmware Slot information.
 Check the Active Slot Number and verify that the firmware revision

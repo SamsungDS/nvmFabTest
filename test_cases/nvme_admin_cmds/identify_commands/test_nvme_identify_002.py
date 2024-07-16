@@ -1,3 +1,6 @@
+# Copyright (c) 2024 Samsung Electronics Corporation
+# SPDX-License-Identifier: BSD-3-Clause
+
 '''
 Send Identify Command specifying an unsupported CNS value, FFh, for each namespace in the NVMe subsystem.
 Expected output: Failure with status "Invalid Field in Command" 

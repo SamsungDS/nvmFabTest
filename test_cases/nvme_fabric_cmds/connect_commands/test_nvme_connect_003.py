@@ -1,3 +1,6 @@
+# Copyright (c) 2024 Samsung Electronics Corporation
+# SPDX-License-Identifier: BSD-3-Clause
+
 '''
 Send a connect command to Discovery Controller supporting change notification with Non-Zero Keep Alive Time Out (KATO) value.
 Expected Output: Command response is successful

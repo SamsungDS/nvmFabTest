@@ -1,3 +1,6 @@
+# Copyright (c) 2024 Samsung Electronics Corporation
+# SPDX-License-Identifier: BSD-3-Clause
+
 '''
 Sends Identify Controller Command and verifies that the Serial Number has 
 characters in the range of 20h to 7Eh in Identify Response Data Structure

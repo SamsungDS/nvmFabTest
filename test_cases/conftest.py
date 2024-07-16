@@ -1,3 +1,6 @@
+# Copyright (c) 2024 Samsung Electronics Corporation
+# SPDX-License-Identifier: BSD-3-Clause
+
 """
 Configurations for pytest and test utilities.
 This file contains test fixtures and helper functions for setting up
@@ -19,7 +22,6 @@ from utils.reporting_module import *
 f = open("config/ts_config.json")
 ts_config = json.load(f)
 f.close()
-
 
 
 def connectByIP(app: NVMeCLILib, cmd_lib: NVMeCommandLib, connect_details):
