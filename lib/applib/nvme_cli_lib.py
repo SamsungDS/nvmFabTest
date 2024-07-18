@@ -85,7 +85,7 @@ class NVMeCLILib():
         """
         cmd = 'nvme version'
         self.execute_cmd(cmd)
-        version = str(self.app_buffer)
+        version = str(self.stdout)
         version = version.split(" ")
         return version[2].strip("\n")
 
@@ -98,7 +98,7 @@ class NVMeCLILib():
         cmd = ['modinfo nvme | grep -i version']
         self.execute_cmd(cmd)
 
-        version = str(self.stdout.readlines()[0])
+        version = str(self.stdout.decode().split("\n")[0])
         version = version.split(":")
         return "NVMe" + str(version[1])
 
@@ -108,12 +108,10 @@ class NVMeCLILib():
         Returns:
             str: path
         """
-        cmd = ['whereis nvme']
-        proc = subprocess.Popen(
-            cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        version = str(proc.stdout.readlines()[0])
-        version = version.split(":")
-        return version[1]
+        cmd = ['which nvme']
+        self.execute_cmd(cmd)
+
+        return self.stdout.decode()
 
     def get_response(self, nvme_cmd, rsp=None):
         """Parse the response and fill the CQE structure
