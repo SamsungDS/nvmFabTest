@@ -40,7 +40,7 @@ class TestNVMePropertyGet:
                 nvme_cmd.cmd.generic_command.cdw10.raw = True
             else:
                 nvme_cmd.cmd.generic_command.cdw10.raw = False
-            res_status = self.controller.app.submit_passthru(nvme_cmd,
+            res_status = self.controller.app.submit_admin_passthru(nvme_cmd,
                                                              verify_rsp=True, async_run=False)
 
             if res_status != 0:

@@ -55,7 +55,7 @@ class TestNVMeIdentify:
             self.controller.app.dev_name = ns_path
             self.controller.app.dev_path = ns_path
             logger.info(ns_path)
-            res_status = self.controller.app.submit_passthru(
+            res_status = self.controller.app.submit_admin_passthru(
                 nvme_cmd, verify_rsp=True, async_run=False)
 
             self.controller.app.get_response(nvme_cmd)

@@ -191,6 +191,28 @@ class NVMeCLILib():
 
         return cmd
 
+    def prepare_io_passthru_cmd(self, command: NVMeCmdStruct):
+        """
+        Prepares the io passthru command for execution by laying out the dwords.
+
+        Args:
+            command: The command object containing the NVMe structure for the
+                io passthru command.
+
+        Returns:
+            The formatted command string for executing the io passthru command.
+        """
+        opcode = command.cdw0.OPC
+        nsid = command.NSID
+        cmd_base = "nvme"
+        cmd = f"{cmd_base} io-passthru {self.dev_path} --opcode={opcode} --namespace-id={nsid}"
+        cmd = f"{cmd} --cdw2={command.cdw2.raw} --cdw3={command.cdw3.raw}"
+        cmd = f"{cmd} --cdw10={command.cdw10.raw} --cdw11={command.cdw11.raw}"
+        cmd = f"{cmd} --cdw12={command.cdw12.raw} --cdw13={command.cdw13.raw}"
+        cmd = f"{cmd} --cdw14={command.cdw14.raw} --cdw15={command.cdw15.raw}"
+
+        return cmd
+    
     def submit_discover_cmd(self, transport, address, svcid, hostnqn=None):
         """
         Submit a discover command to the NVMe device.
@@ -236,6 +258,35 @@ class NVMeCLILib():
             return status, self.stdout
         else:
             return status, self.stderr
+        
+    def get_device_lba_size(self, dev=None):
+        """
+        Submits an id-ns command to retrieve to calculate the block size. 
+
+        Args:
+            str: Device path whose block size is to be computed.  
+
+        Returns:
+            int: The block size. -1 if error.
+
+        """
+        if not dev:
+            dev = self.dev_path
+
+        if not re.match(r"/dev/nvme[0-9]+n[0-9]+", dev):
+            dev = dev + 'n1'
+            
+        cmd_base = "nvme"
+        cmd = f"{cmd_base} id-ns {dev}"
+        status = self.execute_cmd(cmd)
+        if status != 0:
+            return -1
+        else:
+            res = self.stdout.decode()
+            l = res.find("lbads")
+            r = res.find("rp:")
+            res = res[l+6:r-1].strip()            
+            return 2**int(res)
 
     def submit_list_ns_cmd(self):
         """
@@ -265,9 +316,9 @@ class NVMeCLILib():
         else:
             return status, self.stderr
 
-    def submit_passthru(self, nvme_cmd, verify_rsp=True, async_run=False):
+    def submit_admin_passthru(self, nvme_cmd, verify_rsp=True, async_run=False):
         """
-        Submit a passthru command to the NVMe device.
+        Submit admin passthru command to the NVMe device.
 
         Args:
             nvme_cmd: The NVMe command object to be submitted. The "NVMeCmdStruct" 
@@ -330,6 +381,48 @@ class NVMeCLILib():
                 # Parse Property Get response
                 value = int(str(self.stderr[-9:-1])[2:-1], 16)
                 ctypes.memmove(nvme_cmd.buff, value.to_bytes(8, 'little'), 8)
+
+            return 0
+        
+    def submit_io_passthru(self, nvme_cmd, verify_rsp=True, async_run=False):
+        """
+        Submit io passthru command to the NVMe device.
+
+        Args:
+            nvme_cmd: The NVMe command object to be submitted. The "NVMeCmdStruct" 
+                will be utilised from "nvme_cmd.cmd" and the reponse is moved to memory
+                specified in "nvme_cmd.buff".
+            verify_rsp: Flag indicating whether to verify the response. (TBD)
+            async_run: Flag indicating whether to run the command asynchronously. (TBD)
+
+        Returns:
+            int: Status Code of the command execution.
+        """
+        command = nvme_cmd.cmd.generic_command
+        response = nvme_cmd.rsp.response
+        data_len = nvme_cmd.buff_size
+
+        if True: #0 <= command.cdw0.OPC <= 0x0D:
+            
+            cmd = self.prepare_io_passthru_cmd(command)
+            cmd = f"{cmd} --data-len={data_len} -r -b"
+            ret_status = self.execute_cmd(cmd)
+
+            if ret_status != 0:
+                logger.warning("Command execution unsuccessful: ", ret_status)
+                return ret_status
+
+            if verify_rsp:
+                # self.validate_response()
+                # raise Exception("Response invalid")
+                pass
+
+            if not response:
+                logger.warning("Empty response ")
+                return ret_status
+
+            if data_len != 0:
+                ctypes.memmove(nvme_cmd.buff, self.stdout, data_len)
 
             return 0
 

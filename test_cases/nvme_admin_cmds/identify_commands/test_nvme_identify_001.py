@@ -24,7 +24,7 @@ class TestNVMeIdentify:
     @pytest.fixture(scope='function', autouse=True)
     def setup_method(self, dummy):
         ''' Setup Test Case by initialization of objects '''
-        logger.info("\n", "-"*100)
+        logger.info("\n"+ "-"*100)
         logger.info("Setup TestCase: Identify Controller")
         self.dummy = dummy
         device = self.dummy.device
@@ -38,7 +38,7 @@ class TestNVMeIdentify:
         result = IdentifyControllerData()
         nvme_cmd.buff = ctypes.addressof(result)
 
-        res_status = self.controller.app.submit_passthru(
+        res_status = self.controller.app.submit_admin_passthru(
             nvme_cmd, verify_rsp=True, async_run=False)
         if res_status != 0:
             assert False, f"Identify failed: {res_status}"

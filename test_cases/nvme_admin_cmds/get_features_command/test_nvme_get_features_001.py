@@ -37,7 +37,7 @@ class TestNVMeGetFeatures:
         features_id = 7
         nvme_cmd = self.controller.cmdlib.get_get_features_cmd(features_id)
 
-        res_status = self.controller.app.submit_passthru(
+        res_status = self.controller.app.submit_admin_passthru(
             nvme_cmd, verify_rsp=True, async_run=False)
         if res_status != 0:
             self.controller.app.get_response(nvme_cmd)

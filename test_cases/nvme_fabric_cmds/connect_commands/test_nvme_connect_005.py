@@ -60,7 +60,7 @@ class TestNVMeConnectKato:
         result = IdentifyControllerData()
         nvme_cmd.buff = ctypes.addressof(result)
 
-        ret_status = discovery_controller.app.submit_passthru(
+        ret_status = discovery_controller.app.submit_admin_passthru(
             nvme_cmd, verify_rsp=True, async_run=False)
         discovery_controller.app.get_response(nvme_cmd)
         if ret_status != 0 and ret_status:

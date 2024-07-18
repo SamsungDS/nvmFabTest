@@ -43,7 +43,7 @@ class TestNVMeGetLog:
         data = ctypes.create_string_buffer(log_len)
         nvme_cmd.buff = ctypes.addressof(data)
 
-        res_status = self.controller.app.submit_passthru(
+        res_status = self.controller.app.submit_admin_passthru(
             nvme_cmd, verify_rsp=True, async_run=False)
         if res_status != 0:
             self.controller.app.get_response(nvme_cmd)

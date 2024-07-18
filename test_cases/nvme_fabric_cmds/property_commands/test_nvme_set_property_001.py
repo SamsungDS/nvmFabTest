@@ -39,7 +39,7 @@ class TestNVMePropertySet:
             nvme_cmd.cmd.generic_command.cdw10.raw = True
         else:
             nvme_cmd.cmd.generic_command.cdw10.raw = False
-        res_status = self.controller.app.submit_passthru(nvme_cmd,
+        res_status = self.controller.app.submit_admin_passthru(nvme_cmd,
                                                          verify_rsp=True, async_run=False)
         if res_status != 0:
             raise Exception("Property Set failed")
@@ -64,7 +64,7 @@ class TestNVMePropertySet:
         nvme_cmd.cmd.generic_command.cdw12.raw = set_value & 0xFFFFFFFF
         nvme_cmd.cmd.generic_command.cdw13.raw = set_value >> 32
 
-        res_status = self.controller.app.submit_passthru(nvme_cmd,
+        res_status = self.controller.app.submit_admin_passthru(nvme_cmd,
                                                          verify_rsp=True, async_run=False)
         # Verifying Property Set success
         if res_status != 0:
@@ -75,7 +75,7 @@ class TestNVMePropertySet:
 
         # Verifying Shutdown success by checking if base command fails
         nvme_cmd = self.controller.cmdlib.get_identify_controller_cmd()
-        res_status = self.controller.app.submit_passthru(
+        res_status = self.controller.app.submit_admin_passthru(
             nvme_cmd, verify_rsp=True, async_run=False)
         if res_status == 0:
             logger.log("FAIL", "Non-fabric command passed after Shutdown Notification")
@@ -83,7 +83,7 @@ class TestNVMePropertySet:
 
         # Verifying Shutdown success by checking if fabric command passes
         nvme_cmd = self.controller.cmdlib.get_property_get_cmd()
-        res_status = self.controller.app.submit_passthru(
+        res_status = self.controller.app.submit_admin_passthru(
             nvme_cmd, verify_rsp=True, async_run=False)
         if res_status != 0:
             logger.log("FAIL", "Fabric command failed after Shutdown Notification")

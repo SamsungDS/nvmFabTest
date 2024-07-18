@@ -149,3 +149,23 @@ class NVMeCommandLib:
         logger.trace("nvme_cmd returned from Commands Lib")
 
         return nvme_cmd
+    
+    def get_read_cmd(self, feature_id=None):
+        """Retrieves the main NVMeCommand Structure with the required fields set for making
+            it a Read command
+
+        Returns:
+            NVMeCommand: Structure for Read command.
+        """
+        nvme_cmd = self.get_nvme_cmd()
+        nvme_cmd.cmd.generic_command.cdw0.OPC = 0x02
+        nvme_cmd.cmd.generic_command.NSID = 1 
+
+        # nvme_cmd.buff_size = 512
+
+        # nvme_cmd.cmd.generic_command.dptr.sgl.data_len = nvme_cmd.buff_size
+        # nvme_cmd.cmd.generic_command.dptr.sgl.addr = nvme_cmd.buff
+        
+        logger.trace("nvme_cmd returned from Commands Lib")
+
+        return nvme_cmd
