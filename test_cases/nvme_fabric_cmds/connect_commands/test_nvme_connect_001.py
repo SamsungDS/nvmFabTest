@@ -24,7 +24,7 @@ class TestNVMeConnect:
     def setup_method(self, dummy):
         ''' Setup Test Case by initialization of objects '''
 
-        logger.info("\n", "-"*100)
+        logger.info("\n" + "-"*100)
         logger.info("Setup TestCase: Connect Command")
 
         self.dummy = dummy

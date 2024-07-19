@@ -22,7 +22,7 @@ class TestNVMeDiscovery:
         Send a Discovery Service with invalid host NQN
         Expected output: Discovery fails
         '''
-        logger.info("\n", "-"*100)
+        logger.info("\n" + "-"*100)
         logger.info("Setup TestCase: Discovery Service")
 
         self.dummy = dummy

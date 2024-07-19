@@ -21,7 +21,7 @@ class TestNVMeConnectHostID:
     def setup_method(self, dummy, connectDetails: ConnectDetails):
         ''' Setup test case by getting discovering the NQN '''
 
-        logger.info("\n", "-"*100)
+        logger.info("\n" + "-"*100)
         logger.info("Setup TestCase: Connect Command with Host ID cleared to 0h")
         self.dummy = dummy
         device = self.dummy.device

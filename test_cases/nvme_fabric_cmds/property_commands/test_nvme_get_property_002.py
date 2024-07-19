@@ -21,7 +21,7 @@ class TestNVMePropertyGet:
     @pytest.fixture(scope='function', autouse=True)
     def setup_method(self, dummy):
         ''' Setup Test Case by initialization of objects '''
-        logger.info("\n", "-"*100)
+        logger.info("\n" + "-"*100)
         logger.info("Setup TestCase: Property Get")
         self.dummy = dummy
         device = self.dummy.device

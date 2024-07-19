@@ -25,7 +25,7 @@ class TestNVMeConnectKato:
     @pytest.fixture(scope='function', autouse=True)
     def setup_method(self, dummy, connectDetails: ConnectDetails):
         ''' Setup by checking if Change Notification is supported by discovery service '''
-        logger.info("\n", "-"*100)
+        logger.info("\n" + "-"*100)
         logger.info("Setup TestCase: Connect Command with KATO")
         self.dummy = dummy
         device = self.dummy.device

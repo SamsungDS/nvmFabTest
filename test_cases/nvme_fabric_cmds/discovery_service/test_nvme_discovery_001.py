@@ -23,7 +23,7 @@ class TestNVMeDiscovery:
         Send a Get Log Page command to Discovery Controller and retrieve subsystem NQN
         Expected output: Valid NQN retrieved
         '''
-        logger.info("\n", "-"*100)
+        logger.info("\n" + "-"*100)
         logger.info("Setup TestCase: Discovery Service")
 
         self.dummy = dummy

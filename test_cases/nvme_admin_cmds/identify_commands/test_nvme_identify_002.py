@@ -26,7 +26,7 @@ class TestNVMeIdentify:
     def setup_method(self, dummy):
         ''' Setup test case and fetch all namespaces list'''
 
-        logger.info("\n", "-"*100)
+        logger.info("\n" + "-"*100)
         logger.info("Setup TestCase: Identify Controller")
 
         self.dummy = dummy

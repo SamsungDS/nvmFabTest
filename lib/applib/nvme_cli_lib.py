@@ -33,7 +33,7 @@ class NVMeCLILib():
         self.data_buffer = ""
         self.dev_path = dev_path
         self.command = None
-        # self.nvme_cmd.rsp.response = None
+        self.nvme_cmd.rsp.response = None
         self.err_code = 0
         self.nvme_list = []
         self.subsys_list = []
@@ -275,7 +275,7 @@ class NVMeCLILib():
 
         if not re.match(r"/dev/nvme[0-9]+n[0-9]+", dev):
             dev = dev + 'n1'
-            
+
         cmd_base = "nvme"
         cmd = f"{cmd_base} id-ns {dev}"
         status = self.execute_cmd(cmd)

@@ -30,7 +30,7 @@ class TestNVMeAuthConnect:
             self.skipped = True
             pytest.skip("Authentication Tests Disabled")
 
-        logger.info("\n", "-"*100)
+        logger.info("\n" + "-"*100)
         logger.info("Setup TestCase: Auth Connect Command")
 
         self.connectIsSuccess = None

@@ -1,6 +1,6 @@
 {
     "app_name": "nvme-cli",
-    "device_path": "",
+    "device_path": "/dev/nvme0",
     "connectByIP": "false",
     "disconnectOnDone": "false",
     "connectDetails": {

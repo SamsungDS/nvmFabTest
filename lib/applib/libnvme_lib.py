@@ -292,7 +292,7 @@ class Libnvme():
             int: Status Code of the command execution.
         """
         command = nvme_cmd.cmd.generic_command
-        logger.info("--",
+        logger.info("--" +
               f"libnvme submit passthru: OPC:{command.cdw0.OPC} NSID:{command.NSID} CDW10:{command.cdw10.raw} CDW11:{command.cdw11.raw}")
         self.ret_status, error = self.nvme_open()
         if self.ret_status != 0:

@@ -10,6 +10,7 @@ abstraction to the device layer.
 from lib.applib.libnvme_lib import Libnvme
 from lib.applib.nvme_cli_lib import NVMeCLILib
 from lib.cmdlib.commands_lib import NVMeCommandLib
+from lib.syslib.system_lib import SystemLib
 from utils.logging_module import logger
 
 
@@ -33,6 +34,7 @@ class Controller():
         self.cmdlib = NVMeCommandLib(dev_name, app_name)
         self.dev_name = dev_name
         self.app_name = app_name
+        self.sys = SystemLib()
         if app_name.lower() == "nvme-cli"  or app_name.lower() == "nvmecli":
             self.app = NVMeCLILib(dev_name)
             logger.trace("nvme-cli selected")
