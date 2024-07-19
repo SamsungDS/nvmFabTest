@@ -29,7 +29,7 @@ class TestLinkFailure:
         if not should_run_link_failure:
             self.skipped = True
             pytest.skip("Link Failure Test disabled")
-        logger.info("\n", "-"*100)
+        logger.info("\n" + "-"*100)
         logger.info("Setup TestCase: Link Failure")
         self.dummy = dummy
         device = self.dummy.device
@@ -37,10 +37,9 @@ class TestLinkFailure:
         application = self.dummy.application
         self.controller = Controller(device, application)
 
-        cmd = "route | grep \'^default\' | grep -o \'[^ ]*$\'"
-        p = subprocess.run(cmd, shell=True, capture_output=True)
-        self.iface = p.stdout.decode()[:-1]
-
+        self.iface = self.controller.sys.get_network_interface()
+        logger.info("Network interface: {}", self.iface)
+        
         # SETUP - Device Status
         self.output = []
         ret_code, response = self.controller.app.submit_list_subsys_cmd()
@@ -58,18 +57,12 @@ class TestLinkFailure:
         ''' Sending the command and verifying response '''
         try:
             # LINKDOWN
-            cmd = f"ip link set {self.iface} down"
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE, shell=True)
-            p.wait()
+            self.controller.sys.set_link( "down", self.iface)
             self.output.append("Link Down")
 
             # SLEEP 30secs
-            cmd = "sleep 30"
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE, shell=True)
             self.output.append("-- Sleeping ZzZ")
-            p.wait()
+            self.controller.sys.sleep(30)
             self.output.append("-- Woke up after 30 seconds")
 
             # DEVICE STATUS
@@ -86,10 +79,7 @@ class TestLinkFailure:
                     assert False, "Device lost after link down"
 
             # LINKUP
-            cmd = f"ip link set {self.iface} up"
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE, shell=True)
-            p.wait()
+            self.controller.sys.set_link( "up", self.iface)
             self.output.append("Link Up")
 
         except Exception as e:
@@ -138,10 +128,10 @@ class TestLinkFailure:
         cmd = f"{cmd} --do_verify=1"
         cmd = f"{cmd} --verify=crc32"
 
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE, shell=True)
-        stdout, stderr = p.communicate()
-        ret_code = p.returncode
+        self.controller.sys.execute_cmd(cmd)
+
+        stdout, stderr = self.controller.sys.stdout, self.controller.sys.stderr
+        ret_code = self.controller.sys.ret_code
         if ret_code == 0 and "verify" not in stdout.decode():
             self.output.append("fio success with data integrity")
         elif ret_code != 0 and "verify" not in stderr.decode():
@@ -159,8 +149,9 @@ class TestLinkFailure:
         if self.skipped:
             return
         logger.info("Teardown TestCase: Link Failure")
-        cmd = f"ip link set {self.iface} up"
-        subprocess.Popen(cmd, shell=True)
+        self.controller.sys.set_link( "up", self.iface)
+        self.output.append("Link Up")        
+        
         for line in self.output:
             logger.info(line)
         logger.info("-"*100)
