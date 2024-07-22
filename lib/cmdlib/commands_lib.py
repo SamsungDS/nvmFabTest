@@ -150,7 +150,27 @@ class NVMeCommandLib:
 
         return nvme_cmd
     
-    def get_read_cmd(self, feature_id=None):
+    def get_set_features_cmd(self, feature_id=None):
+        """Retrieves the main NVMeCommand Structure with the required fields set for making
+            it a Set Features command
+
+        Returns:
+            NVMeCommand: Structure for Set Features command.
+        """
+        nvme_cmd = self.get_nvme_cmd()
+        nvme_cmd.cmd.generic_command.cdw0.OPC = 0x09
+        nvme_cmd.cmd.generic_command.NSID = 0xFFFFFFFF  
+
+        if feature_id:
+            nvme_cmd.cmd.generic_command.cdw10.raw = feature_id
+        
+        nvme_cmd.buff_size = 0
+        
+        logger.trace("nvme_cmd returned from Commands Lib")
+
+        return nvme_cmd
+    
+    def get_read_cmd(self):
         """Retrieves the main NVMeCommand Structure with the required fields set for making
             it a Read command
 
@@ -161,11 +181,79 @@ class NVMeCommandLib:
         nvme_cmd.cmd.generic_command.cdw0.OPC = 0x02
         nvme_cmd.cmd.generic_command.NSID = 1 
 
-        # nvme_cmd.buff_size = 512
-
+        # For libnvme, use these in test case
         # nvme_cmd.cmd.generic_command.dptr.sgl.data_len = nvme_cmd.buff_size
         # nvme_cmd.cmd.generic_command.dptr.sgl.addr = nvme_cmd.buff
-        
+
+        logger.trace("nvme_cmd returned from Commands Lib")
+
+        return nvme_cmd
+    
+    def get_write_cmd(self):
+        """Retrieves the main NVMeCommand Structure with the required fields set for making
+            it a Write command
+
+        Returns:
+            NVMeCommand: Structure for Write command.
+        """
+        nvme_cmd = self.get_nvme_cmd()
+        nvme_cmd.cmd.generic_command.cdw0.OPC = 0x01
+        nvme_cmd.cmd.generic_command.NSID = 1 
+
+        # For libnvme, use these in test case
+        # nvme_cmd.cmd.generic_command.dptr.sgl.data_len = nvme_cmd.buff_size
+        # nvme_cmd.cmd.generic_command.dptr.sgl.addr = nvme_cmd.buff
+
+        logger.trace("nvme_cmd returned from Commands Lib")
+
+        return nvme_cmd
+    
+    def get_flush_cmd(self):
+        """Retrieves the main NVMeCommand Structure with the required fields set for making
+            it a Flush command
+
+        Returns:
+            NVMeCommand: Structure for Flush command.
+        """
+        nvme_cmd = self.get_nvme_cmd()
+        nvme_cmd.cmd.generic_command.cdw0.OPC = 0x00
+        nvme_cmd.cmd.generic_command.NSID = 1
+ 
+        logger.trace("nvme_cmd returned from Commands Lib")
+
+        return nvme_cmd
+
+    def get_abort_cmd(self, sqid = None, cid = None):
+        """Retrieves the main NVMeCommand Structure with the required fields set for making
+            it an Abort command
+
+        Returns:
+            NVMeCommand: Structure for Abort command.
+        """
+        nvme_cmd = self.get_nvme_cmd()
+        nvme_cmd.cmd.generic_command.cdw0.OPC = 0x08
+
+        if sqid:
+            nvme_cmd.cmd.generic_command.cdw10.raw = sqid & ((1<<16)-1)
+
+        if cid:
+            nvme_cmd.cmd.generic_command.cdw10.raw = cid << 16
+
+        logger.trace("nvme_cmd returned from Commands Lib")
+
+        return nvme_cmd
+    
+    def get_aer_cmd(self):
+        """Retrieves the main NVMeCommand Structure with the required fields set for making
+            it an Abort command
+
+        Returns:
+            NVMeCommand: Structure for Abort command.
+        """
+        nvme_cmd = self.get_nvme_cmd()
+        nvme_cmd.cmd.generic_command.cdw0.OPC = 0x0C
+
+ 
         logger.trace("nvme_cmd returned from Commands Lib")
 
         return nvme_cmd

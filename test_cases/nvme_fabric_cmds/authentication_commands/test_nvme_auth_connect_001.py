@@ -70,7 +70,7 @@ class TestNVMeAuthConnect:
         self.all_nvme_setup.sort()
 
         logger.info("Setup Done: Auth Connect Command")
-        logger.info("-"*35, "\n")
+        logger.info("-"*35 + "\n")
 
     def test_auth_connect_host_dhchap(self, authDetails: AuthDetails):
         ''' Performing test by sending connect command to discovery NQN '''

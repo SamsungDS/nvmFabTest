@@ -11,10 +11,14 @@ with NVMe devices, and it abstracts the complexities of dealing with the cli
 commands and responses.
 """
 import ctypes
+import sys
+sys.path.insert(1, './')
 import subprocess
+from src.macros import *
 from utils.logging_module import logger
 from lib.structlib.nvme_struct_main_lib import NVMeCmdStruct, NVMeRspStruct
 import re
+import os
 
 
 class NVMeCLILib():
@@ -33,7 +37,6 @@ class NVMeCLILib():
         self.data_buffer = ""
         self.dev_path = dev_path
         self.command = None
-        self.nvme_cmd.rsp.response = None
         self.err_code = 0
         self.nvme_list = []
         self.subsys_list = []
@@ -67,15 +70,20 @@ class NVMeCLILib():
         """
         logger.info("-- Executing Command: {}", command)
         process = subprocess.Popen(
-            command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        self.stdout, self.stderr = process.communicate()
-        self.ret_code = process.returncode
+                command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
-        if len(self.stderr) != 0 and self.ret_code != 0:
-            logger.warning(f"-- -- Command execution failed: {self.stderr[:112]}")
-            return self.ret_code
-        logger.success("-- -- Command execution success")
-        return 0
+        if not async_run:   
+
+            self.stdout, self.stderr = process.communicate()
+            self.ret_code = process.returncode
+
+            if len(self.stderr) != 0 and self.ret_code != 0:
+                logger.warning(f"-- -- Command execution failed: {self.stderr[:self.stderr.find(b'\n')]}")
+                return self.ret_code
+            logger.success("-- -- Command execution success")
+            return 0
+        
+        return process
 
     def get_app_version(self):
         """Retrieves the version of the nvme-cli installation
@@ -136,7 +144,6 @@ class NVMeCLILib():
                 nvme_cmd.rsp.response.sf.CRD = NVMeCLILib.mapping(src, 11, 13)
                 nvme_cmd.rsp.response.sf.SCT = NVMeCLILib.mapping(src, 8, 11)
                 nvme_cmd.rsp.response.sf.SC = NVMeCLILib.mapping(src, 0, 8)
-
             else:
                 nvme_cmd.rsp.response.sf.DNR = 0
                 nvme_cmd.rsp.response.sf.M = 0
@@ -338,8 +345,11 @@ class NVMeCLILib():
             # Admin Command
             cmd = self.prepare_admin_passthru_cmd(command)
             cmd = f"{cmd} --data-len={data_len} -r -b"
-            ret_status = self.execute_cmd(cmd)
+            ret_status = self.execute_cmd(cmd, async_run=async_run)
 
+            if async_run:
+                return ret_status
+            
             if ret_status != 0:
                 logger.warning("Command execution unsuccessful: ", ret_status)
                 return ret_status
@@ -362,7 +372,7 @@ class NVMeCLILib():
             # Fabric Command
             cmd = self.prepare_admin_passthru_cmd(command)
             cmd = f"{cmd} -r"
-            ret_status = self.execute_cmd(cmd)
+            ret_status = self.execute_cmd(cmd, async_run=async_run)
 
             if ret_status != 0:
                 logger.warning("Command execution unsuccessful: ", ret_status)
@@ -402,29 +412,40 @@ class NVMeCLILib():
         response = nvme_cmd.rsp.response
         data_len = nvme_cmd.buff_size
 
-        if True: #0 <= command.cdw0.OPC <= 0x0D:
+        if command.cdw0.OPC == 0x01:    
+            os.mkdir(TEMP_DIR) if not os.path.exists(TEMP_DIR) else None
+            input_file = f'{TEMP_DIR}/write_001.txt'
             
+            with open(input_file, 'wb') as f:
+                f.write(ctypes.string_at(nvme_cmd.buff, nvme_cmd.buff_size))
+
+            cmd = self.prepare_io_passthru_cmd(command)
+            cmd = f"{cmd} --data-len={data_len} --input-file={input_file} -w"
+            ret_status = self.execute_cmd(cmd, async_run=async_run)
+        
+        else:
             cmd = self.prepare_io_passthru_cmd(command)
             cmd = f"{cmd} --data-len={data_len} -r -b"
-            ret_status = self.execute_cmd(cmd)
-
-            if ret_status != 0:
-                logger.warning("Command execution unsuccessful: ", ret_status)
-                return ret_status
-
-            if verify_rsp:
-                # self.validate_response()
-                # raise Exception("Response invalid")
-                pass
-
-            if not response:
-                logger.warning("Empty response ")
-                return ret_status
-
+            ret_status = self.execute_cmd(cmd, async_run=async_run)
+            
             if data_len != 0:
                 ctypes.memmove(nvme_cmd.buff, self.stdout, data_len)
 
-            return 0
+
+        if ret_status != 0:
+            logger.warning("Command execution unsuccessful: ", ret_status)
+            return ret_status
+
+        if verify_rsp:
+            # self.validate_response()
+            # raise Exception("Response invalid")
+            pass
+
+        if not response:
+            logger.warning("Empty response ")
+            return ret_status
+        
+        return 0
 
     def submit_connect_cmd(self, transport, address, svcid, nqn, kato=None,
                            duplicate=False, hostnqn=None, hostid=None, nr_io_queues=None,

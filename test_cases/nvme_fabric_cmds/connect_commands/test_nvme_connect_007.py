@@ -41,7 +41,7 @@ class TestNVMeConnectNQN:
         status, response = self.controller.app.submit_discover_cmd(
             transport=tr, address=addr, svcid=svc)
         if status != 0:
-            print(
+            logger.error(
                 "-- -- TestCase Setup Error: Discover command failed. Check the configuration details")
             raise Exception("TestCase Setup Exception")
 
@@ -49,7 +49,7 @@ class TestNVMeConnectNQN:
         # End Discover Command
 
         logger.info("Setup Done: Connect Command with invalid subsystem NQN")
-        logger.info("-"*35, "\n")
+        logger.info("-"*35 + "\n")
 
     def test_connect_invalid_subnqn(self, connectDetails: ConnectDetails):
         ''' Send Connect command with invalid subsystem NQN '''
@@ -64,7 +64,7 @@ class TestNVMeConnectNQN:
             transport=tr, address=addr, svcid=svc, nqn=nqn, duplicate=True)
 
         if status != 0:
-            print("-- Expected Failure in Connect Command")
+            logger.info("-- Expected Failure in Connect Command")
             assert True
         else:
             self.connected_path = response
@@ -74,7 +74,7 @@ class TestNVMeConnectNQN:
     def teardown_method(self):
         ''' Teardown test case by disconnecting the device '''
 
-        print("\n\n", '-'*35)
+        logger.info('-'*35)
         logger.info("Teardown TestCase: Connect Command with invalid subsystem NQN")
 
         if self.connected_path:

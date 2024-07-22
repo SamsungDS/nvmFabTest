@@ -25,9 +25,9 @@ The framework provides two user configurable application options which can be us
     ```bash
     uname -r
     ```
-- **nvme-cli** You can install using the command:
+- **apt packages** You can install using the command:
     ```bash
-    sudo apt install nvme-cli
+    sudo apt install nvme-cli net-tools fio meson
     ```
 ## Installation
 To install the NVMe-oF Compliance Test Suite, follow these steps:
@@ -38,7 +38,7 @@ To install the NVMe-oF Compliance Test Suite, follow these steps:
    ```
 2. Navigate to the project directory:
    ```bash
-   cd nvmfabtest #Change if project directory name is different
+   cd nvmFabTest # Change if project directory name is different
    ```
 3. Install python dependencies:
    ```bash
@@ -61,7 +61,20 @@ To use the NVMe-oF Compliance Test Suite, follow these steps:
             "svcid": "",
             "index": 0
         },
-        "libnvme_path": "auto"
+        "libnvme_path": "auto",
+        
+        "test_link_failure": "true",
+
+        "test_authentication": "true",
+        "test_auth_config": {
+            "transport": "",
+            "addr": "",
+            "svcid": "",
+            "index": 1,
+            "dhchap_host": "",
+            "dhchap_ctrl": "",
+            "hostnqn": ""
+        }
     }
     ```
     The available options for each field are:
@@ -72,8 +85,17 @@ To use the NVMe-oF Compliance Test Suite, follow these steps:
     - `connectDetails.transport: ["tcp", "rdma", "loop"]`
     - `connectDetails.addr: "<IP address to target>"`
     - `connectDetails.svcid: "<SVC Port ID>"`
-    - `connectDetails.index: [0, <Device index in target>]`
+    - `connectDetails.index: [0 (default), <Device index in target>]`
     - `libnvme_path: ["auto", "<Path to libnvme.so file>"]`
+    - `test_link_failure: ["true", "false"]`
+    - `test_authentication: ["true", "false"]`
+    - `test_auth_config.transport: ["tcp", "rdma", "loop"]`
+    - `test_auth_config.addr: "<IP address to target>"`
+    - `test_auth_config.svcid: "<SVC Port ID>"`
+    - `test_auth_config.index: [1 (default), <Device index in target>]`
+    - `test_auth_config.dhchap_host: ["<dhchap Secret Key for Host>", ""]`
+    - `test_auth_config.dhchap_ctrl: ["<dhchap Secret Key for Controller>", ""]`
+    - `test_auth_config.hostnqn: ["<Custom Host NQN>", ""]`
 
 
 2. Run the Test Suite:

@@ -55,8 +55,8 @@ class IdentifyControllerData(ctypes.Structure): #Figure 247
                 ("MN", ctypes.c_char * 40), #B63-24 # Model Number 
                 ("FR", ctypes.c_char * 8), #B71-64 # Firmware Revision 
                 ("RAB", ctypes.c_uint8), #B72 # Recommended Arbitration Burst 
-                ("IEEE", ctypes.c_int8 * 3), #B75-73 # IEEE Organization Unique Identifier
-                ("CMIC", ctypes.c_int8), #B76 # Controller Multi-Path I/O and Namespace Sharing Capabilities
+                ("IEEE", ctypes.c_uint8 * 3), #B75-73 # IEEE Organization Unique Identifier
+                ("CMIC", ctypes.c_uint8), #B76 # Controller Multi-Path I/O and Namespace Sharing Capabilities
                 ("MDTS", ctypes.c_uint8), #B77 # Maximum Data Transfer Size
                 ("CNTLID", ctypes.c_uint16), #B79-78 # Controller ID
                 ("VER", ctypes.c_uint32), #B83-80 #Version

@@ -44,7 +44,7 @@ class TestNVMeIdentify:
             assert False, f"Identify failed: {res_status}"
 
         self.controller.app.get_response(nvme_cmd)
-        logger.info("Status Code: ", nvme_cmd.rsp.response.sf.SC)
+        logger.info("Status Code: {}", nvme_cmd.rsp.response.sf.SC)
 
         SN = result.SN.decode().strip()
         for char in SN:

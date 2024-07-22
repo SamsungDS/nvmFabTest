@@ -38,7 +38,7 @@ class TestNVMeConnectHostID:
         status, response = self.controller.app.submit_discover_cmd(
             transport=tr, address=addr, svcid=svc)
         if status != 0:
-            print(
+            logger.error(
                 "-- -- TestCase Setup Error: Discover command failed. Check the configuration details")
             raise Exception("TestCase Setup Exception")
 
@@ -46,7 +46,7 @@ class TestNVMeConnectHostID:
         # End Discover Command
 
         logger.info("Setup Complete")
-        logger.info("-"*35, "\n")
+        logger.info("-"*35 + "\n")
 
     def test_connect_zero_hostid(self, connectDetails: ConnectDetails):
         ''' Send Connect command with Host ID cleared to 0h '''
@@ -63,7 +63,7 @@ class TestNVMeConnectHostID:
             transport=tr, address=addr, svcid=svc, nqn=nqn, duplicate=True, hostid=hostid)
 
         if status != 0:
-            print("-- Expected Failure in Connect Command")
+            logger.info("-- Expected Failure in Connect Command")
             assert True
         else:
             self.connected_path = response
@@ -73,7 +73,7 @@ class TestNVMeConnectHostID:
     def teardown_method(self):
         ''' Teardown test case by disconnecting the device '''
 
-        print("\n\n", '-'*35)
+        logger.info('-'*35)
         logger.info("Teardown TestCase: Connect Command with Host ID cleared to 0h")
         if self.connected_path:
             status, res = self.controller.app.submit_disconnect_cmd(

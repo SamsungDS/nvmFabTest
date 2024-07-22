@@ -23,6 +23,9 @@ f = open("config/ts_config.json")
 ts_config = json.load(f)
 f.close()
 
+with open("assets/bytes_512.txt", 'wb') as f:
+    f.write(bytearray([(i+10)%128 for i in range(512)]))
+
 
 def connectByIP(app: NVMeCLILib, cmd_lib: NVMeCommandLib, connect_details):
     """
@@ -96,10 +99,10 @@ def session_setup():
             dev_path = response
         else:
             if ts_config["device_path"][:-1] == "/dev/nvme" or ts_config["device_path"][:-3] == "/dev/nvme":
-                logger.warning("-- ErrorConnecting, using device_path instead: ", response)
+                logger.warning("-- ErrorConnecting, using device_path instead: {}", response)
                 dev_path = ts_config["device_path"]
             else:
-                logger.error("-- Error Connecting and no device_path specified: ", response)
+                logger.error("-- Error Connecting and no device_path specified: {}", response)
                 assert False
     else:
         dev_path = ts_config["device_path"]
@@ -116,6 +119,7 @@ def session_setup():
         if status != 0:
             logger.error(f"Disconnect failed: {res}")
             raise Exception(f"Disconnect failed: {res}")
+    logger.info('-'*30 + "Teardown Complete" + '-'*30)
 
 
 @pytest.fixture

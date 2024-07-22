@@ -43,7 +43,7 @@ class TestNVMeConnectKato:
         status, response = self.controller.app.submit_connect_cmd(
             transport=tr, address=addr, svcid=svc, nqn=nqn)
         if status != 0 and status != 1:
-            print(
+            logger.error(
                 "-- -- Session Setup Error: Connect failed. Check the configuration details")
             raise Exception(
                 "TestCase Setup Exeption: Unable to connect discovery controller")
@@ -69,10 +69,10 @@ class TestNVMeConnectKato:
             TestNVMeConnectKato.isChangeNotificationSupported = True
         else:
             TestNVMeConnectKato.isChangeNotificationSupported = False
-        print("Change Notification is {}supported".format(
+        logger.info("Change Notification is {}supported".format(
             "" if TestNVMeConnectKato.isChangeNotificationSupported else "not "))
         logger.info("Setup Done: Connect Command with KATO")
-        logger.info("-"*35, "\n")
+        logger.info("-"*35 + "\n")
 
     def test_connect_discovery_nonzero_kato(self, connectDetails: ConnectDetails):
         ''' Send Connect command with non-zero KATO value to Controller
@@ -101,7 +101,7 @@ class TestNVMeConnectKato:
     def teardown_method(self):
         ''' Teardown test case by disconnecting discovery controller '''
 
-        print("\n\n", '-'*35)
+        logger.info('-'*35)
         logger.info("Teardown TestCase: Connect Command with KATO")
 
         status, res = self.controller.app.submit_disconnect_cmd(

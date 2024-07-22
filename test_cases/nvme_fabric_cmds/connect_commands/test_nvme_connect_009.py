@@ -40,7 +40,7 @@ class TestNVMeConnectIOQueues:
         status, response = self.controller.app.submit_discover_cmd(
             transport=tr, address=addr, svcid=svc)
         if status != 0:
-            print(
+            logger.error(
                 "-- -- TestCase Setup Error: Discover command failed. Check the configuration details")
             raise Exception("TestCase Setup Exception")
 
@@ -48,7 +48,7 @@ class TestNVMeConnectIOQueues:
         # End Discover Command
 
         logger.info("Setup Complete")
-        logger.info("-"*35, "\n")
+        logger.info("-"*35 + "\n")
 
     def test_connect_nr_io_queues(self, connectDetails: ConnectDetails):
         ''' Send Connect and Disconnect command with different number of IO queues '''
@@ -74,7 +74,7 @@ class TestNVMeConnectIOQueues:
     def teardown_method(self):
         ''' Teardown test case by disconnecting the device '''
 
-        print("\n\n", '-'*35)
+        logger.info('-'*35)
         logger.info("Teardown TestCase: Connect Command with different number of IO queues")
 
         for path in self.connected_paths:

@@ -16,3 +16,4 @@ time_compare.py
 fio*
 *.state
 *.log
+.temp/
