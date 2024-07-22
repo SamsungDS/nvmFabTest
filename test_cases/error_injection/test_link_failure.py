@@ -46,9 +46,13 @@ class TestLinkFailure:
 
         if ret_code == 0:
             j = json.loads(response.decode())
-            j = j[0]["Subsystems"][0]["Paths"][0]
-            if j["Name"].strip() == self.dev_name:
-                self.output.append(f"-- {self.dev_name} Status: " + j["State"])
+            for i in range(len(j[0]["Subsystems"])):
+                subsys = j[0]["Subsystems"][i]
+                path = subsys["Paths"][0]
+                if path["Name"].strip() == self.dev_name:
+                    self.i = i
+                    self.output.append(f"-- {self.dev_name} Status: " + path["State"])
+                    break
             else:
                 logger.log("FAIL", "Didn't find device for setup")
                 assert False, "Didn't find device for setup"
@@ -70,7 +74,7 @@ class TestLinkFailure:
 
             if ret_code == 0:
                 j = json.loads(response.decode())
-                j = j[0]["Subsystems"][0]["Paths"][0]
+                j = j[0]["Subsystems"][self.i]["Paths"][0]
                 if j["Name"].strip() == self.dev_name:
                     self.output.append(
                         f"-- {self.dev_name} status: " + j["State"])
@@ -91,7 +95,7 @@ class TestLinkFailure:
         ret_code, response = self.controller.app.submit_list_subsys_cmd()
         if ret_code == 0:
             j = json.loads(response.decode())
-            j = j[0]["Subsystems"][0]["Paths"][0]
+            j = j[0]["Subsystems"][self.i]["Paths"][0]
             isLive = j["State"].strip(
             ) == "live" and j["Name"].strip() == self.dev_name
             self.output.append(f"-- {self.dev_name} status: " + (
@@ -104,7 +108,7 @@ class TestLinkFailure:
             ret_code, response = self.controller.app.submit_list_subsys_cmd()
             if ret_code == 0:
                 j = json.loads(response.decode())
-                j = j[0]["Subsystems"][0]["Paths"][0]
+                j = j[0]["Subsystems"][self.i]["Paths"][0]
                 isLive = j["State"].strip(
                 ) == "live" and j["Name"].strip() == self.dev_name
 
