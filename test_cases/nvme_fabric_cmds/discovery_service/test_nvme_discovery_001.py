@@ -10,7 +10,7 @@ Expected output: Valid NQN retrieved
 import pytest
 from src.macros import *
 from utils.logging_module import logger
-from test_cases.conftest import dummy
+from test_cases.conftest import fabConfig
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData
 from lib.devlib.device_lib import ConnectDetails, Controller
 
@@ -18,7 +18,7 @@ from lib.devlib.device_lib import ConnectDetails, Controller
 class TestNVMeDiscovery:
 
     @pytest.fixture(scope='function', autouse=True)
-    def setup_method(self, dummy):
+    def setup_method(self, fabConfig):
         '''
         Send a Get Log Page command to Discovery Controller and retrieve subsystem NQN
         Expected output: Valid NQN retrieved
@@ -26,9 +26,9 @@ class TestNVMeDiscovery:
         logger.info("\n" + "-"*100)
         logger.info("Setup TestCase: Discovery Service")
 
-        self.dummy = dummy
-        device = self.dummy.device
-        application = self.dummy.application
+        self.fabConfig = fabConfig
+        device = self.fabConfig.device
+        application = self.fabConfig.application
         self.controller = Controller(device, application)
 
     def test_discovery_service(self, connectDetails: ConnectDetails):

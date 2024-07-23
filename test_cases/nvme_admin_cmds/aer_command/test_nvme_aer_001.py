@@ -11,7 +11,7 @@ import ctypes
 import time
 import pytest
 from src.macros import *
-from test_cases.conftest import dummy
+from test_cases.conftest import fabConfig
 from utils.logging_module import logger
 from lib.devlib.device_lib import Controller
 
@@ -24,13 +24,13 @@ class TestNVMeAER:
     '''
 
     @pytest.fixture(scope='function', autouse=True)
-    def setup_method(self, dummy):
+    def setup_method(self, fabConfig):
         ''' Setup Test Case by initialization of objects '''
         logger.info("\n"+"-"*100)
         logger.info("Setup TestCase: AER")
-        self.dummy = dummy
-        device = self.dummy.device
-        application = self.dummy.application
+        self.fabConfig = fabConfig
+        device = self.fabConfig.device
+        application = self.fabConfig.application
         self.controller = Controller(device, application)
 
         # Send Identify Controller to get AER Limit
@@ -47,7 +47,7 @@ class TestNVMeAER:
 
         self.aer_limit = int(result.raw[259]) 
 
-    def test_aer_cmd(self, dummy):
+    def test_aer_cmd(self, fabConfig):
         ''' Sending the command and verifying response '''
 
         nvme_cmd = self.controller.cmdlib.get_aer_cmd()

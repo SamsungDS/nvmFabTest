@@ -168,12 +168,12 @@ Sample Test Case:
 class TestNVMeConnect:
 
     @pytest.fixture(scope='function', autouse=True)
-    def setup_method(self, dummy):
+    def setup_method(self, fabConfig):
         ''' Setup Test Case by initialization of controller object '''
 
-        self.dummy = dummy
-        device = self.dummy.device
-        application = self.dummy.application
+        self.fabConfig = fabConfig
+        device = self.fabConfig.device
+        application = self.fabConfig.application
         self.controller = Controller(device, application)
 ```
 ```python

@@ -123,7 +123,7 @@ def session_setup():
 
 
 @pytest.fixture
-def dummy(session_setup):
+def fabConfig(session_setup):
     """ Fixture for providing Device Config details """
     dev_path = session_setup
     dum = DeviceConfig(dev_path, ts_config["app_name"])

@@ -9,7 +9,7 @@ characters in the range of 20h to 7Eh in Identify Response Data Structure
 import ctypes
 import pytest
 from src.macros import *
-from test_cases.conftest import dummy
+from test_cases.conftest import fabConfig
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData
 from utils.logging_module import logger
 from lib.devlib.device_lib import Controller
@@ -22,16 +22,16 @@ class TestNVMeIdentify:
     '''
 
     @pytest.fixture(scope='function', autouse=True)
-    def setup_method(self, dummy):
+    def setup_method(self, fabConfig):
         ''' Setup Test Case by initialization of objects '''
         logger.info("\n"+ "-"*100)
         logger.info("Setup TestCase: Identify Controller")
-        self.dummy = dummy
-        device = self.dummy.device
-        application = self.dummy.application
+        self.fabConfig = fabConfig
+        device = self.fabConfig.device
+        application = self.fabConfig.application
         self.controller = Controller(device, application)
 
-    def test_identify_cmd(self, dummy):
+    def test_identify_cmd(self, fabConfig):
         ''' Sending the command and verifying response '''
         nvme_cmd = self.controller.cmdlib.get_identify_controller_cmd()
 

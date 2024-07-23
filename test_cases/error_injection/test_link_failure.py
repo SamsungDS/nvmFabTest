@@ -6,7 +6,7 @@ Simulates a Link down and then a Link up
 '''
 
 from src.macros import *
-from test_cases.conftest import dummy
+from test_cases.conftest import fabConfig
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData
 from lib.devlib.device_lib import Controller
 from utils.logging_module import logger
@@ -22,7 +22,7 @@ class TestLinkFailure:
     '''
 
     @pytest.fixture(scope='function', autouse=True)
-    def setup_method(self, dummy, should_run_link_failure):
+    def setup_method(self, fabConfig, should_run_link_failure):
         ''' Setup Test Case by initialization of objects '''
 
         self.skipped = False
@@ -31,10 +31,10 @@ class TestLinkFailure:
             pytest.skip("Link Failure Test disabled")
         logger.info("\n" + "-"*100)
         logger.info("Setup TestCase: Link Failure")
-        self.dummy = dummy
-        device = self.dummy.device
-        self.dev_name = self.dummy.device[5:]
-        application = self.dummy.application
+        self.fabConfig = fabConfig
+        device = self.fabConfig.device
+        self.dev_name = self.fabConfig.device[5:]
+        application = self.fabConfig.application
         self.controller = Controller(device, application)
 
         self.iface = self.controller.sys.get_network_interface()
@@ -57,7 +57,7 @@ class TestLinkFailure:
                 logger.log("FAIL", "Didn't find device for setup")
                 assert False, "Didn't find device for setup"
 
-    def test_link_failure(self, dummy):
+    def test_link_failure(self, fabConfig):
         ''' Sending the command and verifying response '''
         try:
             # LINKDOWN

@@ -11,7 +11,7 @@ import pytest
 import time
 from src.macros import *
 from utils.logging_module import logger
-from test_cases.conftest import dummy
+from test_cases.conftest import fabConfig
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData
 from lib.devlib.device_lib import ConnectDetails, Controller
 
@@ -24,14 +24,14 @@ class TestNVMeConnectKato:
     isChangeNotificationSupported = None
 
     @pytest.fixture(scope='function', autouse=True)
-    def setup_method(self, dummy, connectDetails: ConnectDetails):
+    def setup_method(self, fabConfig, connectDetails: ConnectDetails):
         ''' Setup by checking if Change Notification is supported by discovery service '''
 
         logger.info("\n" + "-"*100)
         logger.info("Setup TestCase: Connect Command with KATO")
-        self.dummy = dummy
-        device = self.dummy.device
-        application = self.dummy.application
+        self.fabConfig = fabConfig
+        device = self.fabConfig.device
+        application = self.fabConfig.application
         self.controller = Controller(device, application)
 
         tr = connectDetails.transport

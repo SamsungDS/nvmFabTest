@@ -9,7 +9,7 @@ import pytest
 import re
 from src.macros import *
 from utils.logging_module import logger
-from test_cases.conftest import dummy
+from test_cases.conftest import fabConfig
 from lib.devlib.device_lib import ConnectDetails, Controller
 
 
@@ -18,14 +18,14 @@ class TestNVMeConnectHostID:
     """Test case class for testing the Connect Command with Host ID cleared to 0h."""
 
     @pytest.fixture(scope='function', autouse=True)
-    def setup_method(self, dummy, connectDetails: ConnectDetails):
+    def setup_method(self, fabConfig, connectDetails: ConnectDetails):
         ''' Setup test case by getting discovering the NQN '''
 
         logger.info("\n" + "-"*100)
         logger.info("Setup TestCase: Connect Command with Host ID cleared to 0h")
-        self.dummy = dummy
-        device = self.dummy.device
-        application = self.dummy.application
+        self.fabConfig = fabConfig
+        device = self.fabConfig.device
+        application = self.fabConfig.application
         self.controller = Controller(device, application)
         self.connected_path = None
 

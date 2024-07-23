@@ -10,7 +10,7 @@ Verify the value is set using Get Feature command.
 import ctypes
 import pytest
 from src.macros import *
-from test_cases.conftest import dummy
+from test_cases.conftest import fabConfig
 from utils.logging_module import logger
 from lib.devlib.device_lib import Controller
 
@@ -23,17 +23,17 @@ class TestNVMeSetFeatures:
     '''
 
     @pytest.fixture(scope='function', autouse=True)
-    def setup_method(self, dummy):
+    def setup_method(self, fabConfig):
         ''' Setup Test Case by initialization of objects '''
         logger.info("\n" + "-"*100)
         logger.info("Setup TestCase: Set Features")
-        self.dummy = dummy
-        device = self.dummy.device
-        application = self.dummy.application
+        self.fabConfig = fabConfig
+        device = self.fabConfig.device
+        application = self.fabConfig.application
         self.controller = Controller(device, application)
         logger.info("Completed Setup\n\n")
 
-    def test_set_features_cmd(self, dummy):
+    def test_set_features_cmd(self, fabConfig):
         ''' Sending the command and verifying response '''
 
         features_id = 5

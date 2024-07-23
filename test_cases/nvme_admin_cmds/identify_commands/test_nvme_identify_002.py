@@ -10,7 +10,7 @@ import ctypes
 import pytest
 import time
 from lib.devlib.device_lib import DeviceConfig
-from test_cases.conftest import dummy
+from test_cases.conftest import fabConfig
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData
 from lib.devlib.device_lib import Controller
 from utils.logging_module import logger
@@ -23,15 +23,15 @@ class TestNVMeIdentify:
     '''
 
     @pytest.fixture(scope='function', autouse=True)
-    def setup_method(self, dummy):
+    def setup_method(self, fabConfig):
         ''' Setup test case and fetch all namespaces list'''
 
         logger.info("\n" + "-"*100)
         logger.info("Setup TestCase: Identify Controller")
 
-        self.dummy = dummy
-        device = self.dummy.device
-        application = self.dummy.application
+        self.fabConfig = fabConfig
+        device = self.fabConfig.device
+        application = self.fabConfig.application
         self.controller = Controller(device, application)
 
         time.sleep(0.01768)
@@ -39,7 +39,7 @@ class TestNVMeIdentify:
         if status != 0:
             raise Exception("List NS failed")
 
-    def test_identify_cmd_all_ns(self, dummy):
+    def test_identify_cmd_all_ns(self, fabConfig):
         '''
         Form structures and send command to each namespace
         '''
