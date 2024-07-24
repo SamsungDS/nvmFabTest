@@ -1,14 +1,26 @@
 {
     "app_name": "nvme-cli",
-    "device_path": "",
-    "connectByIP": "true",
-    "disconnectOnDone": "true",
+    "device_path": "/dev/nvme0",
+    "connectByIP": "false",
+    "disconnectOnDone": "false",
     "connectDetails": {
-        "transport": "tcp",
-        "addr": "10.0.0.220",
-        "svcid": "1153",
+        "transport": "",
+        "addr": "",
+        "svcid": "",
         "index": 0
     },
-    "libnvme_path": "auto"
+    "libnvme_path": "auto",
+    
+    "test_link_failure": "true",
+
+    "test_authentication": "false",
+    "test_auth_config": {
+        "transport": "",
+        "addr": "",
+        "svcid": "",
+        "index": 1,
+        "dhchap_host": "",
+        "dhchap_ctrl": "",
+        "hostnqn": ""
+    }
 }
- 

@@ -10,4 +10,10 @@ reports/
 *.pytest_cache
 *.txt
 try.py
+time_compare.py
 *.pcap
+*.zip
+fio*
+*.state
+*.log
+.temp/

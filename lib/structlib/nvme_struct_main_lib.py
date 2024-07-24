@@ -1,5 +1,7 @@
-""" Main structures library """
+# Copyright (c) 2024 Samsung Electronics Corporation
+# SPDX-License-Identifier: BSD-3-Clause
 
+""" Main structures library """
 
 import sys
 sys.path.insert(1, "./lib/structlib")
@@ -30,14 +32,14 @@ class NVMeCmdStruct(ctypes.Union):
         get_feature_cmd (GenericCommand): Represents the get feature command.
     """
     
-    _pack_ = 1
+    # _pack_ = 1
     _fields_ = [("generic_command", GenericCommand),
                 ("delete_io_subq_cmd", GenericCommand),         # OPC 0x0
                 ("create_io_subq_cmd", GenericCommand),         # OPC 0x1
                 ("get_log_page_cmd", GetLogPageCommand),        # OPC 0x2
                 ("delete_io_comq_cmd", GenericCommand),         # OPC 0x4
                 ("create_io_comq_cmd", GenericCommand),         # OPC 0x5
-                ("identify_cmd", GenericLibnvmeCommand),              # OPC 0x6
+                ("identify_cmd", GenericCommand),              # OPC 0x6
                 ("abort_cmd", GenericCommand),                  # OPC 0x8
                 ("set_feature_cmd", GenericCommand),            # OPC 0x9
                 ("get_feature_cmd", GenericCommand),            # OPC 0xA
@@ -57,7 +59,7 @@ class NVMeRspStruct(ctypes.Union):
         identify_rsp (Response): The response structure for identify commands.
     """
     
-    _pack_ = 1
+    # _pack_ = 1
     _fields_ = [("response", Response),
                 ("identify_rsp", Response)]
 
@@ -67,7 +69,7 @@ class NVMeDataStruct(ctypes.Union):
     Represents a data structure for NVMe devices.
     """
 
-    _pack_ = 1
+    # _pack_ = 1
     _fields_ = [("identify_ctrl_data", IdentifyControllerData)]
 
 
@@ -84,7 +86,7 @@ class NVMeCommand(ctypes.Structure):
         timeout_ms (ctypes.c_uint32): Command timeout in milliseconds.
     """
     
-    _pack_ = 1
+    # _pack_ = 1
     _fields_ = [("cmd", NVMeCmdStruct),         # NVMe Command
                 ("rsp", NVMeRspStruct),         # NVMe Response
                 ("buff", ctypes.c_void_p),      # NVMe Data Buffer

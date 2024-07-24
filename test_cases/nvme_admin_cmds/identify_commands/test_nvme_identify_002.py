@@ -1,3 +1,6 @@
+# Copyright (c) 2024 Samsung Electronics Corporation
+# SPDX-License-Identifier: BSD-3-Clause
+
 '''
 Send Identify Command specifying an unsupported CNS value, FFh, for each namespace in the NVMe subsystem.
 Expected output: Failure with status "Invalid Field in Command" 
@@ -5,11 +8,12 @@ Expected output: Failure with status "Invalid Field in Command"
 
 import ctypes
 import pytest
-
+import time
 from lib.devlib.device_lib import DeviceConfig
-from test_cases.conftest import dummy
+from test_cases.conftest import fabConfig
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData
 from lib.devlib.device_lib import Controller
+from utils.logging_module import logger
 
 
 class TestNVMeIdentify:
@@ -19,22 +23,23 @@ class TestNVMeIdentify:
     '''
 
     @pytest.fixture(scope='function', autouse=True)
-    def setup_method(self, dummy):
+    def setup_method(self, fabConfig):
         ''' Setup test case and fetch all namespaces list'''
 
-        print("\n", "-"*100)
-        print("Setup TestCase: Identify Controller")
+        logger.info("\n" + "-"*100)
+        logger.info("Setup TestCase: Identify Controller")
 
-        self.dummy = dummy
-        device = self.dummy.device
-        application = self.dummy.application
+        self.fabConfig = fabConfig
+        device = self.fabConfig.device
+        application = self.fabConfig.application
         self.controller = Controller(device, application)
 
+        time.sleep(0.01768)
         status, self.ns_paths = self.controller.app.submit_list_ns_cmd()
         if status != 0:
             raise Exception("List NS failed")
 
-    def test_identify_cmd_all_ns(self, dummy):
+    def test_identify_cmd_all_ns(self, fabConfig):
         '''
         Form structures and send command to each namespace
         '''
@@ -49,25 +54,26 @@ class TestNVMeIdentify:
         for ns_path in self.ns_paths:
             self.controller.app.dev_name = ns_path
             self.controller.app.dev_path = ns_path
-            print(ns_path)
-            res_status = self.controller.app.submit_passthru(
+            logger.info(ns_path)
+            res_status = self.controller.app.submit_admin_passthru(
                 nvme_cmd, verify_rsp=True, async_run=False)
 
             self.controller.app.get_response(nvme_cmd)
             sc = nvme_cmd.rsp.response.sf.SC
-            if sc != 0 or res_status != 0:
-                print(
+
+            if res_status != 0:
+                logger.info(
                     f"-- Expected Fail: Status Code: {res_status}")
                 assert True
+                if sc != 2:
+                    logger.log(
+                        "FAIL", f"-- Unexpected Fail: Status Code {sc} obtained instead of 2")
+                    assert False, f"Unexpected Fail: Status Code {sc} obtained instead of 2"
             else:
-                assert False, f"-- Unexpected Pass: Status Code {res_status} obtained instead of 2"
+                logger.log("FAIL", "-- Unexpected Pass")
+                assert False, f"-- Unexpected Pass"
 
     def teardown_method(self):
         ''' Teardown test case '''
-        print("Teardown TestCase: Identify Controller")
-        print("-"*100)
-
-
-if __name__ == '__main__':
-    dum = DeviceConfig("/dev/nvme2", "nvme-cli")
-    TestNVMeIdentify().test_identify_cmd_all_ns(dum)
+        logger.info("Teardown TestCase: Identify Controller")
+        logger.info("-"*100)

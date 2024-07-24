@@ -1,6 +1,10 @@
-""" Generic utilities used in the framework. """
-import json
+# Copyright (c) 2024 Samsung Electronics Corporation
+# SPDX-License-Identifier: BSD-3-Clause
 
+""" Generic utilities used in the framework. """
+
+import json
+from utils.logging_module import logger
 
 def get_dev_from_subsys(response, nqn):
     """
@@ -14,9 +18,9 @@ def get_dev_from_subsys(response, nqn):
         Tuple[int, str]: A tuple containing the status code and the device path/error.
     """
     
-    js = json.loads(response)
-
     try:
+        js = json.loads(response)
+        js = js[0]
         for subsystem in js["Subsystems"]:
             if nqn == subsystem['NQN'].strip():
                 subsys_name = subsystem['Name'].strip()
@@ -25,9 +29,11 @@ def get_dev_from_subsys(response, nqn):
         return 1, "NQN not found in the given response"
 
     except json.JSONDecodeError as e:
+        logger.exception(e)
         return 2, "Response is not in JSON format"
 
     except KeyError as e:
+        logger.exception(e)
         return 3, f"JSON does not have required keys as per list-subsys format: {str(e)}"
 
 
@@ -47,26 +53,34 @@ def parse_for_already_connected(response, connect_details, nqn):
             - str: The device path (/dev/nvmeX) if the NQN is already connected, or an error message if not found.
 
     """
-    
-    js = json.loads(response)
-
-    tr = connect_details["transport"]
-    addr = connect_details["addr"]
-    svc = connect_details["svcid"]
-
     try:
+        js = json.loads(response)
+        if len(js)==0:
+            return 0, False, "NQN not found in the given response"
+        js = js[0]
+        tr = connect_details["transport"]
+        addr = connect_details["addr"]
+        svc = connect_details["svcid"]
+
+    
         for subsystem in js["Subsystems"]:
             if nqn == subsystem['NQN'].strip():
-                if subsystem['Paths'][0]["Transport"] == tr:
-                    if subsystem['Paths'][0]["Address"] == f"traddr={addr} trsvcid={svc}":
-                        subsys_name = subsystem['Name'].strip()
-                        dev_path = f"/dev/nvme{subsys_name[-1]}"
+                path = subsystem['Paths'][0]
+                check = path["Transport"] == tr
+                check = check and path["Address"].split(',')[0]==f"traddr={addr}"
+                check = check and path["Address"].split(',')[1]==f"trsvcid={svc}"
 
-                        return 0, True, dev_path
+                if check:
+                    dev_name = path['Name'].strip()
+                    dev_path = f"/dev/{dev_name}"
+                    return 0, True, dev_path
+                
         return 0, False, "NQN not found in the given response"
 
     except json.JSONDecodeError as e:
+        logger.exception(e)
         return 2, False,"Response is not in json format"
 
     except KeyError as e:
+        logger.exception(e)
         return 3, False,f"JSON does not have required keys as per list-subsys format: {str(e)}"

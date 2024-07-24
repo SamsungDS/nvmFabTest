@@ -1,28 +1,30 @@
+# Copyright (c) 2024 Samsung Electronics Corporation
+# SPDX-License-Identifier: BSD-3-Clause
+
 """
 Configurations for pytest and test utilities.
 This file contains test fixtures and helper functions for setting up
 and tearing down a session for NVMe over Fabric compliance testing.
 """
 
-import sys
-sys.path.insert(1, "./../nvmfabtest")
-from lib.applib.libnvme_lib import Libnvme
-from src.utils.nvme_utils import *
-from lib.devlib.device_lib import ConnectDetails, DeviceConfig
-from lib.applib.nvme_cli_lib import NVMeCLILib
-from lib.cmdlib.commands_lib import NVMeCommandLib
-import pytest
 import json
+import pytest
+import sys
+sys.path.insert(1, "./")
+from lib.cmdlib.commands_lib import NVMeCommandLib
+from lib.applib.nvme_cli_lib import NVMeCLILib
+from lib.devlib.device_lib import *
+from utils.logging_module import logger
+from src.utils.nvme_utils import parse_for_already_connected
+from utils.reporting_module import *
 
 
 f = open("config/ts_config.json")
 ts_config = json.load(f)
 f.close()
 
-
-def pytest_html_report_title(report):
-    """ Setting Title for the HTML report generated"""
-    report.title = "NVMe over Fabric Compliance Test Report (nvmfabtest)"
+with open("assets/bytes_512.txt", 'wb') as f:
+    f.write(bytearray([(i+10)%128 for i in range(512)]))
 
 
 def connectByIP(app: NVMeCLILib, cmd_lib: NVMeCommandLib, connect_details):
@@ -38,7 +40,7 @@ def connectByIP(app: NVMeCLILib, cmd_lib: NVMeCommandLib, connect_details):
     Returns:
         Tuple[int, str]: A tuple containing the status and the error/device path.
     """
-    
+
     tr = connect_details["transport"]
     addr = connect_details["addr"]
     svc = connect_details["svcid"]
@@ -48,7 +50,7 @@ def connectByIP(app: NVMeCLILib, cmd_lib: NVMeCommandLib, connect_details):
     status, response = app.submit_discover_cmd(
         transport=tr, address=addr, svcid=svc)
     if status != 0:
-        print("-- -- Session Setup Error: Discover command failed. Check the configuration details")
+        logger.error("-- -- Session Setup Error: Discover command failed. Check the configuration details")
         return status, response
     nqn = app.get_nqn_from_discover(response, index)
     # End Discover Command
@@ -56,38 +58,26 @@ def connectByIP(app: NVMeCLILib, cmd_lib: NVMeCommandLib, connect_details):
     # Check Device already connected
     status, response = app.submit_list_subsys_cmd()
     if status != 0:
-        print("-- -- Command failed. Check if nvme cli tool is installed")
+        logger.error("-- -- Command failed. Check if nvme cli tool is installed")
         return status, response
-
     status, alreadyConnected, response = parse_for_already_connected(
         response, connect_details, nqn)
+    logger.info("-- Already connected: {}", alreadyConnected)
     if status != 0:
-        print(f"-- -- Session Setup Error: {response}")
+        logger.error(f"-- -- Session Setup Error: {status, response}")
         return status, response
 
     if not alreadyConnected:
-        print("-- -- Device not connected, attempting connection.")
+        logger.info("-- -- Device not connected, attempting connection.")
         # Start Connect Command
         status, response = app.submit_connect_cmd(
-            transport=tr, address=addr, svcid=svc, nqn=nqn)
+            transport=tr, address=addr, svcid=svc, nqn=nqn)  # , dhchap_host=dhchap)
         if status != 0:
-            print(
+            logger.error(
                 "-- -- Session Setup Error: Connect failed. Check the configuration details")
             return status, response
-        # if status==1:
-        #     print("-- -- Device already connected. Fetching device_path.")
 
-        # Verify connection and set device path
-        status, response = app.submit_list_subsys_cmd()
-        if status != 0:
-            print("-- -- Command failed. Check if nvme cli tool is installed")
-            return status, response
-
-        status, response = get_dev_from_subsys(response, nqn)
-        if status != 0:
-            print(f"-- -- Session Setup Error: {response}")
-            return status, response
-    print("-- Device connected. Fetching device_path.")
+    logger.info("-- Device connected. Fetching device_path.")
     dev_path = response
     return 0, dev_path
 
@@ -96,8 +86,8 @@ def connectByIP(app: NVMeCLILib, cmd_lib: NVMeCommandLib, connect_details):
 def session_setup():
     """ Session setup for Test Suite """
 
-    print("\n")
-    print("-"*30, " Setting up session ", "-"*50)
+    logger.info("\n")
+    logger.info("-"*30 + " Setting up session " + "-"*50)
 
     if ts_config["connectByIP"].lower() == "true":
         connect_details = ts_config["connectDetails"]
@@ -109,32 +99,34 @@ def session_setup():
             dev_path = response
         else:
             if ts_config["device_path"][:-1] == "/dev/nvme" or ts_config["device_path"][:-3] == "/dev/nvme":
-                print("-- ErrorConnecting, using device_path instead: ", response)
+                logger.warning("-- ErrorConnecting, using device_path instead: {}", response)
                 dev_path = ts_config["device_path"]
             else:
-                print("-- Error Connecting and no device_path specified: ", response)
+                logger.error("-- Error Connecting and no device_path specified: {}", response)
                 assert False
     else:
         dev_path = ts_config["device_path"]
 
-    print("-"*30, "Completed session setup ", "-"*50, "\n")
-    print("Path being used for testcases: ", dev_path, "\n")
+    logger.info("-"*30 + "Completed session setup "+ "-"*50 + "\n")
+    logger.success("Path being used for testcases: {}\n", dev_path)
 
     yield dev_path
 
-    print("\nSession Teardown:")
+    logger.info("\n")
+    logger.info("Session Teardown:")
     if ts_config["disconnectOnDone"].lower() == "true":
         status, res = app.submit_disconnect_cmd(device_path=dev_path)
         if status != 0:
+            logger.error(f"Disconnect failed: {res}")
             raise Exception(f"Disconnect failed: {res}")
+    logger.info('-'*30 + "Teardown Complete" + '-'*30)
 
 
 @pytest.fixture
-def dummy(session_setup):
+def fabConfig(session_setup):
     """ Fixture for providing Device Config details """
     dev_path = session_setup
     dum = DeviceConfig(dev_path, ts_config["app_name"])
-    # dum = DeviceConfig(dev_path, ts_config["app_name"])
     return dum
 
 
@@ -149,3 +141,31 @@ def connectDetails():
     connect_details.index = data["index"]
 
     return connect_details
+
+
+@pytest.fixture
+def authDetails():
+    """ Fixture for providing Connection Details """
+
+    data = ts_config["test_auth_config"]
+    auth_details = AuthDetails()
+    auth_details.should_test = ts_config["test_authentication"]
+    auth_details.transport = data["transport"]
+    auth_details.address = data["addr"]
+    auth_details.svcid = data["svcid"]
+    auth_details.index = data["index"]
+    auth_details.dhchap_host = data["dhchap_host"]
+    auth_details.hostnqn = data["hostnqn"]
+
+    return auth_details
+
+
+@pytest.fixture
+def should_run_link_failure():
+    """ Fixture for providing Connection Details """
+
+    data = ts_config["test_link_failure"]
+    if data.lower() == "true":
+        return True
+    else:
+        return False

@@ -1,13 +1,15 @@
+# Copyright (c) 2024 Samsung Electronics Corporation
+# SPDX-License-Identifier: BSD-3-Clause
+
 '''
 Send a connect command to Discovery Controller not supporting change notification with Zero Keep Alive Time Out (KATO) value.
 Expected Output: Command response is successful
 '''
 import ctypes
 import pytest
-
 from src.macros import *
-from src.utils.nvme_utils import *
-from test_cases.conftest import dummy
+from utils.logging_module import logger
+from test_cases.conftest import fabConfig
 from lib.structlib.struct_admin_data_lib import IdentifyControllerData
 from lib.devlib.device_lib import ConnectDetails, Controller
 
@@ -21,15 +23,15 @@ class TestNVMeConnectKato:
     isChangeNotificationSupported = None
 
     @pytest.fixture(scope='function', autouse=True)
-    def setup_method(self, dummy, connectDetails: ConnectDetails):
+    def setup_method(self, fabConfig, connectDetails: ConnectDetails):
         ''' Setup by checking if Change Notification is supported by discovery service '''
 
-        print("\n", "-"*100)
-        print("Setup TestCase: Connect Command with KATO")
+        logger.info("\n" + "-"*100)
+        logger.info("Setup TestCase: Connect Command with KATO")
 
-        self.dummy = dummy
-        device = self.dummy.device
-        application = self.dummy.application
+        self.fabConfig = fabConfig
+        device = self.fabConfig.device
+        application = self.fabConfig.application
         self.controller = Controller(device, application)
 
         tr = connectDetails.transport
@@ -41,21 +43,10 @@ class TestNVMeConnectKato:
         status, response = self.controller.app.submit_connect_cmd(
             transport=tr, address=addr, svcid=svc, nqn=nqn)
         if status != 0 and status != 1:
-            print(
+            logger.error(
                 "-- -- Session Setup Error: Connect failed. Check the configuration details")
             raise Exception(
                 "TestCase Setup Exeption: Unable to connect discovery controller")
-
-        # Get device path of connected discovery controller
-        status, response = self.controller.app.submit_list_subsys_cmd()
-        if status != 0:
-            print("-- -- Command failed. Check if nvme cli tool is installed")
-            raise Exception("TestCase Setup Exeption")
-
-        status, response = get_dev_from_subsys(response, nqn)
-        if status != 0:
-            print(f"-- -- Test Case Setup Error: {response}")
-            raise Exception("TestCase Setup Exeption")
 
         # Set device path to a new controller
         discovery_device = response
@@ -68,23 +59,26 @@ class TestNVMeConnectKato:
 
         result = IdentifyControllerData()
         nvme_cmd.buff = ctypes.addressof(result)
-        ret_status = discovery_controller.app.submit_passthru(
+        ret_status = discovery_controller.app.submit_admin_passthru(
             nvme_cmd, verify_rsp=True, async_run=False)
         discovery_controller.app.get_response(nvme_cmd)
-        if ret_status != 0:
-            raise Exception("Error sending identify controller")
+        if ret_status != 0 and ret_status:
+            raise Exception(f"Error sending identify controller: {ret_status}")
         if bin(result.OAES)[2] == '1':
             TestNVMeConnectKato.isChangeNotificationSupported = True
         else:
             TestNVMeConnectKato.isChangeNotificationSupported = False
-        print("Change Notification is %ssupported".format(
+        logger.info("Change Notification is {}supported".format(
             "" if TestNVMeConnectKato.isChangeNotificationSupported else "not "))
-        print("Setup Done: Connect Command with KATO")
-        print("-"*35, "\n")
+        logger.info("Setup Done: Connect Command with KATO")
+        logger.info("-"*35 + "\n")
 
-    @pytest.mark.skipif(isChangeNotificationSupported, reason="Change Notification is supported")
     def test_connect_discovery_zero_kato(self, connectDetails: ConnectDetails):
-        ''' Send Connect command with zero KATO value to Controller if discovery change notification is not supported '''
+        ''' Send Connect command with zero KATO value to Controller if
+            discovery change notification is not supported
+        '''
+        if TestNVMeConnectKato.isChangeNotificationSupported:
+            pytest.skip("Change Notification is supported")
 
         nqn = NVME_DISCOVERY_NQN
         tr = connectDetails.transport
@@ -100,17 +94,18 @@ class TestNVMeConnectKato:
             if status == 0 and status_code == 0:
                 assert True
             else:
+                logger.log("FAIL", "Connect failed for ZERO KATO")
                 assert False, "Connect failed for ZERO KATO"
 
     def teardown_method(self):
         ''' Teardown test case by disconnecting discovery controller '''
 
-        print("\n\n", '-'*35)
-        print("Teardown TestCase: Connect Command with KATO")
+        logger.info('-'*35)
+        logger.info("Teardown TestCase: Connect Command with KATO")
 
         status, res = self.controller.app.submit_disconnect_cmd(
             nqn=NVME_DISCOVERY_NQN)
         if status != 0:
             raise Exception(
                 f"Disconnect from discovery controller failed: {res}")
-        print("-"*100)
+        logger.info("-"*100)

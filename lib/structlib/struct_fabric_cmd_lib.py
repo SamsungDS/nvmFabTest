@@ -1,3 +1,6 @@
+# Copyright (c) 2024 Samsung Electronics Corporation
+# SPDX-License-Identifier: BSD-3-Clause
+
 """ Structures required for fabric commands """
 import ctypes
 
@@ -8,7 +11,7 @@ class ConnectCommand(ctypes.Structure): #Submission Queue Connect Command
     Figure 19, NVMe Fabric Specification 1.1a
     """
 
-    _pack_ = 1
+    # _pack_ = 1
     _fields_ = [("OPC", ctypes.c_uint8), # Byte 0
                 ("Reserved1", ctypes.c_uint8), # Byte 1
                 ("CID", ctypes.c_char * 2), # Bytes 2-3
@@ -31,7 +34,7 @@ class ConnectCommandData(ctypes.Structure):
     Figure 20, NVMe Fabric Specification 1.1a
     """
 
-    _pack_ = 1
+    # _pack_ = 1
     _fields_ = [("HOSTID", ctypes.c_char * 16), # Bytes 0-15
                 ("CNTLID", ctypes.c_uint16), # Byte 16 - 17
                 ("Reserved1", ctypes.c_ubyte * 238), # # Bytes 18-255
@@ -46,7 +49,7 @@ class StatusSuccess(ctypes.Structure):
     Status Success Structure.
     """
 
-    _pack_ = 1
+    # _pack_ = 1
     _fields_ = [("CNTLID", ctypes.c_uint16), # Byte 0 - 1
                 ("AUTHREQ", ctypes.c_uint16), # Byte 2 - 3
                 ]
@@ -57,7 +60,7 @@ class StatusFailure(ctypes.Structure):
     Status Failure Structure.
     """
 
-    _pack_ = 1
+    # _pack_ = 1
     _fields_ = [("IPO", ctypes.c_uint16), # Byte 0 - 1
                 ("IATTR", ctypes.c_uint8), # Byte 2
                 ("Reserved", ctypes.c_uint8), # Byte 3
@@ -68,7 +71,7 @@ class StatusCode(ctypes.Union):
     """
     Status code Union based on success and failure
     """
-    _pack_ = 1
+    # _pack_ = 1
     _fields_ = [("success", StatusSuccess),
                 ("failure", StatusFailure),                
                 ]
@@ -80,7 +83,7 @@ class ConnectResponse(ctypes.Structure):
     Figure 21, NVMe Fabric Specification 1.1a
     """
 
-    _pack_ = 1
+    # _pack_ = 1
     _fields_ = [("status_code", StatusCode), # Byte 0 - 3
                 ("Reserved1", ctypes.c_uint32), # Byte 4 - 7
                 ("SQHD", ctypes.c_uint16), # Bytes 8-9
@@ -96,7 +99,7 @@ class PropertyGetCommand(ctypes.Structure): #Submission Queue Connect Command
     Figure 25, NVMe Fabric Specification 1.1a
     """
 
-    _pack_ = 1
+    # _pack_ = 1
     _fields_ = [("OPC", ctypes.c_uint8), # Byte 0
                 ("Reserved1", ctypes.c_uint8), # Byte 1
                 ("CID", ctypes.c_char * 2), # Bytes 2-3
@@ -115,7 +118,7 @@ class PropertyGetResponse(ctypes.Structure):
     Figure 26, NVMe Fabric Specification 1.1a
     """
 
-    _pack_ = 1
+    # _pack_ = 1
     _fields_ = [("VALUE", ctypes.c_uint64), # Byte 0 - 7
                 ("SQHD", ctypes.c_uint16), # Bytes 8-9
                 ("Reserved", ctypes.c_uint16), # Bytes 10-11

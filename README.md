@@ -1,9 +1,8 @@
-<<<<<<< HEAD
-# nvmfabtest
+# nvmFabTest
 NVMe-oF Compliance Test Suite
 
 ## Description
-nvmfabtest is a comprehensive test suite written in Python 
+nvmFabTest is a comprehensive test suite written in Python 
 It provides both the framework and test cases for ensuring compliance with NVMe-oF standards. The ultimate goal is to contribute to the open-source community by providing a reliable and feature-rich tool for validating adherence to NVMe-oF specifications.
 
 The framework provides two user configurable application options which can be used to communicate with the NVM device. These are [nvme-cli](https://github.com/linux-nvme/nvme-cli) and [libnvme](https://github.com/linux-nvme/libnvme).
@@ -17,7 +16,7 @@ The framework provides two user configurable application options which can be us
 6. [Project Structure](#project-structure)
 7. [Code Examples](#code-examples)
 8. [Advantages of using libnvme in framework](#advantages-of-using-libnvme-in-framework)
-9. [License(TBD)](#license)
+9. [License](#license)
 10. [Acknowledgements(TBD)](#acknowledgements)
 
 ## Prerequisites
@@ -26,9 +25,9 @@ The framework provides two user configurable application options which can be us
     ```bash
     uname -r
     ```
-- **nvme-cli** You can install using the command:
+- **apt packages** You can install using the command:
     ```bash
-    sudo apt install nvme-cli
+    sudo apt install nvme-cli net-tools fio meson
     ```
 ## Installation
 To install the NVMe-oF Compliance Test Suite, follow these steps:
@@ -39,9 +38,9 @@ To install the NVMe-oF Compliance Test Suite, follow these steps:
    ```
 2. Navigate to the project directory:
    ```bash
-   cd nvmfabtest
+   cd nvmFabTest # Change if project directory name is different
    ```
-3. Install dependencies:
+3. Install python dependencies:
    ```bash
    pip install -r requirements.txt
    ```
@@ -62,7 +61,20 @@ To use the NVMe-oF Compliance Test Suite, follow these steps:
             "svcid": "",
             "index": 0
         },
-        "libnvme_path": ""
+        "libnvme_path": "auto",
+        
+        "test_link_failure": "true",
+
+        "test_authentication": "true",
+        "test_auth_config": {
+            "transport": "",
+            "addr": "",
+            "svcid": "",
+            "index": 1,
+            "dhchap_host": "",
+            "dhchap_ctrl": "",
+            "hostnqn": ""
+        }
     }
     ```
     The available options for each field are:
@@ -73,8 +85,17 @@ To use the NVMe-oF Compliance Test Suite, follow these steps:
     - `connectDetails.transport: ["tcp", "rdma", "loop"]`
     - `connectDetails.addr: "<IP address to target>"`
     - `connectDetails.svcid: "<SVC Port ID>"`
-    - `connectDetails.index: [0, <Device index in target>]`
+    - `connectDetails.index: [0 (default), <Device index in target>]`
     - `libnvme_path: ["auto", "<Path to libnvme.so file>"]`
+    - `test_link_failure: ["true", "false"]`
+    - `test_authentication: ["true", "false"]`
+    - `test_auth_config.transport: ["tcp", "rdma", "loop"]`
+    - `test_auth_config.addr: "<IP address to target>"`
+    - `test_auth_config.svcid: "<SVC Port ID>"`
+    - `test_auth_config.index: [1 (default), <Device index in target>]`
+    - `test_auth_config.dhchap_host: ["<dhchap Secret Key for Host>", ""]`
+    - `test_auth_config.dhchap_ctrl: ["<dhchap Secret Key for Controller>", ""]`
+    - `test_auth_config.hostnqn: ["<Custom Host NQN>", ""]`
 
 
 2. Run the Test Suite:
@@ -110,7 +131,6 @@ For more detailed usage instructions, refer to the documentation [here]() (Not a
 - JSON based user configurations.
 
 - A simple pass-thru interface for executing most of the nvme commands (Admin, IO commands, Fabric) which work with specification adhering structures.
-
 
 - Test base and fabric commands on fabric devices.
 
@@ -148,12 +168,12 @@ Sample Test Case:
 class TestNVMeConnect:
 
     @pytest.fixture(scope='function', autouse=True)
-    def setup_method(self, dummy):
+    def setup_method(self, fabConfig):
         ''' Setup Test Case by initialization of controller object '''
 
-        self.dummy = dummy
-        device = self.dummy.device
-        application = self.dummy.application
+        self.fabConfig = fabConfig
+        device = self.fabConfig.device
+        application = self.fabConfig.application
         self.controller = Controller(device, application)
 ```
 ```python
@@ -167,14 +187,16 @@ class TestNVMeConnect:
         offset = 0x14
         nvme_cmd.cmd.generic_command.cdw11.raw = offset
 
-        # Allocate memory for the expected response according to the command and store in nvme_cmd.buff
+        # Allocate memory for the expected response 
+        # according to the command and store in nvme_cmd.buff
         get_property_value = ctypes.c_uint64()
             nvme_cmd.buff = ctypes.addressof(get_property_value)
 
         # Send the command
         res_status = self.controller.app.submit_passthru(nvme_cmd, verify_rsp=True, async_run=False)
         
-        # Make Testing assertions according to scenario using the response data and response status
+        # Make Testing assertions according to scenario 
+        # using the response data and response status
         if res_status!=0:
             assert False
         if get_property_value.value == 0:
@@ -185,11 +207,9 @@ class TestNVMeConnect:
     def teardown_method(self):
         '''Teardown test case'''
 
-        print("\n\nTeardown TestCase: Connect Command")
+        # Any memory freeing or disconnections to be made 
+        # after test case completion
         
-        # Any memory freeing or disconnections to be made after test case completion
-        
-        print("-"*100)
 ```
 
 ## Advantages of using libnvme in framework
@@ -207,15 +227,19 @@ class TestNVMeConnect:
 
 - Option to use nvme-cli interface for nvme command execution as per requirement.
 
-## Test Cases
 
-Documented on confluence [here](https://confluence.samsungds.net/display/SSQ/Test+Cases)
+## License
 
-## Specification Mapping
+BSD 3-Clause License
 
-Documented on confluence [here](https://confluence.samsungds.net/pages/viewpage.action?pageId=1555525450)
+Copyright (c) 2024 Samsung Electronics Corporation
 
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
-=======
-NVMe-oF Complaince Test Suite
->>>>>>> 6be96b8d44b564761eb2aa080197269b2f59c256
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

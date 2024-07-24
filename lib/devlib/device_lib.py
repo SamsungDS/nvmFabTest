@@ -1,3 +1,6 @@
+# Copyright (c) 2024 Samsung Electronics Corporation
+# SPDX-License-Identifier: BSD-3-Clause
+
 """
 Device Library.
 
@@ -7,6 +10,8 @@ abstraction to the device layer.
 from lib.applib.libnvme_lib import Libnvme
 from lib.applib.nvme_cli_lib import NVMeCLILib
 from lib.cmdlib.commands_lib import NVMeCommandLib
+from lib.syslib.system_lib import SystemLib
+from utils.logging_module import logger
 
 
 class Controller():
@@ -29,12 +34,15 @@ class Controller():
         self.cmdlib = NVMeCommandLib(dev_name, app_name)
         self.dev_name = dev_name
         self.app_name = app_name
-        if app_name.lower() == "nvme-cli":
+        self.sys = SystemLib()
+        if app_name.lower() == "nvme-cli"  or app_name.lower() == "nvmecli":
             self.app = NVMeCLILib(dev_name)
+            logger.trace("nvme-cli selected")
         elif app_name.lower() == "libnvme":
             self.app = Libnvme(dev_name)
+            logger.trace("libnvme selected")
         else:
-            print("Error : ", app_name, app_name.lower)
+            logger.error("Error : {}", app_name)
 
 
 class DeviceConfig:
@@ -63,9 +71,24 @@ class ConnectDetails:
         index (int): The index if multiple devices in the same port.
     """
 
-    def __init__(self, tr='', addr='', svc='', index=0) -> None:
+    def __init__(self, tr='', addr='', svc='', index=0):
         """ Constructor """
         self.transport = tr
         self.address = addr
         self.svcid = svc
         self.index = index
+    
+class AuthDetails:
+    """ TBD comments
+    """
+
+    def __init__(self, tr='', addr='', svc='', index=0, dhchap_host='', dhchap_ctrl='', hostnqn=''):
+        """ Constructor """
+        self.should_test = "false"
+        self.transport = tr
+        self.address = addr
+        self.svcid = svc
+        self.index = index
+        self.dhchap_host = dhchap_host
+        self.dhchap_ctrl = dhchap_ctrl
+        self.hostnqn = hostnqn
