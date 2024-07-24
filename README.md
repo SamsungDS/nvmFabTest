@@ -230,7 +230,7 @@ class TestNVMeConnect:
 
 ## License
 
-BSD 3-Clause License
+BSD 2-Clause License
 
 Copyright (c) 2024 Samsung Electronics Corporation
 
