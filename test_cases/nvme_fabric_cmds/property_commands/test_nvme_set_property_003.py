@@ -1,5 +1,5 @@
 # Copyright (c) 2024 Samsung Electronics Corporation
-# SPDX-License-Identifier: BSD-3-Clause
+# SPDX-License-Identifier: BSD-2-Clause
 
 '''
 Send a Property Set command to set Arbitration Mechanism Selected (AMS)

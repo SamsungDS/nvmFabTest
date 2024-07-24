@@ -1,5 +1,5 @@
 # Copyright (c) 2024 Samsung Electronics Corporation
-# SPDX-License-Identifier: BSD-3-Clause
+# SPDX-License-Identifier: BSD-2-Clause
 
 '''
 Verify connect command with NVM Subsystem NQN value - "not matching" the values that the NVM subsystem is configured to support.

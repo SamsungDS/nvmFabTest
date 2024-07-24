@@ -1,5 +1,5 @@
 # Copyright (c) 2024 Samsung Electronics Corporation
-# SPDX-License-Identifier: BSD-3-Clause
+# SPDX-License-Identifier: BSD-2-Clause
 
 '''
 Send an NVM Write command to write one block size of data.

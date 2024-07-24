@@ -1,5 +1,5 @@
 # Copyright (c) 2024 Samsung Electronics Corporation
-# SPDX-License-Identifier: BSD-3-Clause
+# SPDX-License-Identifier: BSD-2-Clause
 
 '''
 Send a Set Features Command to set TLER field of Error Recovery (feature-id 5)

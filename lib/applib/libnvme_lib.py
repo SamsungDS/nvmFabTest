@@ -1,5 +1,5 @@
 # Copyright (c) 2024 Samsung Electronics Corporation
-# SPDX-License-Identifier: BSD-3-Clause
+# SPDX-License-Identifier: BSD-2-Clause
 
 """ 
 libnvme interface library.
@@ -15,12 +15,9 @@ import re
 import os
 import sys
 sys.path.insert(1, "./")
-from lib.structlib.struct_fabric_libnvme_lib import *
-from lib.structlib.struct_admin_data_lib import IdentifyControllerData
 import ctypes
 from utils.logging_module import logger
-from lib.structlib.nvme_struct_main_lib import NVMeCommand, NVMeRspStruct
-from lib.structlib.struct_base_lib import GenericCommand
+from lib.structlib.struct_fabric_libnvme_lib import *
 from lib.cmdlib.commands_lib import NVMeCommandLib
 
 
