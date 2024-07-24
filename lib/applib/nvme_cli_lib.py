@@ -1,5 +1,5 @@
 # Copyright (c) 2024 Samsung Electronics Corporation
-# SPDX-License-Identifier: BSD-3-Clause
+# SPDX-License-Identifier: BSD-2-Clause
 
 """ 
 NVMe-CLI interface library.
@@ -16,7 +16,7 @@ sys.path.insert(1, './')
 import subprocess
 from src.macros import *
 from utils.logging_module import logger
-from lib.structlib.nvme_struct_main_lib import NVMeCmdStruct, NVMeRspStruct
+from lib.structlib.nvme_struct_main_lib import NVMeCmdStruct
 import re
 import os
 
